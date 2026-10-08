@@ -62,7 +62,9 @@ Allowed implementation paths:
 - `src/features/authFiles/`
 - `src/features/clientProfiles/` from CPA-005, for the policy/shared-settings connection
 - `src/hooks/useVisualConfig.ts`
-- `src/services/api/config.ts`, `src/services/api/authFiles.ts`
+- `src/services/api/config.ts`, `src/services/api/authFiles.ts`, `src/services/api/transformers.ts`
+- `src/types/config.ts`
+- `src/styles/components.scss`, only the disabled primary-button state
 - `src/stores/useConfigStore.ts`
 - `src/i18n/locales/`
 - `tests/visualConfigRoutingStrategy.test.ts`, `tests/authFileWeight.test.ts`
@@ -111,7 +113,6 @@ Pending:
 
 - Step 5 (fixture proof that Only-B stays strict under all three strategies and that failures record zero traffic to A) needs the CPA-001 fixture and the CPA-003 strict policies. Not run, not faked.
 - Mounting on the Client routes page and the real Automatic client count belong to CPA-005.
-- `../CLIProxyAPI` was not available in this workspace; selector semantics were taken from this plan and were not re-read in the backend source.
 
 ## Stop conditions and later work
 

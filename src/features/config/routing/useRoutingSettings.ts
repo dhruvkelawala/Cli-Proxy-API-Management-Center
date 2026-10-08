@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { apiClient, authFilesApi } from '@/services/api';
 import { applyConfigPatch } from '@/services/api/configPatch';
 import { notifyAuthFilesChanged } from '@/features/authFiles/authFilesEvents';
@@ -21,7 +20,7 @@ import {
   saveGlobalRouting,
   summarizeAccountSave,
   validateAccountTuning,
-  validateAffinityTtl,
+  validateTouchedTtl,
   type AccountSaveOutcome,
   type AccountTuningEdits,
   type AccountTuningErrors,
@@ -56,7 +55,6 @@ const IDLE_ACCOUNT_SAVE: AccountSaveState = {
  * and are saved with separate auth-file field patches: the two never share a success claim.
  */
 export function useRoutingSettings() {
-  const { t } = useTranslation();
   const config = useConfigStore((state) => state.config);
   const connectionStatus = useAuthStore((state) => state.connectionStatus);
 
@@ -110,15 +108,18 @@ export function useRoutingSettings() {
     }
   }, []);
 
-  // Mount, and again whenever the session changes: drop every draft and status so nothing
-  // from the previous connection can be saved against, or shown for, the new one.
+  // Mount, and again whenever the connection state changes. The cleanup below bumps the
+  // generation, which makes any in-flight save stale: it will never report back, so its
+  // "saving" state and in-flight flag are cleared here. A different connection also drops every
+  // draft so nothing from the previous session can be saved against, or shown for, the new one.
   useEffect(() => {
     mountedRef.current = true;
+    savingRef.current = { global: false, accounts: false };
+    setGlobalSave((prev) => (prev.phase === 'saving' ? IDLE_SAVE : prev));
+    setAccountSave((prev) => (prev.phase === 'saving' ? IDLE_ACCOUNT_SAVE : prev));
     const revision = apiClient.getConnectionRevision();
     if (revision !== sessionRevisionRef.current) {
       sessionRevisionRef.current = revision;
-      generationRef.current += 1;
-      savingRef.current = { global: false, accounts: false };
       setEdits({});
       setGlobalSave(IDLE_SAVE);
       setFiles(null);
@@ -140,7 +141,8 @@ export function useRoutingSettings() {
   );
   const values: RoutingSettingsValues | null = saved ? applyRoutingEdits(saved, edits) : null;
   const dirty = Object.keys(pendingEdits).length > 0;
-  const ttlError = validateAffinityTtl(values?.sessionAffinityTtl ?? '');
+  // Only a TTL the user has touched is validated: an odd saved value must not block other saves.
+  const ttlError = saved ? validateTouchedTtl(saved, edits) : null;
 
   const setEdit = useCallback((next: RoutingSettingsEdits) => {
     setEdits((prev) => ({ ...prev, ...next }));
@@ -176,15 +178,12 @@ export function useRoutingSettings() {
     if (result.kind === 'failed') {
       setGlobalSave({ phase: 'failed', message: result.message });
     } else if (!refreshed) {
-      setGlobalSave({
-        phase: 'failed',
-        message: t('config_management.routing_settings.reload_failed'),
-      });
+      setGlobalSave({ phase: 'reload_failed' });
     } else {
       setEdits({});
       setGlobalSave({ phase: 'saved' });
     }
-  }, [beginOperation, dirty, edits, saved, t, ttlError]);
+  }, [beginOperation, dirty, edits, saved, ttlError]);
 
   const setTuning = useCallback((name: string, next: AccountTuningEdits) => {
     setTuningEdits((prev) => ({ ...prev, [name]: { ...prev[name], ...next } }));
@@ -242,7 +241,8 @@ export function useRoutingSettings() {
           })
         : prev
     );
-    setTuningEdits((prev) => retainFailedTuningEdits(prev, result));
+    const submitted = Object.fromEntries(entries.map((entry) => [entry.name, entry.edits]));
+    setTuningEdits((prev) => retainFailedTuningEdits(prev, result, submitted));
     setAccountSave({
       phase: 'done',
       outcome: summarizeAccountSave(result),
@@ -262,6 +262,7 @@ export function useRoutingSettings() {
   }, [beginOperation, dirtyAccounts, files, hasTuningErrors, loadAccounts, tuningEdits]);
 
   return {
+    connected: connectionStatus === 'connected',
     loaded: values !== null,
     values,
     saved,

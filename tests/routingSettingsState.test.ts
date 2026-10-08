@@ -17,6 +17,7 @@ import {
   toRoutingAccountInput,
   validateAccountTuning,
   validateAffinityTtl,
+  validateTouchedTtl,
   type AccountTuningSaveEntry,
   type RoutingSaveDeps,
   type RoutingSettingsValues,
@@ -155,6 +156,31 @@ describe('routing settings plan: no default migration', () => {
     expect(validateAffinityTtl('1h30m')).toBeNull();
     expect(validateAffinityTtl('soon')).toBe('invalid');
     expect(validateAffinityTtl('10')).toBe('invalid');
+  });
+
+  test('accepts exactly what Go time.ParseDuration accepts', () => {
+    for (const ok of ['+1h', '-30m', '.5s', '1.h', '1.5h', '0', '+0', '1h30m15s', '100ms', '5ns']) {
+      expect(validateAffinityTtl(ok)).toBeNull();
+    }
+    for (const ok of ['2us', '2µs', '2μs', '1h0.5m']) expect(validateAffinityTtl(ok)).toBeNull();
+    for (const bad of ['1d', '1w', '1h 30m', '1h30', 'h', '.', '1..5s', '--1h', '1H', '1hr', '5']) {
+      expect(validateAffinityTtl(bad)).toBe('invalid');
+    }
+  });
+
+  test('only a touched TTL is validated, so an odd saved value never blocks a save', () => {
+    const odd = base({ sessionAffinity: true, sessionAffinityTtl: '1d' });
+    expect(validateTouchedTtl(odd, {})).toBeNull();
+    expect(validateTouchedTtl(odd, { strategy: 'fill-first' })).toBeNull();
+    expect(validateTouchedTtl(odd, { sessionAffinityTtl: '1d' })).toBeNull();
+    expect(validateTouchedTtl(odd, { sessionAffinityTtl: '2d' })).toBe('invalid');
+    expect(validateTouchedTtl(odd, { sessionAffinityTtl: '2h' })).toBeNull();
+    expect(validateTouchedTtl(odd, { sessionAffinityTtl: '' })).toBeNull();
+    // The plan for an unrelated edit does not touch the odd saved TTL.
+    expect(buildRoutingSettingsPlan(odd, { strategy: 'fill-first' })).toEqual({
+      patch: { routing: { strategy: 'fill-first' } },
+      deletions: [],
+    });
   });
 
   test('serializes the same wire fields as the Config page visual pipeline', () => {
@@ -343,9 +369,33 @@ describe('account save orchestration', () => {
           'b.json': { weight: '4' },
           'c.json': { weight: '' },
         },
-        result
+        result,
+        { 'a.json': { priority: '9' }, 'b.json': { weight: '4' }, 'c.json': { weight: '' } }
       )
     ).toEqual({ 'b.json': { weight: '4' } });
+  });
+
+  test('keeps a field typed while the save was in flight instead of dropping the whole draft', async () => {
+    const { deps } = recorder();
+    const submitted = { 'a.json': { priority: '9' }, 'b.json': { weight: '4' } };
+    const result = await saveAccountTunings(deps, [
+      { name: 'a.json', file: { priority: 5 }, edits: submitted['a.json'] },
+      { name: 'b.json', file: { weight: 2 }, edits: submitted['b.json'] },
+    ]);
+    if (result.kind !== 'done') throw new Error('expected done');
+    expect(result.saved).toEqual(['a.json', 'b.json']);
+    // While saving, the user changed a.json's priority and typed a new weight on a.json.
+    const current = {
+      'a.json': { priority: '11', weight: '7' },
+      'b.json': { weight: '4' },
+    };
+    expect(retainFailedTuningEdits(current, result, submitted)).toEqual({
+      'a.json': { priority: '11', weight: '7' },
+    });
+    // Typing only a second field on b.json also counts as newer than what was submitted.
+    expect(
+      retainFailedTuningEdits({ 'b.json': { weight: '4', priority: '3' } }, result, submitted)
+    ).toEqual({ 'b.json': { weight: '4', priority: '3' } });
   });
 
   test('when every account fails the batch is failed and all drafts are retained', async () => {
@@ -356,7 +406,10 @@ describe('account save orchestration', () => {
     if (result.kind !== 'done') throw new Error('expected done');
     expect(summarizeAccountSave(result)).toBe('failed');
     expect(
-      retainFailedTuningEdits({ 'a.json': { priority: '9' }, 'b.json': { weight: '4' } }, result)
+      retainFailedTuningEdits({ 'a.json': { priority: '9' }, 'b.json': { weight: '4' } }, result, {
+        'a.json': { priority: '9' },
+        'b.json': { weight: '4' },
+      })
     ).toEqual({ 'a.json': { priority: '9' }, 'b.json': { weight: '4' } });
   });
 

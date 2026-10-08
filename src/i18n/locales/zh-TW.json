@@ -1622,9 +1622,9 @@
       "title": "共用帳號池",
       "subtitle": "自動用戶端如何選擇帳號",
       "loading": "正在載入共用路由設定…",
-      "scope": "全域 · 影響共用閘道上的所有自動用戶端（兩台 Mac）",
-      "scope_count_one": "全域 · 影響共用閘道上的 {{count}} 個自動用戶端（兩台 Mac）",
-      "scope_count_other": "全域 · 影響共用閘道上的 {{count}} 個自動用戶端（兩台 Mac）",
+      "scope": "全域 · 影響共用閘道上的所有自動用戶端（兩台 Mac）。儲存會重設目前的對話綁定。",
+      "scope_count_one": "全域 · 影響共用閘道上的 {{count}} 個自動用戶端（兩台 Mac）。儲存會重設目前的對話綁定。",
+      "scope_count_other": "全域 · 影響共用閘道上的 {{count}} 個自動用戶端（兩台 Mac）。儲存會重設目前的對話綁定。",
       "strategy_legend": "選擇策略",
       "strategy_saved": "已儲存：{{label}}",
       "strategy": {
@@ -1651,7 +1651,7 @@
         "failed": "未儲存：{{message}} 你的變更已保留。",
         "failed_no_detail": "未儲存。你的變更已保留。"
       },
-      "reload_failed": "變更已送出，但無法重新載入已儲存的設定。再次儲存前請先重新載入。",
+      "reload_failed": "已儲存，但無法重新載入最新設定。再次編輯前請先重新載入。",
       "role": {
         "participating": "參與分配",
         "standby": "備用",
@@ -1678,7 +1678,7 @@
         "weight_label": "權重",
         "weight_hint": "預設 1 · 最大 1,000,000",
         "weight_hint_inactive": "僅「依權重分配」使用",
-        "weight_hint_zero": "0 或更低只會略過加權排程；帳號仍保持啟用",
+        "weight_hint_zero": "0 或更低只會略過加權排程；帳號仍保持啟用。已綁定到它的對話會轉移到其他帳號。",
         "weight_placeholder": "1",
         "weight_aria": "{{name}} 的權重",
         "inactive_note": "目前策略不使用權重，但你仍可編輯。",
@@ -1696,7 +1696,8 @@
           "clean": "與已儲存的帳號一致",
           "dirty": "有未儲存的變更",
           "saving": "正在儲存帳號…",
-          "saved": "已儲存 {{count}} 個帳號",
+          "saved_one": "已儲存 {{count}} 個帳號",
+          "saved_other": "已儲存 {{count}} 個帳號",
           "partial": "已儲存 {{total}} 個帳號中的 {{saved}} 個。未儲存並保留草稿：{{names}}",
           "failed": "沒有帳號被儲存。已保留草稿：{{names}}",
           "invalid": "請先修正標示的值再儲存"

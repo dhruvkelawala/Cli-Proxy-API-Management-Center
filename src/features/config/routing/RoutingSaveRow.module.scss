@@ -27,8 +27,13 @@
   color: var(--text-secondary);
 }
 
-.dirty {
+.dirty,
+.warning {
   color: var(--amber-text);
+}
+
+.warning {
+  font-weight: 600;
 }
 
 .saved {

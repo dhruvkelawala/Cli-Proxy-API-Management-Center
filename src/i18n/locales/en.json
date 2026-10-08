@@ -1601,9 +1601,9 @@
       "title": "Shared pool",
       "subtitle": "How Automatic clients pick an account",
       "loading": "Loading shared routing settings…",
-      "scope": "Global · affects all Automatic clients on the shared gateway (both Macs)",
-      "scope_count_one": "Global · affects {{count}} Automatic client on the shared gateway (both Macs)",
-      "scope_count_other": "Global · affects {{count}} Automatic clients on the shared gateway (both Macs)",
+      "scope": "Global · affects all Automatic clients on the shared gateway (both Macs). Saving resets current conversation bindings.",
+      "scope_count_one": "Global · affects {{count}} Automatic client on the shared gateway (both Macs). Saving resets current conversation bindings.",
+      "scope_count_other": "Global · affects {{count}} Automatic clients on the shared gateway (both Macs). Saving resets current conversation bindings.",
       "strategy_legend": "Selection strategy",
       "strategy_saved": "Saved: {{label}}",
       "strategy": {
@@ -1630,7 +1630,7 @@
         "failed": "Not saved: {{message}} Your changes are kept.",
         "failed_no_detail": "Not saved. Your changes are kept."
       },
-      "reload_failed": "The change was sent, but the saved configuration could not be reloaded. Reload before saving again.",
+      "reload_failed": "Saved, but the latest settings couldn't be reloaded. Reload before editing again.",
       "role": {
         "participating": "Participating",
         "standby": "Standby",
@@ -1657,7 +1657,7 @@
         "weight_label": "Weight",
         "weight_hint": "Default 1 · max 1,000,000",
         "weight_hint_inactive": "Used only by Weighted split",
-        "weight_hint_zero": "0 or below skips weighted scheduling only; the account stays enabled",
+        "weight_hint_zero": "0 or below skips weighted scheduling only; the account stays enabled. A conversation bound to it moves to another account.",
         "weight_placeholder": "1",
         "weight_aria": "Weight for {{name}}",
         "inactive_note": "Weights are not used by the saved or selected strategy. You can still edit them.",
@@ -1675,7 +1675,8 @@
           "clean": "Matches the saved accounts",
           "dirty": "Unsaved changes",
           "saving": "Saving accounts…",
-          "saved": "Saved {{count}} accounts",
+          "saved_one": "Saved {{count}} account",
+          "saved_other": "Saved {{count}} accounts",
           "partial": "Saved {{saved}} of {{total}} accounts. Not saved, drafts kept: {{names}}",
           "failed": "No accounts were saved. Drafts kept: {{names}}",
           "invalid": "Fix the highlighted values to save"

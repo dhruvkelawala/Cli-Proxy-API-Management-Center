@@ -65,12 +65,18 @@ export const readRoutingSettings = (config: Config | null): RoutingSettingsValue
 
 const normalizeTtl = (value: string): string => value.trim();
 
-/** Go duration syntax as accepted by the backend, e.g. 30m, 1h, 1h30m, 90s. Blank = default. */
-const DURATION_PATTERN = /^(?:\d+(?:\.\d+)?(?:ns|us|µs|μs|ms|s|m|h))+$/;
+/**
+ * What Go's time.ParseDuration accepts: optional sign, then one or more decimal numbers (a
+ * leading-dot fraction like .5 and a trailing dot like 1. are both fine) each followed by a
+ * unit (ns, us, µs, μs, ms, s, m, h). A bare 0 is also valid. Blank means the backend default.
+ */
+const DURATION_PATTERN =
+  /^[-+]?(?:\d+\.?\d*|\.\d+)(?:ns|us|µs|μs|ms|s|m|h)(?:(?:\d+\.?\d*|\.\d+)(?:ns|us|µs|μs|ms|s|m|h))*$/;
+const ZERO_PATTERN = /^[-+]?0$/;
 
 export const validateAffinityTtl = (value: string): 'invalid' | null => {
   const ttl = normalizeTtl(value);
-  return !ttl || DURATION_PATTERN.test(ttl) ? null : 'invalid';
+  return !ttl || ZERO_PATTERN.test(ttl) || DURATION_PATTERN.test(ttl) ? null : 'invalid';
 };
 
 /** Edits that actually differ from the saved baseline. Matching edits are dropped. */
@@ -92,6 +98,18 @@ export const effectiveRoutingEdits = (
     result.sessionAffinityTtl = edits.sessionAffinityTtl;
   }
   return result;
+};
+
+/**
+ * Validates only a TTL the user has actually changed. An unusual value that is already saved
+ * must never block saving other settings.
+ */
+export const validateTouchedTtl = (
+  base: RoutingSettingsValues,
+  edits: RoutingSettingsEdits
+): 'invalid' | null => {
+  const touched = effectiveRoutingEdits(base, edits).sessionAffinityTtl;
+  return touched === undefined ? null : validateAffinityTtl(touched);
 };
 
 export const hasRoutingEdits = (base: RoutingSettingsValues, edits: RoutingSettingsEdits) =>
@@ -266,6 +284,8 @@ export type SaveStatus =
   | { phase: 'idle' }
   | { phase: 'saving' }
   | { phase: 'saved' }
+  /** The write succeeded but the saved settings could not be re-read: the baseline is stale. */
+  | { phase: 'reload_failed' }
   | { phase: 'failed'; message: string };
 
 export const IDLE_SAVE: SaveStatus = { phase: 'idle' };
@@ -367,13 +387,26 @@ export const saveAccountTunings = async (
   return { kind: 'done', saved, failed, unchanged };
 };
 
-/** Drops the drafts of saved accounts and keeps every failed or unattempted one. */
+const sameEdits = (a: AccountTuningEdits | undefined, b: AccountTuningEdits | undefined) =>
+  (a?.priority ?? undefined) === (b?.priority ?? undefined) &&
+  (a?.weight ?? undefined) === (b?.weight ?? undefined);
+
+/**
+ * Drops the draft of an account that was saved or had nothing to write, but only while it
+ * still equals what was submitted. A field typed while the save was in flight is a newer
+ * draft and stays. Failed and unattempted accounts always keep their drafts.
+ */
 export const retainFailedTuningEdits = (
   edits: Record<string, AccountTuningEdits>,
-  result: Extract<AccountTuningSaveResult, { kind: 'done' }>
+  result: Extract<AccountTuningSaveResult, { kind: 'done' }>,
+  submitted: Record<string, AccountTuningEdits>
 ): Record<string, AccountTuningEdits> => {
   const settled = new Set([...result.saved, ...result.unchanged]);
-  return Object.fromEntries(Object.entries(edits).filter(([name]) => !settled.has(name)));
+  return Object.fromEntries(
+    Object.entries(edits).filter(
+      ([name, current]) => !settled.has(name) || !sameEdits(current, submitted[name])
+    )
+  );
 };
 
 export type AccountSaveOutcome = 'saved' | 'partial' | 'failed';

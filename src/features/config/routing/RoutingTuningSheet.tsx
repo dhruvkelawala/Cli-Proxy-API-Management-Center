@@ -16,6 +16,7 @@ export interface RoutingTuningSheetProps {
   strategy: RoutingStrategy;
   sessionAffinity: { enabled: boolean; ttl?: string };
   accounts: RoutingAccounts;
+  disabled?: boolean;
 }
 
 export function RoutingTuningSheet({
@@ -24,6 +25,7 @@ export function RoutingTuningSheet({
   strategy,
   sessionAffinity,
   accounts,
+  disabled = false,
 }: RoutingTuningSheetProps) {
   const { t } = useTranslation();
   const status = describeAccountSaveStatus(t, accounts);
@@ -46,7 +48,7 @@ export function RoutingTuningSheet({
           status={status.text}
           tone={status.tone}
           saveLabel={t('config_management.routing_settings.sheet.save')}
-          saveDisabled={!dirty || accounts.hasErrors || saving}
+          saveDisabled={disabled || !dirty || accounts.hasErrors || saving}
           discardDisabled={!hasDrafts}
           saving={saving}
           onSave={() => void accounts.saveAll()}
@@ -66,6 +68,7 @@ export function RoutingTuningSheet({
         edits={accounts.edits}
         errors={accounts.errors}
         save={accounts.save}
+        disabled={disabled}
         onChange={accounts.setTuning}
         onRetry={() => void accounts.load()}
       />

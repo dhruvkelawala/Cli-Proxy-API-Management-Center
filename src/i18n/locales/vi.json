@@ -1558,9 +1558,9 @@
       "title": "Nhóm dùng chung",
       "subtitle": "Cách các client Tự động chọn tài khoản",
       "loading": "Đang tải cài đặt định tuyến dùng chung…",
-      "scope": "Toàn cục · ảnh hưởng đến mọi client Tự động trên cổng dùng chung (cả hai máy Mac)",
-      "scope_count_one": "Toàn cục · ảnh hưởng đến {{count}} client Tự động trên cổng dùng chung (cả hai máy Mac)",
-      "scope_count_other": "Toàn cục · ảnh hưởng đến {{count}} client Tự động trên cổng dùng chung (cả hai máy Mac)",
+      "scope": "Toàn cục · ảnh hưởng đến mọi client Tự động trên cổng dùng chung (cả hai máy Mac). Lưu sẽ đặt lại các liên kết hội thoại hiện tại.",
+      "scope_count_one": "Toàn cục · ảnh hưởng đến {{count}} client Tự động trên cổng dùng chung (cả hai máy Mac). Lưu sẽ đặt lại các liên kết hội thoại hiện tại.",
+      "scope_count_other": "Toàn cục · ảnh hưởng đến {{count}} client Tự động trên cổng dùng chung (cả hai máy Mac). Lưu sẽ đặt lại các liên kết hội thoại hiện tại.",
       "strategy_legend": "Chiến lược chọn",
       "strategy_saved": "Đã lưu: {{label}}",
       "strategy": {
@@ -1587,7 +1587,7 @@
         "failed": "Chưa lưu: {{message}} Thay đổi của bạn vẫn được giữ.",
         "failed_no_detail": "Chưa lưu. Thay đổi của bạn vẫn được giữ."
       },
-      "reload_failed": "Thay đổi đã được gửi nhưng không thể tải lại cấu hình đã lưu. Hãy tải lại trước khi lưu lần nữa.",
+      "reload_failed": "Đã lưu, nhưng không thể tải lại cài đặt mới nhất. Hãy tải lại trước khi chỉnh sửa tiếp.",
       "role": {
         "participating": "Đang tham gia",
         "standby": "Dự phòng",
@@ -1614,7 +1614,7 @@
         "weight_label": "Trọng số",
         "weight_hint": "Mặc định 1 · tối đa 1.000.000",
         "weight_hint_inactive": "Chỉ dùng với Chia theo trọng số",
-        "weight_hint_zero": "0 trở xuống chỉ bỏ qua lập lịch theo trọng số; tài khoản vẫn được bật",
+        "weight_hint_zero": "0 trở xuống chỉ bỏ qua lập lịch theo trọng số; tài khoản vẫn được bật. Hội thoại đang gắn với nó sẽ chuyển sang tài khoản khác.",
         "weight_placeholder": "1",
         "weight_aria": "Trọng số của {{name}}",
         "inactive_note": "Chiến lược hiện tại không dùng trọng số. Bạn vẫn có thể chỉnh sửa.",
@@ -1632,7 +1632,8 @@
           "clean": "Khớp với các tài khoản đã lưu",
           "dirty": "Có thay đổi chưa lưu",
           "saving": "Đang lưu tài khoản…",
-          "saved": "Đã lưu {{count}} tài khoản",
+          "saved_one": "Đã lưu {{count}} tài khoản",
+          "saved_other": "Đã lưu {{count}} tài khoản",
           "partial": "Đã lưu {{saved}} trên {{total}} tài khoản. Chưa lưu, bản nháp được giữ: {{names}}",
           "failed": "Không có tài khoản nào được lưu. Bản nháp được giữ: {{names}}",
           "invalid": "Hãy sửa các giá trị được đánh dấu để lưu"

@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import styles from './RoutingSaveRow.module.scss';
 
-export type RoutingSaveTone = 'clean' | 'dirty' | 'saving' | 'saved' | 'failed';
+export type RoutingSaveTone = 'clean' | 'dirty' | 'saving' | 'saved' | 'warning' | 'failed';
 
 export interface RoutingSaveRowProps {
   /** Scope notice shown beside the save action. */
