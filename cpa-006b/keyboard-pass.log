@@ -1,0 +1,195 @@
+CPA-006b keyboard pass 2026-10-08T20:47:11.285Z
+
+===== light-360 =====
+-- Mobile drawer
+   first 12 Tab stops left edges (none may be negative/off-screen): [18,192,230,268,306,16,187,42,41,41,16,16] offscreen=0
+   "Expand sidebar" via Enter: drawer link x=10 visible=true
+   Tab target in open drawer: a "Accounts3Accounts: 3" indicator=outline=auto 1px rgb(0, 95, 204); shadow=none
+   Escape closes drawer? link visible=false (not required by this change)
+-- Accounts
+   label-in-name violations: []
+   switch focused: input[switch] "Claude Claude A" indicator: outline=solid 2px rgb(106, 100, 93); shadow=none
+   Space on switch: ["Claude Claude A",true] -> ["Claude Claude A",false]
+   Space again restores: ["Claude Claude A",true]
+   Models opened: dialogs=1 focus=button "Close"
+   [models] contrast with sheet open: 96 text nodes, failing=0 
+   Tab reached: button "Copy model ID claude-opus-4-1-20250805" after 1 Tab(s); indicator: outline=solid 3px rgb(106, 100, 93); shadow=none
+   Enter on Copy -> clipboard="claude-opus-4-1-20250805" feedback=["Success:\n\"claude-claude-a@example.test.json\" disabled\nSuccess:\n\"claude-claude-a@example.test.json\" enabled\nSuccess:\nCopied to clipboard","Success:\n\"claude-claude-a@example.test.json\" disabled","Success:\n\"claude-claude-a@example.test.json\" disabled"]
+   Space on button "Copy model ID claude-sonnet-4-5-20250929" -> clipboard="claude-sonnet-4-5-20250929"
+   clipboard failure feedback (writeText rejects, execCommand false): ["Success:\nCopied to clipboard\nSuccess:\nCopied to clipboard\nError:\nCopy failed","Success:\nCopied to clipboard","Success:\nCopied to clipboard"] execStub=true
+   Escape: dialogs=0 focus returned to: button "Models"
+   Account details opened: dialogs=1 focus=button "Close"
+   [details] contrast with sheet open: 135 text nodes, failing=0 
+   details sheet: Tab reached switch=input[switch] "Disable exponential cooldown (disable_cooling)" indicator=outline=solid 2px rgb(106, 100, 93); shadow=rgb(106, 100, 93) 0px 0px 0px 1px inset
+   Escape: dialogs=0 focus returned to: button "Account details"
+   pin button name: "Use only this subscription for… (choose clients for Claude Claude A)" visible: "Use only this subscription for…"
+   Pin sheet opened: dialogs=1 focus=button "Close"
+   [pin-sheet] contrast with sheet open: 95 text nodes, failing=0 
+   pin sheet: Tab reached input "INPUT" indicator=outline=auto 1px rgb(0, 95, 204); shadow=none
+   Space toggled a client checkbox; dirty save enabled=true
+   Escape on dirty pin sheet: dialogs=2 (confirm dialog expected when dirty) focus=button "Close"
+   confirm buttons: ["","Keep editing","Discard changes"]
+   Escape on confirm: dialogs=1 (sheet stays) focus returned into the sheet: input "INPUT"
+   Escape again on the dirty sheet re-asks: dialogs=2
+   Enter on "Discard changes": dialogs=0 focus returned to: button "Use only this subscription for… (choose clients for Claude Claude A)"
+   after closing: dialogs=0 focus=button "Use only this subscription for… (choose clients for Claude Claude A)"
+-- Client routes
+   label-in-name violations: []
+   band: button "Edit shared pool settings" expanded=false indicator=outline=auto 2px rgb(40, 48, 57); shadow=none
+   Enter -> "Hide shared pool settings" expanded=true
+   [band-expanded] contrast with sheet open: 60 text nodes, failing=0 
+   Space -> "Edit shared pool settings" expanded=false (focus: button "Edit shared pool settings")
+   cell focused: button "Mini · T3 Claude: Claude AutomaticClaude A 100% Ch" indicator=outline=solid 2px rgb(139, 134, 128); shadow=none
+   Policy sheet opened: dialogs=1 focus=button "Close"
+   [policy-sheet] contrast with sheet open: 67 text nodes, failing=0 
+   policy sheet: Tab reached input "INPUT"
+   radios: ["Automatic Shared pool. The shared strate checked=true","Only Claude A Strict. Claude A or an err checked=false"]
+   Escape: dialogs=0 focus returned to: button "Mini · T3 Claude: Claude AutomaticClaude A 100% Ch" (opener was button "Mini · T3 Claude: Claude AutomaticClaude A 100% Ch")
+   Profile sheet opened: dialogs=1 focus=button "Close"
+   select focused: button "Not set" indicator=outline=solid 2px rgb(106, 100, 93); shadow=rgba(0, 0, 0, 0.08) 0px 1px 2px 0px, rgba(139, 134, 128, 0.18) 0px 0px 0px 3px
+   select name="client-profile-context-label" expanded=true options=3
+   Escape closes only the listbox: dialogs=1 expanded=false
+   Escape: dialogs=0 focus returned to: button "Profile and keys for Mini · T3 Claude" (opener was button "Profile and keys for Mini · T3 Claude")
+
+===== light-728 =====
+-- Accounts
+   label-in-name violations: []
+   switch focused: input[switch] "Claude Claude A" indicator: outline=solid 2px rgb(106, 100, 93); shadow=none
+   Space on switch: ["Claude Claude A",true] -> ["Claude Claude A",false]
+   Space again restores: ["Claude Claude A",true]
+   Models opened: dialogs=1 focus=button "Close"
+   [models] contrast with sheet open: 93 text nodes, failing=0 
+   Tab reached: button "Copy model ID claude-opus-4-1-20250805" after 1 Tab(s); indicator: outline=solid 3px rgb(106, 100, 93); shadow=none
+   Enter on Copy -> clipboard="claude-opus-4-1-20250805" feedback=["Success:\n\"claude-claude-a@example.test.json\" disabled\nSuccess:\n\"claude-claude-a@example.test.json\" enabled\nSuccess:\nCopied to clipboard","Success:\n\"claude-claude-a@example.test.json\" disabled","Success:\n\"claude-claude-a@example.test.json\" disabled"]
+   Space on button "Copy model ID claude-sonnet-4-5-20250929" -> clipboard="claude-sonnet-4-5-20250929"
+   clipboard failure feedback (writeText rejects, execCommand false): ["Success:\nCopied to clipboard\nSuccess:\nCopied to clipboard\nError:\nCopy failed","Success:\nCopied to clipboard","Success:\nCopied to clipboard"] execStub=true
+   Escape: dialogs=0 focus returned to: button "Models"
+   Account details opened: dialogs=1 focus=button "Close"
+   [details] contrast with sheet open: 132 text nodes, failing=0 
+   details sheet: Tab reached switch=input[switch] "Disable exponential cooldown (disable_cooling)" indicator=outline=solid 2px rgb(106, 100, 93); shadow=rgb(106, 100, 93) 0px 0px 0px 1px inset
+   Escape: dialogs=0 focus returned to: button "Account details"
+   pin button name: "Use only this subscription for… (choose clients for Claude Claude A)" visible: "Use only this subscription for…"
+   Pin sheet opened: dialogs=1 focus=button "Close"
+   [pin-sheet] contrast with sheet open: 92 text nodes, failing=0 
+   pin sheet: Tab reached input "INPUT" indicator=outline=auto 1px rgb(0, 95, 204); shadow=none
+   Space toggled a client checkbox; dirty save enabled=true
+   Escape on dirty pin sheet: dialogs=2 (confirm dialog expected when dirty) focus=button "Close"
+   confirm buttons: ["","Keep editing","Discard changes"]
+   Escape on confirm: dialogs=1 (sheet stays) focus returned into the sheet: input "INPUT"
+   Escape again on the dirty sheet re-asks: dialogs=2
+   Enter on "Discard changes": dialogs=0 focus returned to: button "Use only this subscription for… (choose clients for Claude Claude A)"
+   after closing: dialogs=0 focus=button "Use only this subscription for… (choose clients for Claude Claude A)"
+-- Client routes
+   label-in-name violations: []
+   band: button "Edit shared pool settings" expanded=false indicator=outline=auto 3px rgb(45, 42, 38); shadow=none
+   Enter -> "Hide shared pool settings" expanded=true
+   [band-expanded] contrast with sheet open: 57 text nodes, failing=0 
+   Space -> "Edit shared pool settings" expanded=false (focus: button "Edit shared pool settings")
+   cell focused: button "Mini · T3 Claude: Claude AutomaticClaude A 100% Ch" indicator=outline=solid 2px rgb(139, 134, 128); shadow=none
+   Policy sheet opened: dialogs=1 focus=button "Close"
+   [policy-sheet] contrast with sheet open: 64 text nodes, failing=0 
+   policy sheet: Tab reached input "INPUT"
+   radios: ["Automatic Shared pool. The shared strate checked=true","Only Claude A Strict. Claude A or an err checked=false"]
+   Escape: dialogs=0 focus returned to: button "Mini · T3 Claude: Claude AutomaticClaude A 100% Ch" (opener was button "Mini · T3 Claude: Claude AutomaticClaude A 100% Ch")
+   Profile sheet opened: dialogs=1 focus=button "Close"
+   select focused: button "Not set" indicator=outline=solid 2px rgb(106, 100, 93); shadow=rgba(0, 0, 0, 0.08) 0px 1px 2px 0px, rgba(139, 134, 128, 0.18) 0px 0px 0px 3px
+   select name="client-profile-context-label" expanded=true options=3
+   Escape closes only the listbox: dialogs=1 expanded=false
+   Escape: dialogs=0 focus returned to: button "Profile and keys for Mini · T3 Claude" (opener was button "Profile and keys for Mini · T3 Claude")
+
+===== dark-360 =====
+-- Mobile drawer
+   first 12 Tab stops left edges (none may be negative/off-screen): [18,192,230,268,306,16,187,42,41,41,16,16] offscreen=0
+   "Expand sidebar" via Enter: drawer link x=10 visible=true
+   Tab target in open drawer: a "Accounts3Accounts: 3" indicator=outline=auto 1px rgb(0, 95, 204); shadow=none
+   Escape closes drawer? link visible=false (not required by this change)
+-- Accounts
+   label-in-name violations: []
+   switch focused: input[switch] "Claude Claude A" indicator: outline=solid 2px rgb(180, 184, 192); shadow=none
+   Space on switch: ["Claude Claude A",true] -> ["Claude Claude A",false]
+   Space again restores: ["Claude Claude A",true]
+   Models opened: dialogs=1 focus=button "Close"
+   [models] contrast with sheet open: 96 text nodes, failing=0 
+   Tab reached: button "Copy model ID claude-opus-4-1-20250805" after 1 Tab(s); indicator: outline=solid 3px rgb(255, 255, 255); shadow=none
+   Enter on Copy -> clipboard="claude-opus-4-1-20250805" feedback=["Success:\n\"claude-claude-a@example.test.json\" disabled\nSuccess:\n\"claude-claude-a@example.test.json\" enabled\nSuccess:\nCopied to clipboard","Success:\n\"claude-claude-a@example.test.json\" disabled","Success:\n\"claude-claude-a@example.test.json\" disabled"]
+   Space on button "Copy model ID claude-sonnet-4-5-20250929" -> clipboard="claude-sonnet-4-5-20250929"
+   clipboard failure feedback (writeText rejects, execCommand false): ["Success:\nCopied to clipboard\nSuccess:\nCopied to clipboard\nError:\nCopy failed","Success:\nCopied to clipboard","Success:\nCopied to clipboard"] execStub=true
+   Escape: dialogs=0 focus returned to: button "Models"
+   Account details opened: dialogs=1 focus=button "Close"
+   [details] contrast with sheet open: 135 text nodes, failing=0 
+   details sheet: Tab reached switch=input[switch] "Disable exponential cooldown (disable_cooling)" indicator=outline=solid 2px rgb(180, 184, 192); shadow=rgb(138, 143, 152) 0px 0px 0px 1px inset
+   Escape: dialogs=0 focus returned to: button "Account details"
+   pin button name: "Use only this subscription for… (choose clients for Claude Claude A)" visible: "Use only this subscription for…"
+   Pin sheet opened: dialogs=1 focus=button "Close"
+   [pin-sheet] contrast with sheet open: 95 text nodes, failing=0 
+   pin sheet: Tab reached input "INPUT" indicator=outline=auto 1px rgb(153, 200, 255); shadow=none
+   Space toggled a client checkbox; dirty save enabled=true
+   Escape on dirty pin sheet: dialogs=2 (confirm dialog expected when dirty) focus=button "Close"
+   confirm buttons: ["","Keep editing","Discard changes"]
+   Escape on confirm: dialogs=1 (sheet stays) focus returned into the sheet: input "INPUT"
+   Escape again on the dirty sheet re-asks: dialogs=2
+   Enter on "Discard changes": dialogs=0 focus returned to: button "Use only this subscription for… (choose clients for Claude Claude A)"
+   after closing: dialogs=0 focus=button "Use only this subscription for… (choose clients for Claude Claude A)"
+-- Client routes
+   label-in-name violations: []
+   band: button "Edit shared pool settings" expanded=false indicator=outline=auto 3px rgb(255, 255, 255); shadow=none
+   Enter -> "Hide shared pool settings" expanded=true
+   [band-expanded] contrast with sheet open: 60 text nodes, failing=0 
+   Space -> "Edit shared pool settings" expanded=false (focus: button "Edit shared pool settings")
+   cell focused: button "Mini · T3 Claude: Claude AutomaticClaude A 100% Ch" indicator=outline=solid 2px rgb(94, 106, 210); shadow=none
+   Policy sheet opened: dialogs=1 focus=button "Close"
+   [policy-sheet] contrast with sheet open: 67 text nodes, failing=0 
+   policy sheet: Tab reached input "INPUT"
+   radios: ["Automatic Shared pool. The shared strate checked=true","Only Claude A Strict. Claude A or an err checked=false"]
+   Escape: dialogs=0 focus returned to: button "Mini · T3 Claude: Claude AutomaticClaude A 100% Ch" (opener was button "Mini · T3 Claude: Claude AutomaticClaude A 100% Ch")
+   Profile sheet opened: dialogs=1 focus=button "Close"
+   select focused: button "Not set" indicator=outline=solid 2px rgb(180, 184, 192); shadow=none
+   select name="client-profile-context-label" expanded=true options=3
+   Escape closes only the listbox: dialogs=1 expanded=false
+   Escape: dialogs=0 focus returned to: button "Profile and keys for Mini · T3 Claude" (opener was button "Profile and keys for Mini · T3 Claude")
+
+===== dark-728 =====
+-- Accounts
+   label-in-name violations: []
+   switch focused: input[switch] "Claude Claude A" indicator: outline=solid 2px rgb(180, 184, 192); shadow=none
+   Space on switch: ["Claude Claude A",true] -> ["Claude Claude A",false]
+   Space again restores: ["Claude Claude A",true]
+   Models opened: dialogs=1 focus=button "Close"
+   [models] contrast with sheet open: 93 text nodes, failing=0 
+   Tab reached: button "Copy model ID claude-opus-4-1-20250805" after 1 Tab(s); indicator: outline=solid 3px rgb(255, 255, 255); shadow=none
+   Enter on Copy -> clipboard="claude-opus-4-1-20250805" feedback=["Success:\n\"claude-claude-a@example.test.json\" disabled\nSuccess:\n\"claude-claude-a@example.test.json\" enabled\nSuccess:\nCopied to clipboard","Success:\n\"claude-claude-a@example.test.json\" disabled","Success:\n\"claude-claude-a@example.test.json\" disabled"]
+   Space on button "Copy model ID claude-sonnet-4-5-20250929" -> clipboard="claude-sonnet-4-5-20250929"
+   clipboard failure feedback (writeText rejects, execCommand false): ["Success:\nCopied to clipboard\nSuccess:\nCopied to clipboard\nError:\nCopy failed","Success:\nCopied to clipboard","Success:\nCopied to clipboard"] execStub=true
+   Escape: dialogs=0 focus returned to: button "Models"
+   Account details opened: dialogs=1 focus=button "Close"
+   [details] contrast with sheet open: 132 text nodes, failing=0 
+   details sheet: Tab reached switch=input[switch] "Disable exponential cooldown (disable_cooling)" indicator=outline=solid 2px rgb(180, 184, 192); shadow=rgb(138, 143, 152) 0px 0px 0px 1px inset
+   Escape: dialogs=0 focus returned to: button "Account details"
+   pin button name: "Use only this subscription for… (choose clients for Claude Claude A)" visible: "Use only this subscription for…"
+   Pin sheet opened: dialogs=1 focus=button "Close"
+   [pin-sheet] contrast with sheet open: 92 text nodes, failing=0 
+   pin sheet: Tab reached input "INPUT" indicator=outline=auto 1px rgb(153, 200, 255); shadow=none
+   Space toggled a client checkbox; dirty save enabled=true
+   Escape on dirty pin sheet: dialogs=2 (confirm dialog expected when dirty) focus=button "Close"
+   confirm buttons: ["","Keep editing","Discard changes"]
+   Escape on confirm: dialogs=1 (sheet stays) focus returned into the sheet: input "INPUT"
+   Escape again on the dirty sheet re-asks: dialogs=2
+   Enter on "Discard changes": dialogs=0 focus returned to: button "Use only this subscription for… (choose clients for Claude Claude A)"
+   after closing: dialogs=0 focus=button "Use only this subscription for… (choose clients for Claude Claude A)"
+-- Client routes
+   label-in-name violations: []
+   band: button "Edit shared pool settings" expanded=false indicator=outline=auto 2px rgb(226, 237, 249); shadow=none
+   Enter -> "Hide shared pool settings" expanded=true
+   [band-expanded] contrast with sheet open: 57 text nodes, failing=0 
+   Space -> "Edit shared pool settings" expanded=false (focus: button "Edit shared pool settings")
+   cell focused: button "Mini · T3 Claude: Claude AutomaticClaude A 100% Ch" indicator=outline=solid 2px rgb(94, 106, 210); shadow=none
+   Policy sheet opened: dialogs=1 focus=button "Close"
+   [policy-sheet] contrast with sheet open: 64 text nodes, failing=0 
+   policy sheet: Tab reached input "INPUT"
+   radios: ["Automatic Shared pool. The shared strate checked=true","Only Claude A Strict. Claude A or an err checked=false"]
+   Escape: dialogs=0 focus returned to: button "Mini · T3 Claude: Claude AutomaticClaude A 100% Ch" (opener was button "Mini · T3 Claude: Claude AutomaticClaude A 100% Ch")
+   Profile sheet opened: dialogs=1 focus=button "Close"
+   select focused: button "Not set" indicator=outline=solid 2px rgb(180, 184, 192); shadow=none
+   select name="client-profile-context-label" expanded=true options=3
+   Escape closes only the listbox: dialogs=1 expanded=false
+   Escape: dialogs=0 focus returned to: button "Profile and keys for Mini · T3 Claude" (opener was button "Profile and keys for Mini · T3 Claude")
