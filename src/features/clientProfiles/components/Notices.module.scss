@@ -1,0 +1,55 @@
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  min-width: 0;
+}
+
+.info {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.danger {
+  background: var(--failure-badge-bg);
+  border-color: var(--failure-badge-border);
+  color: var(--failure-badge-text);
+}
+
+.icon {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.text {
+  font-size: 13px;
+  line-height: 1.5;
+
+  p {
+    margin: 0;
+  }
+}
+
+.info .text {
+  color: var(--text-secondary);
+}
+
+.action {
+  margin-top: 6px;
+}

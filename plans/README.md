@@ -18,7 +18,7 @@ Use `sumo/main` as the base for a new ticket branch. The plan linked from each i
 | [CPA-002](https://github.com/dhruvkelawala/CLIProxyAPI/issues/2) | Add durable client profiles and a v8 management contract | Backend | CPA-001 | TODO |
 | [CPA-003](https://github.com/dhruvkelawala/CLIProxyAPI/issues/3) | Enforce the selected subscription across retries, helpers, streams and WebSockets | Backend | CPA-001, CPA-002 | TODO |
 | [CPA-004](https://github.com/dhruvkelawala/Cli-Proxy-API-Management-Center/issues/1) | Make account labels, enablement, availability and preference clear | Dashboard | Ready now | IN REVIEW (branch `cpa-004-account-presentation`) |
-| [CPA-005](https://github.com/dhruvkelawala/Cli-Proxy-API-Management-Center/issues/2) | Let the dashboard choose and enforce a subscription for each client | Dashboard | CPA-002, CPA-003, CPA-004 | TODO |
+| [CPA-005](https://github.com/dhruvkelawala/Cli-Proxy-API-Management-Center/issues/2) | Let the dashboard choose and enforce a subscription for each client | Dashboard | CPA-002, CPA-003, CPA-004 | IN REVIEW (branch `cpa-005-client-routes`; E2E proof pending CPA-003) |
 | [CPA-006](https://github.com/dhruvkelawala/Cli-Proxy-API-Management-Center/issues/3) | Make account and client-route controls accessible in both themes | Dashboard | CPA-004, CPA-005 | TODO |
 | [CPA-007](https://github.com/dhruvkelawala/CLIProxyAPI/issues/4) | Package pinned releases and configure both Macs through existing T3 instances | Backend | CPA-001, CPA-002, CPA-003, CPA-004, CPA-005, CPA-006 | TODO |
 | [CPA-008](https://github.com/dhruvkelawala/Cli-Proxy-API-Management-Center/issues/4) | Expose shared load-balancing strategies with priority, weights and session affinity | Dashboard | CPA-004, CPA-005, CPA-006 | TODO |

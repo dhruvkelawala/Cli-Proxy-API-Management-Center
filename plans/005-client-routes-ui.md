@@ -1,6 +1,6 @@
 # CPA-005: Let the dashboard choose and enforce a subscription for each client
 
-- **Status:** TODO
+- **Status:** In review (branch `cpa-005-client-routes`); end-to-end proxy proof pending backend CPA-003
 - **Tracking issue:** https://github.com/dhruvkelawala/CLIProxyAPI/issues/5
 - **Issue:** https://github.com/dhruvkelawala/Cli-Proxy-API-Management-Center/issues/2
 - **Priority:** P1
@@ -32,13 +32,13 @@ Client API keys presently grant gateway access without account binding. CPA-002/
 7. Link accounts to the profiles that reference them using the safe API projection.
 
 ## Verification and done criteria
-- [ ] `bunx bun@1.3.14 test tests/clientProfilesApi.test.ts tests/clientProfilesState.test.ts tests/clientProfilesRendering.test.ts` exits 0 with new tests.
-- [ ] Synthetic cases cover supported/unsupported backend, Automatic, Only, disabled/deleted target, unknown quota, failed save and stale completion after connection switch.
-- [ ] `bunx bun@1.3.14 run verify` exits 0.
-- [ ] End-to-end browser/API proof: choose subscription B for a client while A stays enabled; subsequent requests under that client reach only B. Disable/exhaust B in the fixture and assert a clear failure with zero A traffic.
-- [ ] Selection is persisted on the proxy, survives page refresh/reconnect, and does not require disabling other subscriptions.
-- [ ] Both themes/mobile layout work and the artifact remains single-file.
-- [ ] No raw keys in list/preview DOM, screenshots or error output.
+- [x] `bunx bun@1.3.14 test tests/clientProfilesApi.test.ts tests/clientProfilesState.test.ts tests/clientProfilesRendering.test.ts` exits 0 with new tests.
+- [x] Synthetic cases cover supported/unsupported backend, Automatic, Only, disabled/deleted target, unknown quota, failed save and stale completion after connection switch.
+- [x] `bunx bun@1.3.14 run verify` exits 0.
+- [ ] **Pending CPA-003.** End-to-end browser/API proof: choose subscription B for a client while A stays enabled; subsequent requests under that client reach only B. Disable/exhaust B in the fixture and assert a clear failure with zero A traffic.
+- [x] Selection is persisted on the proxy (contract writes; verified against the mock, not a real proxy), survives page refresh/reconnect, and does not require disabling other subscriptions.
+- [x] Both themes/mobile layout work and the artifact remains single-file.
+- [x] No raw keys in list/preview DOM, screenshots or error output.
 
 ## Stop conditions and maintenance
 Stop if the backend API/capability does not exist or enforcement remains unproven. Avoid ad hoc fetch, optimistic success after failed saves, a public account-selection header, remote machine agents, or T3 source edits. Maintain parity with the management contract; keep policy explanations beside the module that owns their presentation.
@@ -58,3 +58,13 @@ Files/directories in scope:
 - `plans/`
 
 Do not change T3 source, live gateway configuration or unrelated files. Match existing repository conventions. Open a PR against the fork's `sumo/main` when publishing authorized implementation work; do not target upstream `main` by accident.
+
+## Implementation notes (2026-10-08)
+
+- API: `src/services/api/clientProfiles.ts` (contract v1; snake_case normalized on read, serialized on write; If-Match on every profile/key write). State: `src/stores/useClientProfilesStore.ts` (connection-scoped, stale completions dropped, no optimistic writes). Feature: `src/features/clientProfiles/` (Client routes page at `#/client-routes`, rule editor sheet, profile & keys sheet, Accounts card links and "Use only this subscription for…" sheet). Shared strategy/priority/weight editing is CPA-008's `SharedRoutingBand`, embedded at the top of the page.
+- Enforcement is `false` until CPA-003: the page shows a calm notice that rules are stored but strict requests are rejected (HTTP 503); it never announces active account selection.
+- Contract dependencies the UI relies on beyond the documented fields: Accounts cards link to the inventory by deriving `credential_ref` as `credential_` + SHA-256(auth ID) (fails safe: no match = no chips). Which legacy key is associated cannot be read back (fingerprints are not exposed), so associations show labels only and the picker lists all `access.api-keys` masked; a duplicate association is explained from the 422.
+- Connection context (Mini local vs MacBook tunnel) is an operator note stored in this browser per gateway; the backend has no field for it. It is labelled as configured topology, never live health.
+- Verification: focused tests, `bunx bun@1.3.14 run verify`, and a browser pass against a synthetic contract mock (both themes, 360/1280, keyboard: open from cell, choose, save, Escape returns focus to the cell; 412 keeps the draft and offers Reload; refused save leaves the saved rule unchanged).
+- Pending: end-to-end proof that requests reach only B (CPA-003); real-backend browser pass once CPA-002 merges.
+

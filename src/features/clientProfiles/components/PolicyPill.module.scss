@@ -1,0 +1,121 @@
+.cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  width: 100%;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  min-height: 28px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.pillAuto {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* "Only X" in strong ink. */
+.pillOnly {
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+  color: var(--bg-secondary);
+}
+
+.onlyDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: 0 0 auto;
+}
+
+.pillFail {
+  background: var(--failure-badge-bg);
+  border-color: var(--failure-badge-border);
+  color: var(--failure-badge-text);
+}
+
+.failTag {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--btn-danger-bg);
+  color: var(--btn-danger-fg);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.caption {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-operational-muted, var(--text-secondary));
+  overflow-wrap: anywhere;
+}
+
+.captionFail {
+  color: var(--failure-badge-text);
+  font-weight: 600;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.dotOk {
+  background: var(--success-color);
+}
+
+/* Unknown availability: an amber ring, never a green dot. */
+.dotUnknown {
+  border: 2px solid var(--amber-color);
+}
+
+.bar {
+  display: flex;
+  gap: 2px;
+  width: 100%;
+  max-width: 260px;
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--border-color);
+}
+
+.segment {
+  flex-basis: 0;
+  min-width: 4px;
+  background: var(--text-secondary);
+}
+
+.segmentAlt {
+  background: var(--text-tertiary);
+}
+
+/* Striped = availability unknown. */
+.segmentUnknown {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 3px,
+    color-mix(in srgb, var(--bg-secondary) 70%, transparent) 3px 6px
+  );
+}

@@ -1,0 +1,79 @@
+.links {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+  min-width: 0;
+}
+
+.pinned {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  width: 100%;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-operational-muted, var(--text-secondary));
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--text-primary);
+  color: var(--bg-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.chipFail {
+  background: var(--failure-badge-bg);
+  border: 1px solid var(--failure-badge-border);
+  color: var(--failure-badge-text);
+}
+
+.chipLabel {
+  overflow-wrap: anywhere;
+}
+
+.chipTag {
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--btn-danger-bg);
+  color: var(--btn-danger-fg);
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.failNote {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 600;
+  color: var(--failure-badge-text);
+}
+
+.action {
+  max-width: 100%;
+}
