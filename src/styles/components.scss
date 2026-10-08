@@ -316,6 +316,16 @@ textarea {
   }
 }
 
+// 减少动态效果：对话框不再缩放/淡入淡出（Sheet 已有同样的降级）。
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay.modal-overlay-entering,
+  .modal-overlay.modal-overlay-closing,
+  .modal.modal-entering,
+  .modal.modal-closing {
+    animation: none;
+  }
+}
+
 .modal-close-floating {
   position: absolute;
   top: 12px;

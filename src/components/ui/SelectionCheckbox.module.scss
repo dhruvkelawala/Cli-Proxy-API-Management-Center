@@ -32,7 +32,8 @@
   height: 22px;
   flex-shrink: 0;
   border-radius: 7px;
-  border: 1px solid var(--border-color);
+  /* Unchecked boundary must reach 3:1 against the card (WCAG 1.4.11); --border-color does not. */
+  border: 1px solid var(--text-operational-muted);
   background: color-mix(in srgb, var(--bg-secondary) 92%, transparent);
   color: var(--primary-contrast, #fff);
   display: inline-flex;
@@ -55,7 +56,7 @@
 }
 
 .disabled:hover .box {
-  border-color: var(--border-color);
+  border-color: var(--text-operational-muted);
   box-shadow: none;
 }
 

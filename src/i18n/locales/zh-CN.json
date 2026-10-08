@@ -241,8 +241,6 @@
     "file_size": "大小",
     "file_modified": "修改时间",
     "card_select": "选择 {{name}} 用于批量操作",
-    "card_toggle_enabled": "{{name}}：已启用",
-    "card_toggle_disabled": "{{name}}：已停用",
     "account_state_available": "可用",
     "account_state_cooling": "冷却中",
     "account_state_attention": "需处理",
@@ -368,6 +366,7 @@
     "filter_empty": "空文件",
     "filter_unknown": "其他",
     "type_virtual": "虚拟认证文件",
+    "card_off": "已关闭",
     "models_button": "模型",
     "models_title": "支持的模型",
     "models_loading": "正在加载模型列表...",
@@ -1950,7 +1949,8 @@
     "login_failed": "登录失败",
     "commercial_mode_restart_required": "商业模式开关已变更，请重启服务后生效",
     "copy_failed": "复制失败",
-    "link_copied": "已复制"
+    "link_copied": "已复制",
+    "copied": "已复制到剪贴板"
   },
   "language": {
     "switch": "语言",
@@ -2397,7 +2397,8 @@
       "caption": "各客户端配置在每个提供商下可使用的订阅",
       "profile_column": "客户端配置",
       "edit_profile": "{{name}} 的配置与密钥",
-      "cell_label": "{{profile}} 的 {{provider}} 规则：{{policy}}。修改规则",
+      "cell_context": "{{profile}}：",
+      "cell_change": "修改规则",
       "keys_count": "{{count}} 个客户端密钥",
       "no_keys": "尚未关联客户端密钥",
       "footnote": "一条规则覆盖使用该配置客户端密钥发出的该提供商全部请求。Claude 与 Codex 规则彼此独立。"
@@ -2610,7 +2611,7 @@
       "chip_title": "{{profile}} 的 {{provider}} 请求只使用此订阅",
       "will_fail_note": "此账号已停用或不可用，{{count}} 个固定到它的客户端会失败，不会由其他账号代替。",
       "use_only": "仅将此订阅用于…",
-      "use_only_aria": "选择必须只使用 {{account}} 的客户端",
+      "use_only_aria": "仅将此订阅用于…（为 {{account}} 选择客户端）",
       "sheet_eyebrow": "{{provider}} 订阅",
       "sheet_title": "必须只使用 {{account}} 的客户端",
       "sheet_intro": "勾选的配置会把每个 {{provider}} 请求发往 {{account}}。取消勾选会让配置恢复为自动。",

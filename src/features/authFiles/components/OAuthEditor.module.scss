@@ -110,7 +110,7 @@
   height: 28px;
   border: 1px solid var(--border-color);
   border-radius: $radius-sm;
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
   font-family: $font-mono;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
@@ -247,7 +247,7 @@
   padding: $spacing-2xl $spacing-md;
   border: 1px dashed var(--border-color);
   border-radius: $radius-md;
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
   text-align: center;
   font-size: 13px;
 }
@@ -263,7 +263,7 @@
   svg {
     margin-top: 3px;
     flex-shrink: 0;
-    color: var(--text-tertiary);
+    color: var(--text-operational-muted);
   }
 
   @include mobile {
@@ -295,7 +295,7 @@
 }
 
 .mappingNumber {
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
   font-family: $font-mono;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
@@ -341,7 +341,7 @@
   align-items: center;
   justify-content: center;
   height: 38px;
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
 
   @media (max-width: 540px) {
     display: none;
@@ -368,7 +368,7 @@
   width: 34px;
   height: 34px;
   padding: 0;
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
 
   @media (hover: hover) and (pointer: fine) {
     &:hover:not(:disabled) {

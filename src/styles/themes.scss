@@ -15,12 +15,15 @@
   --floating-shadow: 0 12px 26px rgba(0, 0, 0, 0.14);
 
   --text-primary: #2d2a26;
-  --text-secondary: #6d6760;
+  --text-secondary: #6a645d; // 4.5:1 on --bg-tertiary / hover tones (was #6d6760: 4.48)
   --text-tertiary: #a29c95;
   --text-quaternary: #c0bab3;
   // 运营文本专用：--text-tertiary 同时用于装饰填充，故不全局加深；浅色下它低于 4.5:1。
   --text-operational-muted: #6a645d;
   --text-muted: var(--text-operational-muted);
+  // 运营文本专用：--viz-success/--error-color 同时用于填充；作为 12px 以下文字时低于 4.5:1。
+  --text-operational-success: #0a6b4b;
+  --text-operational-danger: #a63d2c;
 
   --border-color: #e3e1db; // 边框/分割线
   --border-secondary: var(--border-color);
@@ -113,12 +116,15 @@
   --floating-shadow: 0 12px 26px rgba(0, 0, 0, 0.12);
 
   --text-primary: #2d2a26;
-  --text-secondary: #6d6760;
+  --text-secondary: #6a645d; // 4.5:1 on --bg-tertiary / hover tones (was #6d6760: 4.48)
   --text-tertiary: #a29c95;
   --text-quaternary: #c0bab3;
   // 运营文本专用：--text-tertiary 同时用于装饰填充，故不全局加深；浅色下它低于 4.5:1。
   --text-operational-muted: #6a645d;
   --text-muted: var(--text-operational-muted);
+  // 运营文本专用：--viz-success/--error-color 同时用于填充；作为 12px 以下文字时低于 4.5:1。
+  --text-operational-success: #0a6b4b;
+  --text-operational-danger: #a63d2c;
 
   --border-color: #e5e5e5;
   --border-secondary: var(--border-color);
@@ -199,6 +205,9 @@
   // 运营文本专用：深色下 --text-tertiary 已达 4.8–6.2:1，直接沿用。
   --text-operational-muted: var(--text-tertiary);
   --text-muted: var(--text-operational-muted);
+  // 运营文本专用：--viz-success/--error-color 同时用于填充；作为 12px 以下文字时低于 4.5:1。
+  --text-operational-success: var(--viz-success);
+  --text-operational-danger: #e5604f;
 
   --border-color: #23252a;
   --border-secondary: var(--border-color);

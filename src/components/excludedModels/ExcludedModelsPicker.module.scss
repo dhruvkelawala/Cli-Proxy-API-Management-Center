@@ -66,13 +66,13 @@
 
 .triggerSpinner {
   flex-shrink: 0;
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
   animation: excluded-spin 900ms linear infinite;
 }
 
 .chevron {
   flex-shrink: 0;
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
   transition: transform var(--dur-hover, 200ms) var(--ease-out-strong, ease-out);
 }
 
@@ -162,7 +162,7 @@
 .searchIcon {
   position: absolute;
   left: 18px;
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
   pointer-events: none;
 }
 
@@ -176,7 +176,7 @@
   font-size: 12px;
 
   &::placeholder {
-    color: var(--text-tertiary);
+    color: var(--text-operational-muted);
   }
 
   &:focus {
@@ -225,10 +225,9 @@
   color: var(--bg-primary);
 }
 
-/* 纯规则命中：压暗且不可切换，但仍可聚焦、仍会朗读原因。 */
+/* 纯规则命中：不可切换，但仍可聚焦、仍会朗读原因；不再用透明度压暗（会使文字低于 4.5:1）。 */
 .rowLocked {
   cursor: default;
-  opacity: 0.62;
 }
 
 .checkbox {
@@ -266,7 +265,7 @@
 .rowDisplayName,
 .rowReason {
   overflow: hidden;
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
   font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -283,13 +282,13 @@
 
 .badgeMuted {
   border-style: dotted;
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
 }
 
 .noResults {
   margin: 0;
   padding: $spacing-lg $spacing-sm;
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
   font-size: 12px;
   text-align: center;
 }
@@ -391,7 +390,7 @@
 
 .chipsMore {
   align-self: center;
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
   font-size: 11px;
 }
 
@@ -419,7 +418,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    color: var(--text-tertiary);
+    color: var(--text-operational-muted);
     font-size: 11px;
   }
 

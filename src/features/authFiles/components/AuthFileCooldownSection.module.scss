@@ -51,7 +51,7 @@
 
 .chevron {
   flex-shrink: 0;
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
 }
 
 .section[open] .chevron {
@@ -105,7 +105,7 @@
 .observed,
 .note,
 .unknown {
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
   font-size: 11px;
   line-height: 1.5;
   overflow-wrap: anywhere;

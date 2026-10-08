@@ -51,7 +51,7 @@
 }
 
 .metaDot {
-  color: var(--text-quaternary);
+  color: var(--text-operational-muted);
   user-select: none;
 }
 
@@ -60,15 +60,15 @@
 }
 
 .metaActive {
-  color: var(--viz-success);
+  color: var(--text-operational-success);
 }
 
 .metaMuted {
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
 }
 
 .metaProblem {
-  color: var(--viz-failure);
+  color: var(--text-operational-danger);
 }
 
 /* 共享网关语境：管理改动作用于所有使用该网关的客户端 */

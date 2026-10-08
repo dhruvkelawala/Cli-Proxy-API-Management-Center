@@ -167,7 +167,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
     styles.card,
     compact ? styles.cardCompact : '',
     selected ? styles.cardSelected : '',
-    file.disabled === true ? styles.cardDisabled : '',
+    !enabled ? styles.cardDisabled : '',
     mountEntranceDelayMs != null ? styles.cardEnter : '',
   ]
     .filter(Boolean)
@@ -198,6 +198,9 @@ export function AuthFileCard(props: AuthFileCardProps) {
             ...(typeColor.border ? { border: typeColor.border } : {}),
           }}
         />
+        {!enabled && !isRuntimeOnly && (
+          <span className={styles.offMarker}>{t('auth_files.card_off')}</span>
+        )}
         {isRuntimeOnly && (
           <span className={styles.runtimeLabel}>{t('auth_files.type_virtual')}</span>
         )}
@@ -324,6 +327,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
                   onClick={() => onManualRefresh(file)}
                   className={styles.iconButton}
                   title={t('auth_files.manual_refresh_button')}
+                  aria-label={t('auth_files.manual_refresh_button')}
                   disabled={
                     disableControls ||
                     file.disabled ||
@@ -340,6 +344,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
                 onClick={() => onDownload(file.name)}
                 className={styles.iconButton}
                 title={t('auth_files.download_button')}
+                aria-label={t('auth_files.download_button')}
                 disabled={disableControls}
               >
                 <IconDownload size={15} />
@@ -350,6 +355,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
                 onClick={() => onOpenPrefixProxyEditor(file)}
                 className={styles.iconButton}
                 title={t('auth_files.prefix_proxy_button')}
+                aria-label={t('auth_files.prefix_proxy_button')}
                 disabled={disableControls || isManualRefreshing}
               >
                 <IconSettings size={15} />
@@ -360,6 +366,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
                 onClick={() => onDelete(file.name)}
                 className={styles.iconButton}
                 title={t('auth_files.delete_button')}
+                aria-label={t('auth_files.delete_button')}
                 disabled={disableControls || deleting === file.name || isManualRefreshing}
               >
                 {deleting === file.name ? <LoadingSpinner size={14} /> : <IconTrash2 size={15} />}
@@ -375,11 +382,8 @@ export function AuthFileCard(props: AuthFileCardProps) {
                 : t('auth_files.status_toggle_disabled')}
             </span>
             <ToggleSwitch
-              ariaLabel={
-                enabled
-                  ? t('auth_files.card_toggle_enabled', { name: accountName })
-                  : t('auth_files.card_toggle_disabled', { name: accountName })
-              }
+              // Fixed name; the switch's checked state (and the visible label) carry on/off.
+              ariaLabel={accountName}
               checked={enabled}
               disabled={
                 disableControls ||

@@ -165,15 +165,17 @@ describe('client routes matrix', () => {
       })
     );
 
-  test('every cell is a labelled button naming provider, profile and policy', () => {
-    expect(matrix()).toContain(
-      `aria-label="${t('client_routes.matrix.cell_label', {
-        provider: 'Claude',
-        profile: 'MacBook · T3 Claude',
-        policy: `${t('client_routes.pill.only', { account: 'Claude A' })}, ${t('client_routes.pill.available')}`,
-      })}"`
-    );
-    expect(matrix().match(/<button/g)).toHaveLength(3 + 6);
+  test('every cell is a button whose name comes from its visible text plus hidden context', () => {
+    const markup = matrix();
+    // No aria-label override: it would hide the visible rule text (WCAG 2.5.3 label in name).
+    expect(markup).not.toMatch(/data-cell="[^"]*"[^>]*aria-label=/);
+    expect(markup).not.toMatch(/aria-label="[^"]*"[^>]*data-cell=/);
+    const context = t('client_routes.matrix.cell_context', { profile: 'MacBook · T3 Claude' });
+    expect(markup).toContain(context);
+    expect(markup).toContain(t('client_routes.matrix.cell_change'));
+    expect(markup).toContain(t('client_routes.pill.only', { account: 'Claude A' }));
+    expect(markup).toContain(t('client_routes.pill.available'));
+    expect(markup.match(/<button/g)).toHaveLength(3 + 6);
   });
 
   test('Automatic shows an illustrative share; Only is a strong pill; a disabled target will fail', () => {

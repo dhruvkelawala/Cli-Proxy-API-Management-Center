@@ -276,11 +276,7 @@ export function ProviderResourceTable({
                         checked={!resource.disabled}
                         disabled={disableMutations}
                         onChange={(value) => onToggleDisabled(resource, !value)}
-                        ariaLabel={
-                          resource.disabled
-                            ? t('providersPage.actions.enable')
-                            : t('providersPage.actions.disable')
-                        }
+                        ariaLabel={resource.name ?? resource.identifier}
                       />
                     </span>
                   ) : null}

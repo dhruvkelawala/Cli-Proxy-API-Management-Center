@@ -48,18 +48,17 @@
   right: 0;
   left: var(--sidebar-active-width);
   z-index: $z-dropdown - 2;
-  height: 141px;
+  /* Only as tall as the floating header controls: taller strips (and the old backdrop blur) sat
+     over the page title and washed it out in light themes. */
+  height: 64px;
   pointer-events: none;
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--bg-secondary) 88%, #0d0c0a) 0%,
+    color-mix(in srgb, var(--bg-secondary) 88%, transparent) 0%,
     color-mix(in srgb, var(--bg-secondary) 54%, transparent) 36%,
     color-mix(in srgb, var(--bg-secondary) 22%, transparent) 66%,
     transparent 100%
   );
-  --glass-blur: 22px;
-  backdrop-filter: var(--glass-backdrop-filter);
-  -webkit-backdrop-filter: var(--glass-backdrop-filter);
   mask-image: linear-gradient(
     to bottom,
     #000 0%,
@@ -553,7 +552,7 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: color-mix(in srgb, var(--text-primary) 42%, transparent);
+    color: var(--text-operational-muted);
     user-select: none;
   }
 
@@ -845,10 +844,6 @@
     --floating-control-size: 36px;
   }
 
-  .top-gradient-blur {
-    height: 114px;
-  }
-
   .nav-tooltip {
     display: none;
   }
@@ -942,6 +937,12 @@
     width: var(--sidebar-panel-width);
     height: auto;
     transform: translateX(calc(-100% - 24px));
+    /* The closed drawer is off-screen: keep its links out of the tab order and the a11y tree
+       (hidden only after the slide-out finishes). */
+    visibility: hidden;
+    transition:
+      transform $transition-normal,
+      visibility 0s linear 300ms;
     background: var(--bg-primary);
     border: 0;
     border-right: 1px solid color-mix(in srgb, var(--border-color) 78%, transparent);
@@ -950,6 +951,18 @@
 
     &.open {
       transform: translateX(0);
+      visibility: visible;
+      transition:
+        transform $transition-normal,
+        visibility 0s;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+
+      &.open {
+        transition: none;
+      }
     }
 
     &.collapsed {

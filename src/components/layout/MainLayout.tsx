@@ -329,6 +329,24 @@ export function MainLayout() {
   const setLanguage = useLanguageStore((state) => state.setLanguage);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const mobileMenuRef = useRef<HTMLDivElement | null>(null);
+  // Closing the drawer from a link or Escape must not strand focus on <body>.
+  const closeSidebarRestoringFocus = useCallback(() => {
+    setSidebarOpen(false);
+    window.requestAnimationFrame(() => {
+      mobileMenuRef.current?.querySelector<HTMLElement>('button')?.focus({ preventScroll: true });
+    });
+  }, []);
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape' || event.defaultPrevented) return;
+      if (document.querySelector('[role="dialog"][aria-modal="true"]')) return;
+      closeSidebarRestoringFocus();
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [sidebarOpen, closeSidebarRestoringFocus]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [authFilesCount, setAuthFilesCount] = useState<number | null>(null);
   const [railTooltip, setRailTooltip] = useState<{
@@ -874,7 +892,7 @@ export function MainLayout() {
         className={({ isActive }) => `${className} ${isActive ? 'active' : ''}`}
         onClick={() => {
           focusedRailItemRef.current = null;
-          setSidebarOpen(false);
+          if (sidebarOpen) closeSidebarRestoringFocus();
           hideRailTooltip();
         }}
         aria-label={showSidebarLabels ? undefined : accessibleLabel}
@@ -1014,7 +1032,7 @@ export function MainLayout() {
           {sidebarCollapsed ? headerIcons.chevronRight : headerIcons.chevronLeft}
         </button>
 
-        <div className="mobile-sidebar-actions">
+        <div className="mobile-sidebar-actions" ref={mobileMenuRef}>
           <Button
             className="mobile-menu-btn"
             variant="ghost"

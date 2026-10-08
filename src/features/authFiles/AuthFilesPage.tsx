@@ -522,7 +522,7 @@ export function AuthFilesPage() {
       const copied = await copyToClipboard(text);
       showNotification(
         copied
-          ? t('notification.link_copied', { defaultValue: 'Copied to clipboard' })
+          ? t('notification.copied')
           : t('notification.copy_failed', { defaultValue: 'Copy failed' }),
         copied ? 'success' : 'error'
       );

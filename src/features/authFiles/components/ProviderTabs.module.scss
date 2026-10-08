@@ -76,7 +76,7 @@
 
 .tabGlyph {
   flex-shrink: 0;
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
 
   .tabActive & {
     color: var(--text-primary);
@@ -116,7 +116,7 @@
   font-weight: 650;
   font-variant-numeric: tabular-nums;
   line-height: 1.6;
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
   padding: 0 6px;
   border-radius: $radius-full;
   background: color-mix(in srgb, var(--text-primary) 6%, transparent);

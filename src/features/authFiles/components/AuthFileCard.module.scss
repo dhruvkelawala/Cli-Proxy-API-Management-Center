@@ -25,10 +25,22 @@
 
 .cardDisabled {
   background: color-mix(in srgb, var(--bg-primary) 55%, var(--bg-tertiary));
+  /* No opacity (it drops text below 4.5:1): a dashed boundary plus the Off marker carry the state. */
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--text-operational-muted) 55%, var(--border-color));
 }
 
-.cardDisabled > :not(.actions) {
-  opacity: 0.68;
+.offMarker {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 1px 8px;
+  border: 1px dashed var(--text-operational-muted);
+  border-radius: $radius-full;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-operational-muted);
 }
 
 .cardCompact {
@@ -94,7 +106,7 @@
 .runtimeLabel {
   margin-left: auto;
   font-size: 11px;
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
 }
 
 /* 窄卡片保留基本阅读宽度；空间不足时换行，不截断邮箱或项目 ID。 */
@@ -120,7 +132,7 @@
   font-family: $font-mono;
   font-size: 11px;
   line-height: 1.45;
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
   overflow-wrap: anywhere;
   @include text-ellipsis-multiline(2);
 }
@@ -243,7 +255,7 @@
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
 }
 
 .healthCounts {
@@ -257,20 +269,20 @@
 }
 
 .countOk {
-  color: var(--text-quaternary);
+  color: var(--text-operational-muted);
 }
 
 .countFail {
-  color: var(--text-quaternary);
+  color: var(--text-operational-muted);
 }
 
 /* 绿色只给活的流量：有计数才点亮 */
 .countLive.countOk {
-  color: var(--viz-success);
+  color: var(--text-operational-success);
 }
 
 .countLive.countFail {
-  color: var(--viz-failure);
+  color: var(--text-operational-danger);
 }
 
 /* ---------- ProviderStatusBar 注入样式（18 个契约类名） ---------- */
@@ -313,13 +325,13 @@
   font-size: 11.5px;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
-  color: var(--text-quaternary);
+  color: var(--text-operational-muted);
   min-width: 40px;
   text-align: right;
 }
 
 .statusRateHigh {
-  color: var(--viz-success);
+  color: var(--text-operational-success);
 }
 
 .statusRateMedium {
@@ -327,7 +339,7 @@
 }
 
 .statusRateLow {
-  color: var(--viz-failure);
+  color: var(--text-operational-danger);
 }
 
 .statusTooltip {
@@ -363,7 +375,7 @@
 }
 
 .tooltipTime {
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
   letter-spacing: 0.03em;
 }
 
@@ -375,11 +387,11 @@
 }
 
 .tooltipSuccess {
-  color: var(--viz-success);
+  color: var(--text-operational-success);
 }
 
 .tooltipFailure {
-  color: var(--viz-failure);
+  color: var(--text-operational-danger);
 }
 
 .tooltipRate {
@@ -396,11 +408,11 @@
   font-family: $font-mono;
   font-size: 11.5px;
   font-variant-numeric: tabular-nums;
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
 }
 
 .metaDivider {
-  color: var(--text-quaternary);
+  color: var(--text-operational-muted);
   user-select: none;
 }
 
@@ -433,7 +445,6 @@
   font-size: 10px;
   font-weight: 600;
   color: currentColor;
-  opacity: 0.78;
 }
 
 /* ---------- 页脚动作区 ---------- */
@@ -491,7 +502,7 @@
 }
 
 .card .actions .iconButton:global(.btn-danger) {
-  color: var(--danger-color);
+  color: var(--text-operational-danger);
   border-color: color-mix(in srgb, var(--danger-color) 28%, transparent);
 }
 
@@ -503,7 +514,7 @@
   }
 
   .card .actions .iconButton:global(.btn-danger):hover:not(:disabled) {
-    color: var(--danger-color);
+    color: var(--text-operational-danger);
     border-color: color-mix(in srgb, var(--danger-color) 45%, transparent);
     background: var(--destructive-10);
   }
@@ -532,7 +543,7 @@
 
 .toggleLabel {
   font-size: 11px;
-  color: var(--text-tertiary);
+  color: var(--text-operational-muted);
   white-space: nowrap;
 }
 
