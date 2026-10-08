@@ -18,7 +18,9 @@
   --text-secondary: #6d6760;
   --text-tertiary: #a29c95;
   --text-quaternary: #c0bab3;
-  --text-muted: var(--text-tertiary);
+  // 运营文本专用：--text-tertiary 低于 4.5:1，且同时用于装饰填充，故不全局加深。
+  --text-operational-muted: #6a645d;
+  --text-muted: var(--text-operational-muted);
 
   --border-color: #e3e1db; // 边框/分割线
   --border-secondary: var(--border-color);
@@ -29,6 +31,10 @@
   --primary-hover: #7f7a74;
   --primary-active: #726d67;
   --primary-contrast: #ffffff;
+  // 主按钮：白字需 ≥4.5:1，--primary-color 仅 3.61:1，因此按钮单独取色。
+  --btn-primary-bg: #6d6760;
+  --btn-primary-bg-hover: #625d57;
+  --btn-primary-fg: #ffffff;
 
   --success-color: #10b981;
   --quota-medium-color: #e0aa14;
@@ -107,7 +113,9 @@
   --text-secondary: #6d6760;
   --text-tertiary: #a29c95;
   --text-quaternary: #c0bab3;
-  --text-muted: var(--text-tertiary);
+  // 运营文本专用：--text-tertiary 低于 4.5:1，且同时用于装饰填充，故不全局加深。
+  --text-operational-muted: #6a645d;
+  --text-muted: var(--text-operational-muted);
 
   --border-color: #e5e5e5;
   --border-secondary: var(--border-color);
@@ -118,6 +126,10 @@
   --primary-hover: #7f7a74;
   --primary-active: #726d67;
   --primary-contrast: #ffffff;
+  // 主按钮：白字需 ≥4.5:1，--primary-color 仅 3.61:1，因此按钮单独取色。
+  --btn-primary-bg: #6d6760;
+  --btn-primary-bg-hover: #625d57;
+  --btn-primary-fg: #ffffff;
 
   --success-color: #10b981;
   --quota-medium-color: #e0aa14;
@@ -178,7 +190,9 @@
   --text-secondary: #c9c3bb;
   --text-tertiary: #9c958d;
   --text-quaternary: #6f6962;
-  --text-muted: var(--text-tertiary);
+  // 运营文本专用：--text-tertiary 低于 4.5:1，且同时用于装饰填充，故不全局加深。
+  --text-operational-muted: var(--text-tertiary);
+  --text-muted: var(--text-operational-muted);
 
   --border-color: #3a3530;
   --border-secondary: var(--border-color);
@@ -189,6 +203,10 @@
   --primary-hover: #9a948e;
   --primary-active: #a6a099;
   --primary-contrast: #ffffff;
+  // 主按钮：白字需 ≥4.5:1，--primary-color 仅 3.61:1，因此按钮单独取色。
+  --btn-primary-bg: #6d6760;
+  --btn-primary-bg-hover: #7a746d;
+  --btn-primary-fg: #ffffff;
 
   --success-color: #10b981;
   --quota-medium-color: #ffd862;

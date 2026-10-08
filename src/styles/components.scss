@@ -1,6 +1,9 @@
 @use 'sass:color';
 @use './variables.scss' as *;
 
+// White 16px/600 label on $error-color is 4.33:1; this shade keeps the hue and reaches 4.89:1.
+$btn-danger-bg: #bd4d3c;
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -16,13 +19,13 @@
   color: var(--text-primary);
 
   &.btn-primary {
-    background-color: var(--primary-color);
-    color: var(--primary-contrast, #fff);
-    border-color: var(--primary-color);
+    background-color: var(--btn-primary-bg, var(--primary-color));
+    color: var(--btn-primary-fg, var(--primary-contrast, #fff));
+    border-color: var(--btn-primary-bg, var(--primary-color));
 
     &:hover {
-      background-color: var(--primary-hover);
-      border-color: var(--primary-hover);
+      background-color: var(--btn-primary-bg-hover, var(--primary-hover));
+      border-color: var(--btn-primary-bg-hover, var(--primary-hover));
     }
   }
 
@@ -49,12 +52,13 @@
   }
 
   &.btn-danger {
-    background-color: $error-color;
-    border-color: $error-color;
+    background-color: $btn-danger-bg;
+    border-color: $btn-danger-bg;
     color: #fff;
 
     &:hover {
-      background-color: color.adjust($error-color, $lightness: -5%);
+      background-color: color.adjust($btn-danger-bg, $lightness: -5%);
+      border-color: color.adjust($btn-danger-bg, $lightness: -5%);
     }
   }
 
