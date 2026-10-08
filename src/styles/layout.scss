@@ -48,18 +48,17 @@
   right: 0;
   left: var(--sidebar-active-width);
   z-index: $z-dropdown - 2;
-  height: 141px;
+  /* Only as tall as the floating header controls: taller strips (and the old backdrop blur) sat
+     over the page title and washed it out in light themes. */
+  height: 64px;
   pointer-events: none;
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--bg-secondary) 88%, #0d0c0a) 0%,
+    color-mix(in srgb, var(--bg-secondary) 88%, transparent) 0%,
     color-mix(in srgb, var(--bg-secondary) 54%, transparent) 36%,
     color-mix(in srgb, var(--bg-secondary) 22%, transparent) 66%,
     transparent 100%
   );
-  --glass-blur: 22px;
-  backdrop-filter: var(--glass-backdrop-filter);
-  -webkit-backdrop-filter: var(--glass-backdrop-filter);
   mask-image: linear-gradient(
     to bottom,
     #000 0%,
@@ -843,10 +842,6 @@
     --shell-gutter: 12px;
     --sidebar-panel-width: min(280px, calc(100vw - 24px));
     --floating-control-size: 36px;
-  }
-
-  .top-gradient-blur {
-    height: 114px;
   }
 
   .nav-tooltip {
