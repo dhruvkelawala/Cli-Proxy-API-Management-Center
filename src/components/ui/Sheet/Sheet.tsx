@@ -216,6 +216,7 @@ export function Sheet({
     >
       <div
         ref={sheetRef}
+        data-closing={isClosing ? 'true' : undefined}
         className={contentCls}
         role="dialog"
         aria-modal="true"

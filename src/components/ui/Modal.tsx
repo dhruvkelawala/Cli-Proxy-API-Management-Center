@@ -186,6 +186,7 @@ export function Modal({
     <div className={overlayClass}>
       <div
         ref={modalRef}
+        data-closing={isClosing ? 'true' : undefined}
         className={modalClass}
         style={{ width, maxWidth: '100%' }}
         role="dialog"

@@ -6,6 +6,9 @@
  */
 export const isTopmostDialog = (element: HTMLElement | null): boolean => {
   if (!element || typeof document === 'undefined') return true;
-  const dialogs = document.querySelectorAll('[role="dialog"][aria-modal="true"]');
+  // A dialog animating out (marked data-closing) no longer counts: the one below it takes over.
+  const dialogs = Array.from(
+    document.querySelectorAll('[role="dialog"][aria-modal="true"]')
+  ).filter((dialog) => !dialog.hasAttribute('data-closing'));
   return dialogs.length === 0 || dialogs[dialogs.length - 1] === element;
 };
