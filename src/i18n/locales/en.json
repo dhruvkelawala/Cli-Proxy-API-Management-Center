@@ -1596,6 +1596,94 @@
         "unavailable": "This account is currently unavailable. Requests for this profile fail and never fall back to another account.",
         "missing": "The selected account was not found. Requests for this profile fail and never fall back to another account."
       }
+    },
+    "routing_settings": {
+      "title": "Shared pool",
+      "subtitle": "How Automatic clients pick an account",
+      "loading": "Loading shared routing settings…",
+      "scope": "Global · affects all Automatic clients on the shared gateway (both Macs)",
+      "scope_count_one": "Global · affects {{count}} Automatic client on the shared gateway (both Macs)",
+      "scope_count_other": "Global · affects {{count}} Automatic clients on the shared gateway (both Macs)",
+      "only_ignores": "Clients set to Only one account ignore these settings.",
+      "strategy_legend": "Selection strategy",
+      "strategy_saved": "Saved: {{label}}",
+      "strategy": {
+        "round_robin": "Rotate evenly",
+        "weighted_round_robin": "Weighted split",
+        "fill_first": "Concentrate on one"
+      },
+      "recommend": "Recommended for coding: Rotate evenly with conversations kept on one account. Your saved strategy is never changed automatically.",
+      "affinity_label": "Keep conversations on one account",
+      "affinity_ttl_prefix": "for",
+      "affinity_ttl_aria": "How long a conversation stays on its account",
+      "ttl_default": "the default time",
+      "ttl_invalid": "Use a duration such as 30m, 1h or 1h30m.",
+      "priorities_button": "Priorities & weights",
+      "actions": {
+        "save": "Save shared settings",
+        "discard": "Discard"
+      },
+      "status": {
+        "clean": "Matches the saved gateway configuration",
+        "dirty": "Unsaved changes",
+        "saving": "Saving to the gateway…",
+        "saved": "Saved to the gateway configuration",
+        "failed": "Not saved: {{message}} Your changes are kept.",
+        "failed_no_detail": "Not saved. Your changes are kept."
+      },
+      "reload_failed": "The change was sent, but the saved configuration could not be reloaded. Reload before saving again.",
+      "role": {
+        "participating": "Participating",
+        "standby": "Standby",
+        "unknown": "Availability unknown",
+        "disabled": "Disabled",
+        "unavailable": "Unavailable",
+        "lower_priority": "Lower priority",
+        "non_positive_weight": "Weight 0 or below"
+      },
+      "sheet": {
+        "eyebrow": "Shared pool",
+        "title": "Priorities & weights",
+        "description": "Higher priority wins new assignments; equal priorities share; lower priorities are fallback. Weights matter only for Weighted split.",
+        "separate_saves": "Account settings are saved separately from the strategy and conversation settings.",
+        "loading": "Loading accounts…",
+        "load_failed": "Accounts could not be loaded: {{message}}",
+        "retry": "Try again",
+        "empty": "No credential accounts yet. Connect one on the Accounts page to tune its priority and weight.",
+        "priority_label": "Priority",
+        "priority_hint": "Higher wins new assignments",
+        "priority_placeholder": "0",
+        "priority_invalid": "Whole number",
+        "priority_aria": "Priority for {{name}}",
+        "weight_label": "Weight",
+        "weight_hint": "Default 1 · max 1,000,000",
+        "weight_hint_inactive": "Used only by Weighted split",
+        "weight_hint_zero": "0 or below skips weighted scheduling only; the account stays enabled",
+        "weight_placeholder": "1",
+        "weight_aria": "Weight for {{name}}",
+        "inactive_note": "Weights are not used by the saved or selected strategy. You can still edit them.",
+        "enabled_aria": "{{name}} is enabled",
+        "disabled_aria": "{{name}} is disabled",
+        "share_aria": "Illustrative share of new assignments: {{summary}}",
+        "share_item": "{{label}} {{percent}}",
+        "share_empty": "No eligible account",
+        "share_caption": "Illustrative share of new assignments under {{strategy}} · not actual traffic, tokens or cost",
+        "share_unknown": "striped = availability unknown",
+        "share_standby": "Standby",
+        "scope": "Global · affects every Automatic client that can use these accounts, on both Macs",
+        "scope_count_one": "Global · affects Automatic clients that can use these accounts (up to {{count}} client), on both Macs",
+        "scope_count_other": "Global · affects Automatic clients that can use these accounts (up to {{count}} clients), on both Macs",
+        "save": "Save accounts",
+        "status": {
+          "clean": "Matches the saved accounts",
+          "dirty": "Unsaved changes",
+          "saving": "Saving accounts…",
+          "saved": "Saved {{count}} accounts",
+          "partial": "Saved {{saved}} of {{total}} accounts. Not saved, drafts kept: {{names}}",
+          "failed": "No accounts were saved. Drafts kept: {{names}}",
+          "invalid": "Fix the highlighted values to save"
+        }
+      }
     }
   },
   "quota_management": {

@@ -1,0 +1,48 @@
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+}
+
+.copy {
+  display: flex;
+  flex: 1 1 260px;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.scope {
+  font-size: 12.5px;
+  font-weight: 650;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+
+.status {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.dirty {
+  color: var(--amber-text);
+}
+
+.saved {
+  color: var(--success-badge-text);
+  font-weight: 600;
+}
+
+.failed {
+  color: var(--failure-badge-text);
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}

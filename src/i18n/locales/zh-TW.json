@@ -1617,6 +1617,94 @@
         "unavailable": "該帳號目前無法使用。此設定檔下的請求會失敗，不會回退到其他帳號。",
         "missing": "找不到所選帳號。此設定檔下的請求會失敗，不會回退到其他帳號。"
       }
+    },
+    "routing_settings": {
+      "title": "共用帳號池",
+      "subtitle": "自動用戶端如何選擇帳號",
+      "loading": "正在載入共用路由設定…",
+      "scope": "全域 · 影響共用閘道上的所有自動用戶端（兩台 Mac）",
+      "scope_count_one": "全域 · 影響共用閘道上的 {{count}} 個自動用戶端（兩台 Mac）",
+      "scope_count_other": "全域 · 影響共用閘道上的 {{count}} 個自動用戶端（兩台 Mac）",
+      "only_ignores": "設為「僅使用某個帳號」的用戶端會忽略這些設定。",
+      "strategy_legend": "選擇策略",
+      "strategy_saved": "已儲存：{{label}}",
+      "strategy": {
+        "round_robin": "平均輪替",
+        "weighted_round_robin": "依權重分配",
+        "fill_first": "集中到一個帳號"
+      },
+      "recommend": "程式開發建議：平均輪替，並讓對話保持在同一帳號。已儲存的策略不會被自動變更。",
+      "affinity_label": "讓對話保持在同一帳號",
+      "affinity_ttl_prefix": "時長",
+      "affinity_ttl_aria": "對話保持在同一帳號的時長",
+      "ttl_default": "預設時長",
+      "ttl_invalid": "請使用時長格式，例如 30m、1h 或 1h30m。",
+      "priorities_button": "優先順序與權重",
+      "actions": {
+        "save": "儲存共用設定",
+        "discard": "捨棄變更"
+      },
+      "status": {
+        "clean": "與已儲存的閘道設定一致",
+        "dirty": "有未儲存的變更",
+        "saving": "正在儲存到閘道…",
+        "saved": "已儲存到閘道設定",
+        "failed": "未儲存：{{message}} 你的變更已保留。",
+        "failed_no_detail": "未儲存。你的變更已保留。"
+      },
+      "reload_failed": "變更已送出，但無法重新載入已儲存的設定。再次儲存前請先重新載入。",
+      "role": {
+        "participating": "參與分配",
+        "standby": "備用",
+        "unknown": "可用性未知",
+        "disabled": "已停用",
+        "unavailable": "無法使用",
+        "lower_priority": "優先順序較低",
+        "non_positive_weight": "權重為 0 或更低"
+      },
+      "sheet": {
+        "eyebrow": "共用帳號池",
+        "title": "優先順序與權重",
+        "description": "優先順序高的帳號優先取得新的分配；優先順序相同的帳號共同分擔；較低者作為備援。權重僅在「依權重分配」時生效。",
+        "separate_saves": "帳號設定與策略、對話設定分開儲存。",
+        "loading": "正在載入帳號…",
+        "load_failed": "無法載入帳號：{{message}}",
+        "retry": "重試",
+        "empty": "尚無憑證帳號。請先到帳號頁面連接一個帳號，再調整其優先順序與權重。",
+        "priority_label": "優先順序",
+        "priority_hint": "數值越大越優先取得新分配",
+        "priority_placeholder": "0",
+        "priority_invalid": "請輸入整數",
+        "priority_aria": "{{name}} 的優先順序",
+        "weight_label": "權重",
+        "weight_hint": "預設 1 · 最大 1,000,000",
+        "weight_hint_inactive": "僅「依權重分配」使用",
+        "weight_hint_zero": "0 或更低只會略過加權排程；帳號仍保持啟用",
+        "weight_placeholder": "1",
+        "weight_aria": "{{name}} 的權重",
+        "inactive_note": "目前策略不使用權重，但你仍可編輯。",
+        "enabled_aria": "{{name}} 已啟用",
+        "disabled_aria": "{{name}} 已停用",
+        "share_aria": "新分配的示意占比：{{summary}}",
+        "share_item": "{{label}} {{percent}}",
+        "share_empty": "沒有可用帳號",
+        "share_caption": "{{strategy}}下新分配的示意占比 · 並非實際流量、權杖或費用",
+        "share_unknown": "斜紋 = 可用性未知",
+        "share_standby": "備用",
+        "scope": "全域 · 影響所有可使用這些帳號的自動用戶端（兩台 Mac）",
+        "scope_count_one": "全域 · 影響可使用這些帳號的自動用戶端（最多 {{count}} 個，兩台 Mac）",
+        "scope_count_other": "全域 · 影響可使用這些帳號的自動用戶端（最多 {{count}} 個，兩台 Mac）",
+        "save": "儲存帳號",
+        "status": {
+          "clean": "與已儲存的帳號一致",
+          "dirty": "有未儲存的變更",
+          "saving": "正在儲存帳號…",
+          "saved": "已儲存 {{count}} 個帳號",
+          "partial": "已儲存 {{total}} 個帳號中的 {{saved}} 個。未儲存並保留草稿：{{names}}",
+          "failed": "沒有帳號被儲存。已保留草稿：{{names}}",
+          "invalid": "請先修正標示的值再儲存"
+        }
+      }
     }
   },
   "quota_management": {

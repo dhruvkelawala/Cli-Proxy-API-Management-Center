@@ -1,0 +1,243 @@
+import { useId, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/Button';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { IconSlidersHorizontal } from '@/components/ui/icons';
+import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
+import type { RoutingStrategy } from '@/types/visualConfig';
+import { RoutingSaveRow, type RoutingSaveTone } from './RoutingSaveRow';
+import { RoutingTuningSheet } from './RoutingTuningSheet';
+import { buildRoutingPresentation } from './routingPresentation';
+import { STRATEGY_LABEL_KEYS } from './routingFormat';
+import { bandScopeText } from './routingScope';
+import {
+  ROUTING_STRATEGIES,
+  type RoutingSettingsEdits,
+  type RoutingSettingsValues,
+  type SaveStatus,
+} from './routingSettingsState';
+import { useRoutingSettings } from './useRoutingSettings';
+import styles from './SharedRoutingBand.module.scss';
+
+const ROOT = 'config_management.routing_settings';
+
+export interface SharedRoutingBandProps {
+  /**
+   * Number of client profiles currently set to Automatic. When given, the scope notice names
+   * it; otherwise the notice says the change affects all Automatic clients.
+   */
+  automaticClientCount?: number;
+}
+
+export interface RoutingBandViewProps {
+  values: RoutingSettingsValues;
+  saved: RoutingSettingsValues;
+  dirty: boolean;
+  ttlInvalid: boolean;
+  save: SaveStatus;
+  automaticClientCount?: number;
+  onChange: (edits: RoutingSettingsEdits) => void;
+  onSave: () => void;
+  onDiscard: () => void;
+  onOpenTuning: () => void;
+}
+
+const bandStatus = (
+  t: ReturnType<typeof useTranslation>['t'],
+  save: SaveStatus,
+  dirty: boolean,
+  ttlInvalid: boolean
+): { text: string; tone: RoutingSaveTone } => {
+  if (save.phase === 'saving') return { text: t(`${ROOT}.status.saving`), tone: 'saving' };
+  if (save.phase === 'failed') {
+    return {
+      text: save.message
+        ? t(`${ROOT}.status.failed`, { message: save.message })
+        : t(`${ROOT}.status.failed_no_detail`),
+      tone: 'failed',
+    };
+  }
+  if (ttlInvalid) return { text: t(`${ROOT}.ttl_invalid`), tone: 'failed' };
+  if (dirty) return { text: t(`${ROOT}.status.dirty`), tone: 'dirty' };
+  if (save.phase === 'saved') return { text: t(`${ROOT}.status.saved`), tone: 'saved' };
+  return { text: t(`${ROOT}.status.clean`), tone: 'clean' };
+};
+
+/** Presentational band. All state lives in useRoutingSettings; this only renders and reports. */
+export function RoutingBandView({
+  values,
+  saved,
+  dirty,
+  ttlInvalid,
+  save,
+  automaticClientCount,
+  onChange,
+  onSave,
+  onDiscard,
+  onOpenTuning,
+}: RoutingBandViewProps) {
+  const { t } = useTranslation();
+  const titleId = useId();
+  const ttlId = useId();
+  const ttlErrorId = `${ttlId}-error`;
+  const radioName = useId();
+  const presentation = buildRoutingPresentation({
+    strategy: values.strategy,
+    sessionAffinity: {
+      enabled: values.sessionAffinity,
+      ttl: values.sessionAffinityTtl || undefined,
+    },
+    accounts: [],
+  });
+  const status = bandStatus(t, save, dirty, ttlInvalid);
+  const saving = save.phase === 'saving';
+  const ttlLabel = values.sessionAffinityTtl.trim() || t(`${ROOT}.ttl_default`);
+
+  return (
+    <section className={styles.band} aria-labelledby={titleId} data-testid="shared-routing-band">
+      <div className={styles.head}>
+        <h2 id={titleId} className={styles.title}>
+          {t(`${ROOT}.title`)}
+          <span className={styles.subtitle}>{t(`${ROOT}.subtitle`)}</span>
+        </h2>
+      </div>
+
+      <div className={styles.controls}>
+        <fieldset className={styles.strategy} disabled={saving}>
+          <legend className={styles.srOnly}>{t(`${ROOT}.strategy_legend`)}</legend>
+          {ROUTING_STRATEGIES.map((strategy: RoutingStrategy) => (
+            <label
+              key={strategy}
+              className={`${styles.option} ${values.strategy === strategy ? styles.optionOn : ''}`}
+            >
+              <input
+                type="radio"
+                name={radioName}
+                value={strategy}
+                checked={values.strategy === strategy}
+                onChange={() => onChange({ strategy })}
+              />
+              <span className={styles.optionLabel}>{t(STRATEGY_LABEL_KEYS[strategy])}</span>
+              <span className={styles.optionName}>{strategy}</span>
+            </label>
+          ))}
+        </fieldset>
+
+        <div className={styles.affinity}>
+          <ToggleSwitch
+            checked={values.sessionAffinity}
+            disabled={saving}
+            onChange={(sessionAffinity) => onChange({ sessionAffinity })}
+            label={t(`${ROOT}.affinity_label`)}
+          />
+          <div className={styles.ttl}>
+            <label htmlFor={ttlId}>{t(`${ROOT}.affinity_ttl_prefix`)}</label>
+            <input
+              id={ttlId}
+              className="input"
+              value={values.sessionAffinityTtl}
+              placeholder="1h"
+              disabled={!values.sessionAffinity || saving}
+              autoComplete="off"
+              spellCheck={false}
+              aria-label={t(`${ROOT}.affinity_ttl_aria`)}
+              aria-invalid={ttlInvalid ? true : undefined}
+              aria-describedby={ttlInvalid ? ttlErrorId : undefined}
+              onChange={(event) => onChange({ sessionAffinityTtl: event.target.value })}
+            />
+            {ttlInvalid && (
+              <span id={ttlErrorId} className={styles.srOnly}>
+                {t(`${ROOT}.ttl_invalid`)}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <Button variant="secondary" size="sm" onClick={onOpenTuning}>
+          <IconSlidersHorizontal size={15} aria-hidden="true" /> {t(`${ROOT}.priorities_button`)}
+        </Button>
+      </div>
+
+      <div className={styles.explain}>
+        <p>
+          {t(presentation.strategyExplanationKey)}
+          {values.strategy !== saved.strategy && (
+            <span className={styles.savedNote}>
+              {' '}
+              {t(`${ROOT}.strategy_saved`, { label: t(STRATEGY_LABEL_KEYS[saved.strategy]) })}
+            </span>
+          )}
+        </p>
+        <p className={styles.muted}>{t(presentation.affinity.explanationKey, { ttl: ttlLabel })}</p>
+        <p className={styles.muted}>
+          {t(`${ROOT}.only_ignores`)} {t(`${ROOT}.recommend`)}
+        </p>
+      </div>
+
+      <RoutingSaveRow
+        scope={bandScopeText(t, automaticClientCount)}
+        status={status.text}
+        tone={status.tone}
+        saveLabel={t(`${ROOT}.actions.save`)}
+        saveDisabled={!dirty || ttlInvalid || saving}
+        discardDisabled={!dirty && save.phase !== 'failed'}
+        saving={saving}
+        onSave={onSave}
+        onDiscard={onDiscard}
+      />
+    </section>
+  );
+}
+
+/**
+ * Shared load-balancing editor for Automatic clients: strategy, session affinity and a
+ * Priorities & weights sheet. Settings are global to the gateway, so it states that scope
+ * beside each save. Strategy/affinity and account priority/weight are separate saves.
+ */
+export function SharedRoutingBand({ automaticClientCount }: SharedRoutingBandProps) {
+  const { t } = useTranslation();
+  const routing = useRoutingSettings();
+  const [tuningOpen, setTuningOpen] = useState(false);
+
+  if (!routing.values || !routing.saved) {
+    return (
+      <section className={styles.band} aria-busy="true">
+        <div className={styles.loading} role="status">
+          <LoadingSpinner size={14} />
+          <span>{t(`${ROOT}.loading`)}</span>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <>
+      <RoutingBandView
+        values={routing.values}
+        saved={routing.saved}
+        dirty={routing.dirty}
+        ttlInvalid={routing.ttlError !== null}
+        save={routing.globalSave}
+        automaticClientCount={automaticClientCount}
+        onChange={routing.setEdit}
+        onSave={() => void routing.saveGlobal()}
+        onDiscard={routing.discardGlobal}
+        onOpenTuning={() => {
+          setTuningOpen(true);
+          void routing.accounts.load();
+        }}
+      />
+      <RoutingTuningSheet
+        open={tuningOpen}
+        onClose={() => setTuningOpen(false)}
+        strategy={routing.values.strategy}
+        sessionAffinity={{
+          enabled: routing.values.sessionAffinity,
+          ttl: routing.values.sessionAffinityTtl || undefined,
+        }}
+        accounts={routing.accounts}
+        automaticClientCount={automaticClientCount}
+      />
+    </>
+  );
+}
