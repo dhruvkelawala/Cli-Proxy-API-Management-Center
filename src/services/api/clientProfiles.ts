@@ -287,7 +287,7 @@ const readFingerprints = (value: unknown, into: Set<string>) => {
 /**
  * Fingerprints of client keys already associated with a profile, from the saved YAML.
  * JSON reads (`/client-profiles`, `/config`) redact them by contract; the authenticated YAML
- * backup keeps them under `access.client-profile-keys` (or the older flat `client-profile-keys`).
+ * backup keeps them under the v8 path `access.client-profile-keys`.
  * Raw values in that document are never returned from here.
  */
 export const parseLinkedKeyFingerprints = (yamlText: string): Set<string> => {
@@ -295,7 +295,6 @@ export const parseLinkedKeyFingerprints = (yamlText: string): Set<string> => {
   const linked = new Set<string>();
   if (!isRecord(root)) return linked;
   if (isRecord(root.access)) readFingerprints(root.access['client-profile-keys'], linked);
-  readFingerprints(root['client-profile-keys'], linked);
   return linked;
 };
 

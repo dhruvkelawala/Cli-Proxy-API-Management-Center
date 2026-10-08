@@ -165,7 +165,7 @@ export function AccountPinSheet(props: AccountPinSheetProps) {
             reloading={reloading}
             onReload={async () => {
               setReloading(true);
-              await load();
+              await load({ fresh: true });
               setReloading(false);
               setFailure(null);
             }}

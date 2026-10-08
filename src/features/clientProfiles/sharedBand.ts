@@ -10,15 +10,18 @@ import { STRATEGY_LABEL_KEYS } from '@/features/config/routing/routingFormat';
 import { CR } from './copy';
 
 /**
- * True once per strategy/affinity save that reached the gateway config file (including a save
- * whose re-read failed). Client profile ETags hash that whole file, so the list must be re-read.
+ * True once per finished strategy/affinity save: saved, saved but not re-read, or failed (a
+ * failed multi-field patch can be partly applied). Any of them may have changed the config file,
+ * and client profile ETags hash that whole file, so the profile list must be re-read.
  */
-export const sharedBandWroteConfig = (
+export const sharedBandSaveFinished = (
   previous: SharedRoutingBandState | null,
   next: SharedRoutingBandState
 ): boolean =>
   next.save !== previous?.save &&
-  (next.save.phase === 'saved' || next.save.phase === 'reload_failed');
+  (next.save.phase === 'saved' ||
+    next.save.phase === 'reload_failed' ||
+    next.save.phase === 'failed');
 
 export const isSharedBandForcedOpen = (state: SharedRoutingBandState | null): boolean =>
   Boolean(state && (state.dirty || state.attention));

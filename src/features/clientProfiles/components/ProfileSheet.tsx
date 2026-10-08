@@ -19,6 +19,7 @@ import type {
 import { CONNECTION_CONTEXTS, type ConnectionContext } from '../connectionContext';
 import { DEFAULT_NEW_PROFILE_POLICIES, toWritablePolicy } from '../model';
 import { CR } from '../copy';
+import { useLinkedKeyFingerprints } from '../hooks/useLinkedKeyFingerprints';
 import { continueAfterClose, useSheetCloseGuard } from '../sheetGuard';
 import { FailureNotice, Notice } from './Notices';
 import { ProfileKeys } from './ProfileKeys';
@@ -65,6 +66,7 @@ export function ProfileSheet(props: ProfileSheetProps) {
   const showConfirmation = useNotificationStore((state) => state.showConfirmation);
   // Key link/move/rotate/revoke writes run through the store; they block closing too.
   const mutating = useClientProfilesStore((state) => state.mutating);
+  const linkedKeys = useLinkedKeyFingerprints(snapshot.revision);
 
   const savedLabel = profile?.label ?? '';
   const [name, setName] = useState(mode === 'new' ? '' : savedLabel);
@@ -97,7 +99,7 @@ export function ProfileSheet(props: ProfileSheetProps) {
 
   const handleReload = async () => {
     setReloading(true);
-    await load();
+    await load({ fresh: true });
     setReloading(false);
     setFailure(null);
   };
@@ -279,6 +281,7 @@ export function ProfileSheet(props: ProfileSheetProps) {
                 hint={t(`${CR}.matrix.keys_count`, { count: keyCount })}
               >
                 <ProfileKeys
+                  linkedKeys={linkedKeys}
                   profile={profile}
                   snapshot={snapshot}
                   apiKeys={apiKeys}

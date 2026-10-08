@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { apiClient } from '@/services/api/client';
 import { clientProfilesApi } from '@/services/api/clientProfiles';
 import { useConfigStore, useNotificationStore } from '@/stores';
 import {
@@ -40,6 +39,8 @@ type ProfileKeysProps = {
   enforcement: boolean;
   hasOnlyRule: boolean;
   apiBase: string;
+  /** Fingerprints already linked to any profile (hidden from the picker); null while unknown. */
+  linkedKeys: ReadonlySet<string> | null;
 };
 
 type Editing = { keyRef: string; action: 'move' | 'rotate' } | null;
@@ -51,6 +52,7 @@ type Editing = { keyRef: string; action: 'move' | 'rotate' } | null;
  */
 export function ProfileKeys(props: ProfileKeysProps) {
   const { profile, snapshot, apiKeys, wsAuth, enforcement, hasOnlyRule, apiBase } = props;
+  const linked = props.linkedKeys;
   const { t } = useTranslation();
   const mutate = useClientProfilesStore((state) => state.mutate);
   const mutating = useClientProfilesStore((state) => state.mutating);
@@ -62,8 +64,6 @@ export function ProfileKeys(props: ProfileKeysProps) {
   const [failure, setFailure] = useState<ClientProfilesFailure | null>(null);
   const [reloading, setReloading] = useState(false);
   const [selection, setSelection] = useState<ClientKeySelection>(null);
-  /** Fingerprints already linked to any profile; null while unknown (the gateway still checks). */
-  const [linked, setLinked] = useState<Set<string> | null>(null);
   const [linkLabel, setLinkLabel] = useState('');
   const [editing, setEditing] = useState<Editing>(null);
   const [moveTarget, setMoveTarget] = useState('');
@@ -71,22 +71,6 @@ export function ProfileKeys(props: ProfileKeysProps) {
 
   const keys = snapshot.keys.filter((key) => key.profileRef === profile.profileRef);
   const names = useMemo(() => readApiKeyNames(apiBase), [apiBase]);
-  // Associations change with every profile/key write, so re-read them with each list revision.
-  useEffect(() => {
-    let cancelled = false;
-    const connection = apiClient.getConnectionRevision();
-    clientProfilesApi
-      .linkedKeyFingerprints()
-      .then((next) => {
-        if (!cancelled && connection === apiClient.getConnectionRevision()) setLinked(next);
-      })
-      .catch(() => {
-        if (!cancelled) setLinked(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [snapshot.revision]);
 
   const keyOptions = useMemo(
     () =>
@@ -212,7 +196,7 @@ export function ProfileKeys(props: ProfileKeysProps) {
           reloading={reloading}
           onReload={async () => {
             setReloading(true);
-            await Promise.allSettled([load(), fetchConfig(true)]);
+            await Promise.allSettled([load({ fresh: true }), fetchConfig(true)]);
             setReloading(false);
             setFailure(null);
           }}

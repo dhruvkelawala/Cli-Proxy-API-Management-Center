@@ -36,8 +36,9 @@ export interface SharedRoutingBandState {
   /** A save failed, its re-read failed, or an edit is invalid. */
   attention: boolean;
   /**
-   * Latest strategy/affinity save status. A new `saved` or `reload_failed` object means the
-   * gateway config file was written, so hosts keyed on its revision must re-read.
+   * Latest strategy/affinity save status. A new `saved`, `reload_failed` or `failed` object means
+   * the gateway config file may have been written (a failed patch can be partly applied), so
+   * hosts keyed on its revision must re-read.
    */
   save: SaveStatus;
 }

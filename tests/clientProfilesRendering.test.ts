@@ -9,6 +9,8 @@ import { PolicyPreview } from '@/features/clientProfiles/components/PolicyPrevie
 import { PolicySheet } from '@/features/clientProfiles/components/PolicySheet';
 import { ProfileSheet } from '@/features/clientProfiles/components/ProfileSheet';
 import { AccountClientLinks } from '@/features/clientProfiles/components/AccountClientLinks';
+import { AccountPinSheet } from '@/features/clientProfiles/components/AccountPinSheet';
+import { ProfileKeys } from '@/features/clientProfiles/components/ProfileKeys';
 import { EnforcementNotice, FailureNotice } from '@/features/clientProfiles/components/Notices';
 import { buildAccountClientLinks } from '@/features/clientProfiles/accountLinks';
 import {
@@ -20,6 +22,7 @@ import type { SharedRoutingBandState } from '@/features/config/routing/SharedRou
 import {
   buildPoolPreview,
   buildProfileRows,
+  clientKeyFingerprint,
   credentialRefForAuthFile,
 } from '@/features/clientProfiles/model';
 import type { AuthFileItem } from '@/types';
@@ -609,5 +612,78 @@ describe('CPA-003 enforcement', () => {
       );
     expect(keysSheet(capabilities)).toContain(t('client_routes.keys.strict_warning'));
     expect(keysSheet(enforcedCapabilities)).not.toContain(t('client_routes.keys.strict_warning'));
+  });
+});
+
+describe('wiring of availability and linked keys', () => {
+  /** profile label -> whether its pin checkbox is disabled. */
+  const pinCheckboxes = (markup: string) =>
+    Object.fromEntries(
+      [...markup.matchAll(/<label[^>]*><input([^>]*type="checkbox"[^>]*)>.*?<\/label>/g)].map(
+        ([whole, attrs]) => [
+          snapshot.profiles.find((profile) => whole.includes(`>${profile.label}<`))?.label ?? '?',
+          /\sdisabled=""/.test(attrs),
+        ]
+      )
+    );
+
+  test('pin sheet: an unavailable account only lets clients already pinned to it be unchecked', () => {
+    const markup = render(
+      createElement(AccountPinSheet, {
+        open: true,
+        account: snapshot.accounts[1], // Claude B: unavailable, pinned by "MacBook · T3 Claude B"
+        provider: 'claude',
+        fallbackLabel: 'Claude B',
+        snapshot,
+        capabilities,
+        files,
+        onClose: noop,
+      })
+    );
+    expect(pinCheckboxes(markup)).toEqual({
+      'Mini · T3 Claude': true,
+      'MacBook · T3 Claude': true,
+      'MacBook · T3 Claude B': false,
+    });
+    const available = render(
+      createElement(AccountPinSheet, {
+        open: true,
+        account: snapshot.accounts[0], // Claude A: available
+        provider: 'claude',
+        fallbackLabel: 'Claude A',
+        snapshot,
+        capabilities,
+        files,
+        onClose: noop,
+      })
+    );
+    expect(Object.values(pinCheckboxes(available))).toEqual([false, false, false]);
+  });
+
+  test('key picker: keys linked to any profile are not offered', () => {
+    const otherKey = 'sk-raw-client-key-fixture-0002';
+    const keys = (linkedKeys: ReadonlySet<string> | null) =>
+      render(
+        createElement(ProfileKeys, {
+          profile: snapshot.profiles[0],
+          snapshot,
+          apiKeys: [RAW_CLIENT_KEY, otherKey],
+          wsAuth: true,
+          enforcement: false,
+          hasOnlyRule: false,
+          apiBase: 'http://127.0.0.1:1',
+          linkedKeys,
+        })
+      );
+    const allLinked = keys(new Set([RAW_CLIENT_KEY, otherKey].map(clientKeyFingerprint)));
+    expect(allLinked).toContain(t('client_routes.keys.all_linked'));
+    expect(allLinked).not.toContain(t('client_routes.keys.link_select'));
+    // One key still free: the picker is offered.
+    const oneFree = keys(new Set([clientKeyFingerprint(RAW_CLIENT_KEY)]));
+    expect(oneFree).toContain(t('client_routes.keys.link_select'));
+    expect(oneFree).not.toContain(t('client_routes.keys.all_linked'));
+    // Associations unknown: every key is offered (the gateway rejects duplicates).
+    expect(keys(null)).toContain(t('client_routes.keys.link_select'));
+    for (const markup of [allLinked, oneFree]) expect(markup).not.toContain(RAW_CLIENT_KEY);
   });
 });

@@ -117,7 +117,7 @@ export function ClientRoutesPage() {
     setSheetDirty(false);
     openProfile(profileRef);
   };
-  // The band writes the config file; client profile ETags hash that file, so re-read the list.
+  // A finished band save may have written the config file; client profile ETags hash that file.
   const handleBandConfigWritten = useCallback(() => void load({ fresh: true }), [load]);
 
   const sheetProfile =

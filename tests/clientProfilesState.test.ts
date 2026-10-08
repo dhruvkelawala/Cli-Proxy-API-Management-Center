@@ -7,7 +7,7 @@ import {
   policyEditorReducer,
 } from '@/features/clientProfiles/policyEditorState';
 import { continueAfterClose, sheetCloseDecision } from '@/features/clientProfiles/sheetGuard';
-import { sharedBandWroteConfig } from '@/features/clientProfiles/sharedBand';
+import { sharedBandSaveFinished } from '@/features/clientProfiles/sharedBand';
 import type { SharedRoutingBandState } from '@/features/config/routing/SharedRoutingBand';
 import {
   buildPoolPreview,
@@ -592,7 +592,7 @@ describe('client routes presentation model', () => {
     expect(switched).toEqual(['profile']);
   });
 
-  test('a shared band save that wrote the config is reported once', () => {
+  test('a finished shared band save (saved or failed) is reported once', () => {
     const base: SharedRoutingBandState = {
       saved: null,
       dirty: false,
@@ -601,15 +601,17 @@ describe('client routes presentation model', () => {
     };
     const saving = { ...base, save: { phase: 'saving' as const } };
     const saved = { ...base, save: { phase: 'saved' as const } };
-    expect(sharedBandWroteConfig(null, base)).toBe(false);
-    expect(sharedBandWroteConfig(base, saving)).toBe(false);
-    expect(sharedBandWroteConfig(saving, saved)).toBe(true);
+    expect(sharedBandSaveFinished(null, base)).toBe(false);
+    expect(sharedBandSaveFinished(base, saving)).toBe(false);
+    expect(sharedBandSaveFinished(saving, saved)).toBe(true);
     // Same save object re-reported (e.g. a dirty flag change): not another write.
-    expect(sharedBandWroteConfig(saved, { ...saved, dirty: true })).toBe(false);
+    expect(sharedBandSaveFinished(saved, { ...saved, dirty: true })).toBe(false);
     const reloadFailed = { ...base, save: { phase: 'reload_failed' as const } };
-    expect(sharedBandWroteConfig(saving, reloadFailed)).toBe(true);
+    expect(sharedBandSaveFinished(saving, reloadFailed)).toBe(true);
+    // A failed multi-field patch can be partly applied, so it changes the ETag too.
     const failed = { ...base, save: { phase: 'failed' as const, message: 'x' } };
-    expect(sharedBandWroteConfig(saving, failed)).toBe(false);
+    expect(sharedBandSaveFinished(saving, failed)).toBe(true);
+    expect(sharedBandSaveFinished(failed, { ...failed, attention: true })).toBe(false);
   });
 
   test('key fingerprints follow the contract (SHA-256 of the trimmed value)', () => {

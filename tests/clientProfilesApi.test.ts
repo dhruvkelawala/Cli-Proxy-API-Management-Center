@@ -405,11 +405,12 @@ describe('linked client key fingerprints', () => {
       '  client-profile-keys:',
       `    - {key_ref: ${KEY_REF}, label: one, profile_ref: ${PROFILE_REF}, fingerprint: ${A}}`,
       '    - {label: broken, fingerprint: not-a-fingerprint}',
+      // Not a v8 path: ignored (no legacy fallbacks).
       'client-profile-keys:',
-      `  - {label: legacy flat layout, fingerprint: ${B}}`,
+      `  - {label: top-level layout, fingerprint: ${B}}`,
     ].join('\n');
     const linked = parseLinkedKeyFingerprints(yaml);
-    expect([...linked].sort()).toEqual([A, B.toLowerCase()].sort());
+    expect([...linked]).toEqual([A]);
     expect([...linked].join()).not.toContain('sk-raw');
 
     const getRaw = mock('getRaw', { data: yaml });

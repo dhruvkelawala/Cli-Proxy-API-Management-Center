@@ -10,7 +10,7 @@ import {
   isSharedBandForcedOpen,
   isSharedBandOpen,
   sharedBandSummaryParts,
-  sharedBandWroteConfig,
+  sharedBandSaveFinished,
 } from '../sharedBand';
 import styles from './CollapsibleSharedRoutingBand.module.scss';
 
@@ -79,7 +79,10 @@ export function CollapsibleSharedRoutingBand({
   onConfigWritten,
 }: {
   automaticClientCount?: number;
-  /** A band save wrote the gateway config file (which changes the client profiles ETag). */
+  /**
+   * A band save finished (saved or failed) and may have written the gateway config file, which
+   * changes the client profiles ETag.
+   */
   onConfigWritten?: () => void;
 }) {
   const { t } = useTranslation();
@@ -88,7 +91,7 @@ export function CollapsibleSharedRoutingBand({
   const previousState = useRef<SharedRoutingBandState | null>(null);
   const handleStateChange = useCallback(
     (next: SharedRoutingBandState) => {
-      if (sharedBandWroteConfig(previousState.current, next)) onConfigWritten?.();
+      if (sharedBandSaveFinished(previousState.current, next)) onConfigWritten?.();
       previousState.current = next;
       setBandState(next);
     },
