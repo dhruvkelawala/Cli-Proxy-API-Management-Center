@@ -1955,7 +1955,8 @@
     "login_failed": "Login failed",
     "commercial_mode_restart_required": "Commercial mode setting changed. Please restart the service for it to take effect",
     "copy_failed": "Copy failed",
-    "link_copied": "Link copied to clipboard"
+    "link_copied": "Link copied to clipboard",
+    "copied": "Copied to clipboard"
   },
   "language": {
     "switch": "Language",
@@ -2402,7 +2403,8 @@
       "caption": "Client profiles and the subscription each may use, per provider",
       "profile_column": "Client profile",
       "edit_profile": "Profile and keys for {{name}}",
-      "cell_label": "{{provider}} rule for {{profile}}: {{policy}}. Change rule",
+      "cell_context": "{{profile}}:",
+      "cell_change": "Change rule",
       "keys_count_one": "{{count}} client key",
       "keys_count_other": "{{count}} client keys",
       "no_keys": "No client keys linked",
@@ -2620,7 +2622,7 @@
       "will_fail_note_one": "This account is off or unavailable, so {{count}} pinned client fails. No other account substitutes.",
       "will_fail_note_other": "This account is off or unavailable, so {{count}} pinned clients fail. No other account substitutes.",
       "use_only": "Use only this subscription for…",
-      "use_only_aria": "Choose clients that must use only {{account}}",
+      "use_only_aria": "Use only this subscription for… (choose clients for {{account}})",
       "sheet_eyebrow": "{{provider}} subscription",
       "sheet_title": "Clients that must use only {{account}}",
       "sheet_intro": "Checked profiles send every {{provider}} request to {{account}}. Unchecking returns a profile to Automatic.",

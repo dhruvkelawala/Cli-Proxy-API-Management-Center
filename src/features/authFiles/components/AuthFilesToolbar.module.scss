@@ -29,7 +29,7 @@
 }
 
 .searchIcon {
-  color: var(--text-quaternary);
+  color: var(--text-operational-muted);
 }
 
 /* ---------- 状态分段控件 ---------- */
@@ -53,7 +53,7 @@
   font-size: 12px;
   font-weight: 550;
   line-height: 1.3;
-  color: var(--text-secondary);
+  color: var(--text-operational-muted);
   white-space: nowrap;
   transition:
     color var(--dur-hover, 200ms) var(--ease-out-strong, ease-out),
@@ -87,7 +87,7 @@
 }
 
 .segmentProblem.segmentActive {
-  color: var(--danger-color);
+  color: var(--text-operational-danger);
   background: color-mix(
     in srgb,
     var(--danger-color) 12%,
@@ -221,7 +221,7 @@
   cursor: pointer;
   font-size: 12px;
   font-weight: 550;
-  color: var(--danger-color);
+  color: var(--text-operational-danger);
   white-space: nowrap;
   transition:
     background-color var(--dur-hover, 200ms) var(--ease-out-strong, ease-out),

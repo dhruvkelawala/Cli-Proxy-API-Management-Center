@@ -324,6 +324,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
                   onClick={() => onManualRefresh(file)}
                   className={styles.iconButton}
                   title={t('auth_files.manual_refresh_button')}
+                  aria-label={t('auth_files.manual_refresh_button')}
                   disabled={
                     disableControls ||
                     file.disabled ||
@@ -340,6 +341,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
                 onClick={() => onDownload(file.name)}
                 className={styles.iconButton}
                 title={t('auth_files.download_button')}
+                aria-label={t('auth_files.download_button')}
                 disabled={disableControls}
               >
                 <IconDownload size={15} />
@@ -350,6 +352,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
                 onClick={() => onOpenPrefixProxyEditor(file)}
                 className={styles.iconButton}
                 title={t('auth_files.prefix_proxy_button')}
+                aria-label={t('auth_files.prefix_proxy_button')}
                 disabled={disableControls || isManualRefreshing}
               >
                 <IconSettings size={15} />
@@ -360,6 +363,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
                 onClick={() => onDelete(file.name)}
                 className={styles.iconButton}
                 title={t('auth_files.delete_button')}
+                aria-label={t('auth_files.delete_button')}
                 disabled={disableControls || deleting === file.name || isManualRefreshing}
               >
                 {deleting === file.name ? <LoadingSpinner size={14} /> : <IconTrash2 size={15} />}

@@ -3,14 +3,12 @@
  * them; components only pick keys from here so wording stays consistent across views.
  */
 
-import type { TFunction } from 'i18next';
 import type { ClientProfilesFailure } from '@/stores/useClientProfilesStore';
 import {
   CLIENT_PROFILE_PROVIDERS,
   type ClientProfileProvider,
   type ClientProfileTargetState,
 } from '@/types/clientProfiles';
-import type { PolicyCell } from './model';
 
 export const CR = 'client_routes';
 
@@ -47,25 +45,3 @@ export const failureOffersReload = (failure: Pick<ClientProfilesFailure, 'kind'>
   ].includes(failure.kind);
 
 export const providerLabelKey = (provider: string): string => `${CR}.providers.${provider}`;
-
-/** Plain-text summary of a rule, used for the cell's accessible name. */
-export const describeCellText = (t: TFunction, cell: PolicyCell): string => {
-  if (cell.kind === 'unknown') {
-    return `${t(`${CR}.pill.unknown_rule`)}, ${t(`${CR}.pill.will_fail`)}`;
-  }
-  if (cell.kind === 'only') {
-    const name = cell.accountLabel ?? t(`${CR}.pill.removed_account`);
-    const only = t(`${CR}.pill.only`, { account: name });
-    return cell.willFail
-      ? `${only}, ${t(`${CR}.pill.will_fail`)}: ${t(targetStateKey(cell.state))}`
-      : `${only}, ${
-          cell.state === 'available'
-            ? t(`${CR}.pill.available`)
-            : t(`${CR}.pill.availability_unknown`)
-        }`;
-  }
-  const automatic = t(`${CR}.pill.automatic`);
-  if (cell.willFail)
-    return `${automatic}, ${t(`${CR}.pill.will_fail`)}: ${t(`${CR}.pill.pool_empty`)}`;
-  return cell.pool.known ? automatic : `${automatic}, ${t(`${CR}.pill.pool_unknown`)}`;
-};

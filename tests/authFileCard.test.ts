@@ -66,10 +66,10 @@ describe('auth file card presentation contract', () => {
     expect(source).not.toMatch(/compact\s*&&[^\n]*stateKey/);
   });
 
-  test('dims disabled card content but keeps the re-enable controls clear', () => {
+  test('marks disabled cards with a surface tint, never opacity (text must stay >= 4.5:1)', () => {
     expect(source).toContain("file.disabled === true ? styles.cardDisabled : ''");
-    expect(styles).toMatch(/\.cardDisabled\s*>\s*:not\(\.actions\)\s*\{\s*opacity:\s*0\.68;/);
-    expect(styles).not.toMatch(/\.cardDisabled\s*\{[^}]*opacity:/);
+    expect(styles).toMatch(/\.cardDisabled\s*\{[^}]*background:/);
+    expect(styles).not.toMatch(/\.cardDisabled[^{]*\{[^}]*opacity:/);
   });
 
   test('uses a plain-text weight tooltip while preserving the details link', () => {

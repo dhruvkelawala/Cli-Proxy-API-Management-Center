@@ -88,6 +88,7 @@
 }
 
 .cellButton {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -121,8 +122,20 @@
   border-color: var(--failure-badge-border);
 }
 
+.visuallyHidden,
 .mobileProvider {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.mobileProvider {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -165,8 +178,16 @@
     padding-bottom: 8px;
   }
 
+  /* Shown on narrow screens, where the provider column header is not visible. */
   .mobileProvider {
+    position: static;
     display: block;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
   }
 
   .cellButton {

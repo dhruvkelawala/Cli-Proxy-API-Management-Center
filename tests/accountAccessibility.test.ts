@@ -1,9 +1,12 @@
 import { afterEach, describe, expect, test } from 'bun:test';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import i18n from '@/i18n';
 import { AuthFileModelList } from '@/features/authFiles/components/AuthFileModelsModal';
+import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
+import { isTopmostDialog } from '@/components/ui/dialogStack';
+import { TYPE_COLORS } from '@/utils/quota/constants';
 import { contrastRatio, loadThemeTokens } from './helpers/wcagContrast';
 
 const read = (relative: string) => readFileSync(new URL(`../${relative}`, import.meta.url), 'utf8');
@@ -161,5 +164,282 @@ describe('AuthFileModelList copy buttons', () => {
     expect(styles).not.toContain('opacity: 0.55');
     expect(styles).not.toContain('var(--text-tertiary)');
     expect(styles).not.toContain('.item:hover');
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// CPA-006 part 2: Accounts, Client routes and the shared band in both themes.
+// Static markup / pure contrast only. Focus, Escape and clipboard behaviour is proven in a real
+// browser (see plans/006-account-accessibility.md), not by these tests.
+// ---------------------------------------------------------------------------------------------
+
+const LOCALES = ['en', 'zh-CN', 'zh-TW', 'ru', 'vi'] as const;
+const locale = (name: string) =>
+  JSON.parse(read(`src/i18n/locales/${name}.json`)) as Record<string, unknown>;
+const lookup = (data: Record<string, unknown>, path: string): unknown =>
+  path.split('.').reduce<unknown>((node, key) => (node as Record<string, unknown>)?.[key], data);
+
+describe('operational status colours', () => {
+  for (const name of THEME_NAMES) {
+    const tokens = themes[name];
+    test(`${name}: success/danger text tokens are 4.5:1 on cards, pages, dialogs and tinted rows`, () => {
+      for (const text of ['--text-operational-success', '--text-operational-danger']) {
+        for (const surface of SURFACES) {
+          expect(contrastRatio(tokens[text], tokens[surface])).toBeGreaterThanOrEqual(TEXT_MIN);
+        }
+      }
+    });
+  }
+
+  test('dark sidebar group labels (operational muted on the shell ground) are 4.5:1', () => {
+    const layout = read('src/styles/layout.scss');
+    const ground = layout.match(/--shell-ground:\s*(#[0-9a-f]{6})/i)?.[1];
+    expect(ground).toBeDefined();
+    expect(contrastRatio(themes.dark['--text-operational-muted'], ground!)).toBeGreaterThanOrEqual(
+      TEXT_MIN
+    );
+    expect(layout).toMatch(/\.nav-group-label\s*\{[^}]*color:\s*var\(--text-operational-muted\)/);
+    expect(layout).not.toMatch(/\.nav-group-label\s*\{[^}]*color-mix/);
+  });
+
+  test('provider badge colours are 4.5:1 in light and dark', () => {
+    for (const [provider, set] of Object.entries(TYPE_COLORS)) {
+      for (const mode of ['light', 'dark'] as const) {
+        const colors = set[mode];
+        if (!colors) continue;
+        expect({
+          provider,
+          mode,
+          ok: contrastRatio(colors.text, colors.bg) >= TEXT_MIN,
+        }).toEqual({ provider, mode, ok: true });
+      }
+    }
+  });
+
+  test('Accounts styles use operational tokens for text and never dim content with opacity', () => {
+    const dir = 'src/features/authFiles/components';
+    for (const file of [
+      'AuthFileCard',
+      'AuthFileQuota',
+      'AuthFilesToolbar',
+      'ProviderTabs',
+      'VaultHeader',
+      'VaultPulse',
+      'AuthFileDetailsSheet',
+    ]) {
+      const css = read(`${dir}/${file}.module.scss`);
+      expect({
+        file,
+        hits: css.match(/^\s*color:\s*var\(--text-(tertiary|quaternary)\)/gm),
+      }).toEqual({ file, hits: null });
+    }
+    const card = read(`${dir}/AuthFileCard.module.scss`);
+    // Status dots keep the brand fills; the text next to them uses the operational tokens.
+    expect(card).toMatch(/\.countLive\.countOk\s*\{[^}]*--text-operational-success/);
+    expect(card).toMatch(/\.countLive\.countFail\s*\{[^}]*--text-operational-danger/);
+    expect(card).not.toMatch(/\.cardDisabled\s*>/);
+    expect(card).not.toMatch(/\.metaMetricLabel\s*\{[^}]*opacity/);
+    expect(read('src/components/excludedModels/ExcludedModelsPicker.module.scss')).not.toMatch(
+      /\.rowLocked\s*\{[^}]*opacity/
+    );
+  });
+});
+
+describe('ToggleSwitch', () => {
+  test('renders a real switch whose name is the supplied state-aware label', () => {
+    const markup = renderToStaticMarkup(
+      createElement(ToggleSwitch, {
+        checked: true,
+        onChange: () => {},
+        ariaLabel: 'Claude A: enabled',
+      })
+    );
+    expect(markup).toContain('type="checkbox"');
+    expect(markup).toContain('role="switch"');
+    expect(markup).toContain('aria-label="Claude A: enabled"');
+    expect(markup).toContain('checked=""');
+  });
+
+  test('has a visible keyboard focus ring and a 3:1 off-state boundary', () => {
+    const css = read('src/components/ui/ToggleSwitch.module.scss');
+    expect(css).toMatch(/input:focus-visible\s*\+\s*\.track\s*\{[^}]*outline:\s*2px solid/);
+    expect(css).toMatch(
+      /input:not\(:checked\)\s*\+\s*\.track\s*\{[^}]*var\(--text-operational-muted\)/
+    );
+    expect(css).toMatch(/prefers-reduced-motion:\s*reduce[\s\S]*transition:\s*none/);
+    for (const name of THEME_NAMES) {
+      for (const surface of SURFACES) {
+        expect(
+          contrastRatio(themes[name]['--text-operational-muted'], themes[name][surface])
+        ).toBeGreaterThanOrEqual(CONTROL_MIN);
+      }
+    }
+  });
+});
+
+describe('SelectionCheckbox', () => {
+  test('unchecked boundary uses a 3:1 colour (the border token is far below it)', () => {
+    const css = read('src/components/ui/SelectionCheckbox.module.scss');
+    expect(css).toMatch(/\.box\s*\{[^}]*border:\s*1px solid var\(--text-operational-muted\)/);
+    for (const name of THEME_NAMES) {
+      const tokens = themes[name];
+      expect(contrastRatio(tokens['--border-color'], tokens['--bg-primary'])).toBeLessThan(
+        CONTROL_MIN
+      );
+      for (const surface of SURFACES) {
+        expect(
+          contrastRatio(tokens['--text-operational-muted'], tokens[surface])
+        ).toBeGreaterThanOrEqual(CONTROL_MIN);
+      }
+    }
+  });
+});
+
+describe('Accounts controls: names that contain their visible text (WCAG 2.5.3)', () => {
+  test('"Use only this subscription for…" keeps its visible text at the start of its name in every locale', () => {
+    for (const lng of LOCALES) {
+      const data = locale(lng);
+      const visible = lookup(data, 'client_routes.accounts.use_only') as string;
+      const named = lookup(data, 'client_routes.accounts.use_only_aria') as string;
+      expect(named.startsWith(visible)).toBe(true);
+      expect(named).toContain('{{account}}');
+    }
+  });
+
+  test('icon-only account actions carry an explicit aria-label equal to their title', () => {
+    const card = read('src/features/authFiles/components/AuthFileCard.tsx');
+    for (const key of [
+      'manual_refresh_button',
+      'download_button',
+      'prefix_proxy_button',
+      'delete_button',
+    ]) {
+      expect(card).toContain(`title={t('auth_files.${key}')}`);
+      expect(card).toContain(`aria-label={t('auth_files.${key}')}`);
+    }
+  });
+
+  test('the Sort select name includes the visible current value', () => {
+    const toolbar = read('src/features/authFiles/components/AuthFilesToolbar.tsx');
+    expect(toolbar).toMatch(/ariaLabel=\{`\$\{t\('auth_files\.sort_label'\)\}: \$\{/);
+  });
+
+  test('copy feedback uses a generic message that exists in every locale', () => {
+    for (const lng of LOCALES) {
+      const data = locale(lng);
+      expect(typeof lookup(data, 'notification.copied')).toBe('string');
+      expect(typeof lookup(data, 'notification.copy_failed')).toBe('string');
+      expect(typeof lookup(data, 'client_routes.matrix.cell_context')).toBe('string');
+      expect(typeof lookup(data, 'client_routes.matrix.cell_change')).toBe('string');
+      expect(lookup(data, 'client_routes.matrix.cell_label')).toBeUndefined();
+    }
+    expect(read('src/features/authFiles/AuthFilesPage.tsx')).toContain("t('notification.copied')");
+  });
+});
+
+describe('Client routes and the shared band', () => {
+  test('shared band disclosure exposes expanded state and a name that starts with its visible text', () => {
+    const source = read('src/features/clientProfiles/components/CollapsibleSharedRoutingBand.tsx');
+    expect(source).toContain('aria-expanded={open}');
+    expect(source).toContain('aria-controls={regionId}');
+    for (const lng of LOCALES) {
+      const data = locale(lng);
+      const base = 'client_routes.shared_band';
+      expect((lookup(data, `${base}.edit_aria`) as string).toLowerCase()).toContain(
+        (lookup(data, `${base}.edit`) as string).toLowerCase()
+      );
+      expect((lookup(data, `${base}.hide_aria`) as string).toLowerCase()).toContain(
+        (lookup(data, `${base}.hide`) as string).toLowerCase()
+      );
+    }
+  });
+
+  test('matrix cells are named from visible text, with narrow-screen provider text kept in the tree', () => {
+    const matrix = read('src/features/clientProfiles/components/ClientRoutesMatrix.tsx');
+    expect(matrix).not.toMatch(/aria-label=\{t\(`\$\{CR\}\.matrix\.cell_label`/);
+    expect(matrix).not.toContain('aria-hidden="true">\n                          {providerName}');
+    const css = read('src/features/clientProfiles/components/ClientRoutesMatrix.module.scss');
+    // Visually hidden (not display:none) so the provider stays part of the cell's name.
+    expect(css).toMatch(/\.visuallyHidden,\s*\.mobileProvider\s*\{[^}]*clip-path:\s*inset\(50%\)/);
+    expect(css).not.toMatch(/\.mobileProvider\s*\{[^}]*display:\s*none/);
+  });
+});
+
+describe('dialogs, drawer and motion', () => {
+  test('only the topmost modal dialog reacts to Escape and Tab', () => {
+    const bottom = {} as HTMLElement;
+    const top = {} as HTMLElement;
+    const original = (globalThis as { document?: unknown }).document;
+    (globalThis as { document?: unknown }).document = {
+      querySelectorAll: () => [bottom, top],
+    };
+    try {
+      expect(isTopmostDialog(top)).toBe(true);
+      expect(isTopmostDialog(bottom)).toBe(false);
+      expect(isTopmostDialog(null)).toBe(true);
+    } finally {
+      (globalThis as { document?: unknown }).document = original;
+    }
+    expect(read('src/components/ui/Sheet/Sheet.tsx')).toContain(
+      'if (!isTopmostDialog(sheetRef.current)) return;'
+    );
+    expect(read('src/components/ui/Modal.tsx')).toContain(
+      'if (!isTopmostDialog(modalRef.current)) return;'
+    );
+  });
+
+  test('the confirmation dialog returns focus to its opener (it unmounts, so Modal cannot)', () => {
+    const source = read('src/components/common/ConfirmationModal.tsx');
+    expect(source).toContain('openerRef.current = ');
+    expect(source).toContain('document.activeElement instanceof HTMLElement');
+    expect(source).toContain('opener?.isConnected');
+    expect(source).toContain('opener.focus(');
+  });
+
+  test('the closed mobile drawer is not focusable and motion honours reduced-motion', () => {
+    const layout = read('src/styles/layout.scss');
+    const mobileSidebar = layout.slice(
+      layout.indexOf('transform: translateX(calc(-100% - 24px));')
+    );
+    expect(mobileSidebar.slice(0, 400)).toContain('visibility: hidden;');
+    expect(mobileSidebar).toMatch(/&\.open\s*\{[^}]*visibility:\s*visible/);
+    const components = read('src/styles/components.scss');
+    expect(components).toMatch(
+      /prefers-reduced-motion:\s*reduce\)\s*\{[^}]*\.modal\.modal-entering[^}]*animation:\s*none/
+    );
+  });
+
+  test('Select keyboard focus has a high-contrast outline, not only a faint ring', () => {
+    expect(read('src/components/ui/Select.module.scss')).toMatch(
+      /&:focus-visible\s*\{[^}]*outline:\s*2px solid var\(--text-secondary\)/
+    );
+  });
+});
+
+describe('CSS module class names', () => {
+  test('no component reads a class name that collides with String.prototype in Bun tests', () => {
+    // In Bun tests SCSS modules load as strings, so `styles.link` is String.prototype.link (a
+    // function), which React rejects as an invalid className prop.
+    const collisions =
+      /\bstyles\.(anchor|big|blink|bold|fixed|fontcolor|fontsize|italics|link|small|strike|sub|sup)\b/;
+    const walk = (dir: string): string[] =>
+      readdirSync(new URL(`../${dir}`, import.meta.url), { withFileTypes: true }).flatMap(
+        (entry) =>
+          entry.isDirectory()
+            ? walk(`${dir}/${entry.name}`)
+            : entry.name.endsWith('.tsx')
+              ? [`${dir}/${entry.name}`]
+              : []
+      );
+    const offenders = walk('src').filter((file) => collisions.test(read(file)));
+    expect(offenders).toEqual([]);
+  });
+
+  test('RoutingTuningPanel renders its providers link without an invalid className', () => {
+    const source = read('src/features/config/routing/RoutingTuningPanel.tsx');
+    expect(source).toContain('styles.providersLink');
+    expect(read('src/features/config/routing/RoutingTuningPanel.module.scss')).toContain(
+      '.providersLink {'
+    );
   });
 });

@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { CLIENT_PROFILE_PROVIDERS, type ClientProfileProvider } from '@/types/clientProfiles';
 import type { ConnectionContext } from '../connectionContext';
 import { matrixCellId, type ProfileRow } from '../model';
-import { CR, describeCellText, providerLabelKey } from '../copy';
+import { CR, providerLabelKey } from '../copy';
 import { PolicyPill } from './PolicyPill';
 import { ConnectionContextLine } from './ConnectionContextLine';
 import styles from './ClientRoutesMatrix.module.scss';
@@ -69,17 +69,18 @@ export function ClientRoutesMatrix({
                         type="button"
                         className={`${styles.cellButton} ${cell.willFail ? styles.cellFail : ''}`}
                         data-cell={matrixCellId(profile.profileRef, provider)}
-                        aria-label={t(`${CR}.matrix.cell_label`, {
-                          provider: providerName,
-                          profile: profile.label,
-                          policy: describeCellText(t, cell),
-                        })}
                         onClick={() => onOpenCell(profile.profileRef, provider)}
                       >
-                        <span className={styles.mobileProvider} aria-hidden="true">
-                          {providerName}
+                        {/* The name is built from the visible text (WCAG 2.5.3), plus hidden context. */}
+                        <span className={styles.visuallyHidden}>
+                          {t(`${CR}.matrix.cell_context`, { profile: profile.label })}{' '}
                         </span>
+                        <span className={styles.mobileProvider}>{providerName} </span>
                         <PolicyPill cell={cell} />
+                        <span className={styles.visuallyHidden}>
+                          {' '}
+                          {t(`${CR}.matrix.cell_change`)}
+                        </span>
                       </button>
                     </td>
                   );

@@ -1976,7 +1976,8 @@
     "login_failed": "登入失敗",
     "commercial_mode_restart_required": "商業模式開關已變更，請重啟服務後生效",
     "copy_failed": "複製失敗",
-    "link_copied": "已複製"
+    "link_copied": "已複製",
+    "copied": "已複製到剪貼簿"
   },
   "language": {
     "switch": "語言",
@@ -2423,7 +2424,8 @@
       "caption": "各用戶端設定檔在每個提供者下可使用的訂閱",
       "profile_column": "用戶端設定檔",
       "edit_profile": "{{name}} 的設定檔與金鑰",
-      "cell_label": "{{profile}} 的 {{provider}} 規則：{{policy}}。修改規則",
+      "cell_context": "{{profile}}：",
+      "cell_change": "修改規則",
       "keys_count": "{{count}} 個用戶端金鑰",
       "no_keys": "尚未連結用戶端金鑰",
       "footnote": "一條規則涵蓋以該設定檔用戶端金鑰發出的該提供者全部請求。Claude 與 Codex 規則彼此獨立。"
@@ -2636,7 +2638,7 @@
       "chip_title": "{{profile}} 的 {{provider}} 請求只使用此訂閱",
       "will_fail_note": "此帳號已停用或無法使用，{{count}} 個固定到它的用戶端會失敗，不會由其他帳號代替。",
       "use_only": "僅將此訂閱用於…",
-      "use_only_aria": "選擇必須只使用 {{account}} 的用戶端",
+      "use_only_aria": "僅將此訂閱用於…（為 {{account}} 選擇用戶端）",
       "sheet_eyebrow": "{{provider}} 訂閱",
       "sheet_title": "必須只使用 {{account}} 的用戶端",
       "sheet_intro": "勾選的設定檔會把每個 {{provider}} 請求送往 {{account}}。取消勾選會讓設定檔恢復為自動。",
