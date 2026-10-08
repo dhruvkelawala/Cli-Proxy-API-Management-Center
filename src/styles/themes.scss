@@ -15,7 +15,7 @@
   --floating-shadow: 0 12px 26px rgba(0, 0, 0, 0.14);
 
   --text-primary: #2d2a26;
-  --text-secondary: #6d6760;
+  --text-secondary: #6a645d; // 4.5:1 on --bg-tertiary / hover tones (was #6d6760: 4.48)
   --text-tertiary: #a29c95;
   --text-quaternary: #c0bab3;
   // 运营文本专用：--text-tertiary 同时用于装饰填充，故不全局加深；浅色下它低于 4.5:1。
@@ -116,7 +116,7 @@
   --floating-shadow: 0 12px 26px rgba(0, 0, 0, 0.12);
 
   --text-primary: #2d2a26;
-  --text-secondary: #6d6760;
+  --text-secondary: #6a645d; // 4.5:1 on --bg-tertiary / hover tones (was #6d6760: 4.48)
   --text-tertiary: #a29c95;
   --text-quaternary: #c0bab3;
   // 运营文本专用：--text-tertiary 同时用于装饰填充，故不全局加深；浅色下它低于 4.5:1。

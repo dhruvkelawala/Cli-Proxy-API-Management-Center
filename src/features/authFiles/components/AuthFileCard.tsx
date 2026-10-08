@@ -167,7 +167,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
     styles.card,
     compact ? styles.cardCompact : '',
     selected ? styles.cardSelected : '',
-    file.disabled === true ? styles.cardDisabled : '',
+    !enabled ? styles.cardDisabled : '',
     mountEntranceDelayMs != null ? styles.cardEnter : '',
   ]
     .filter(Boolean)
@@ -198,6 +198,9 @@ export function AuthFileCard(props: AuthFileCardProps) {
             ...(typeColor.border ? { border: typeColor.border } : {}),
           }}
         />
+        {!enabled && !isRuntimeOnly && (
+          <span className={styles.offMarker}>{t('auth_files.card_off')}</span>
+        )}
         {isRuntimeOnly && (
           <span className={styles.runtimeLabel}>{t('auth_files.type_virtual')}</span>
         )}
@@ -379,11 +382,8 @@ export function AuthFileCard(props: AuthFileCardProps) {
                 : t('auth_files.status_toggle_disabled')}
             </span>
             <ToggleSwitch
-              ariaLabel={
-                enabled
-                  ? t('auth_files.card_toggle_enabled', { name: accountName })
-                  : t('auth_files.card_toggle_disabled', { name: accountName })
-              }
+              // Fixed name; the switch's checked state (and the visible label) carry on/off.
+              ariaLabel={accountName}
               checked={enabled}
               disabled={
                 disableControls ||

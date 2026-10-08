@@ -42,15 +42,15 @@ describe('auth file card presentation contract', () => {
     expect(footer).toContain('!isRuntimeOnly &&');
   });
 
-  test('labels the switch from the actual account state', () => {
+  test('names the switch after the account and shows the actual state visibly', () => {
     const footer = source.split('<footer')[1].split('</footer>')[0];
     expect(footer).not.toContain('status_toggle_label');
     expect(footer).toMatch(
       /enabled\s*\?\s*t\('auth_files\.status_toggle_enabled'\)\s*:\s*t\('auth_files\.status_toggle_disabled'\)/
     );
-    expect(footer).toMatch(
-      /enabled\s*\?\s*t\('auth_files\.card_toggle_enabled', \{ name: accountName \}\)\s*:\s*t\('auth_files\.card_toggle_disabled', \{ name: accountName \}\)/
-    );
+    // The name is fixed (the account); aria-checked carries the state instead of the label flipping.
+    expect(footer).toContain('ariaLabel={accountName}');
+    expect(footer).not.toContain('card_toggle_');
   });
 
   test('keeps the account title and state visible in compact mode', () => {
@@ -67,7 +67,9 @@ describe('auth file card presentation contract', () => {
   });
 
   test('marks disabled cards with a surface tint, never opacity (text must stay >= 4.5:1)', () => {
-    expect(source).toContain("file.disabled === true ? styles.cardDisabled : ''");
+    expect(source).toContain("!enabled ? styles.cardDisabled : ''");
+    expect(source).toContain("{t('auth_files.card_off')}");
+    expect(styles).toMatch(/\.cardDisabled\s*\{[^}]*border-style:\s*dashed/);
     expect(styles).toMatch(/\.cardDisabled\s*\{[^}]*background:/);
     expect(styles).not.toMatch(/\.cardDisabled[^{]*\{[^}]*opacity:/);
   });

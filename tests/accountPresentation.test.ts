@@ -307,8 +307,6 @@ describe('account presentation locales', () => {
     'auth_files.gateway_context_unknown',
     'auth_files.status_toggle_enabled',
     'auth_files.status_toggle_disabled',
-    'auth_files.card_toggle_enabled',
-    'auth_files.card_toggle_disabled',
     'auth_files.details_purpose_title',
     'auth_files.details_routing_title',
     'auth_files.details_routing_hint',
