@@ -148,7 +148,9 @@ export function RoutingTuningPanel({
         <p className={styles.keys}>
           <Trans
             i18nKey="config_management.routing_settings.sheet.config_keys_note"
-            components={{ providersLink: <Link className={styles.link} to="/ai-providers" /> }}
+            components={{
+              providersLink: <Link className={styles.providersLink} to="/ai-providers" />,
+            }}
           />
         </p>
       </div>
