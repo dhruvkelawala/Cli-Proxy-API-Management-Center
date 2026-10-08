@@ -59,8 +59,8 @@
 .chipTag {
   padding: 0 5px;
   border-radius: 999px;
-  background: var(--danger-color);
-  color: #fff;
+  background: var(--btn-danger-bg);
+  color: var(--btn-danger-fg);
   font-size: 10px;
   font-weight: 700;
   white-space: nowrap;

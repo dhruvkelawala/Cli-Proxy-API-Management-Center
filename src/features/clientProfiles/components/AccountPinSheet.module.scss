@@ -68,6 +68,11 @@
   height: 18px;
   margin: 2px 0 0;
   accent-color: var(--text-primary);
+
+  // Native controls otherwise paint a white unchecked disc on the dark canvas.
+  [data-theme='dark'] & {
+    color-scheme: dark;
+  }
 }
 
 .itemText {

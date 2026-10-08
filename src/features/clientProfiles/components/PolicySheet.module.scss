@@ -65,6 +65,11 @@
   height: 18px;
   margin: 2px 0 0;
   accent-color: var(--text-primary);
+
+  // Native controls otherwise paint a white unchecked disc on the dark canvas.
+  [data-theme='dark'] & {
+    color-scheme: dark;
+  }
 }
 
 .staticCard {
@@ -119,8 +124,8 @@
 .failBadge {
   padding: 1px 6px;
   border-radius: 999px;
-  background: var(--danger-color);
-  color: #fff;
+  background: var(--btn-danger-bg);
+  color: var(--btn-danger-fg);
   font-size: 11px;
   font-weight: 700;
 }
