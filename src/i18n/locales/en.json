@@ -1568,6 +1568,34 @@
         "update": "Update",
         "add": "Add"
       }
+    },
+    "routing_presentation": {
+      "strategy": {
+        "round_robin": "Rotate evenly: new assignments cycle through the eligible accounts in the highest priority tier.",
+        "weighted_round_robin": "Weighted split: new assignments are shared across the highest priority tier in proportion to each account weight. Accounts with a weight of 0 or below are skipped.",
+        "fill_first": "Concentrate on one: new assignments go to the first eligible account in internal ID order. Give an account a higher priority to prefer it."
+      },
+      "shares_assumption": "Illustrative configured shares. They assume every eligible account is available and are not a measure of actual requests, tokens or cost.",
+      "affinity": {
+        "enabled": "Conversation affinity is on. An existing healthy binding stays on its account (retained for {{ttl}}) even when a higher-priority account recovers or priorities change. Weights and priority decide new conversations, requests without a session and failover.",
+        "disabled": "Conversation affinity is off. Every request is assigned independently by the selected strategy."
+      },
+      "reason": {
+        "participating": "Participates in the shared pool.",
+        "standby": "Eligible, but only used if the accounts before it become unavailable.",
+        "unknown_availability": "Availability is unknown. Counted as a candidate until live status is known.",
+        "disabled": "Excluded: the account is disabled.",
+        "unavailable": "Excluded: the account is currently unavailable.",
+        "lower_priority": "Excluded for now: a higher priority tier has eligible accounts. This tier is only a fallback.",
+        "non_positive_weight": "Excluded: a weight of 0 or below removes the account from weighted selection. The account is not disabled."
+      },
+      "strict": {
+        "ready": "All requests for this profile use only this account. Pool strategy, priority and weights do not apply.",
+        "unknown": "All requests for this profile use only this account. Its availability is unknown, and if it is unusable the request fails instead of switching accounts.",
+        "disabled": "This account is disabled. Requests for this profile fail and never fall back to another account.",
+        "unavailable": "This account is currently unavailable. Requests for this profile fail and never fall back to another account.",
+        "missing": "The selected account was not found. Requests for this profile fail and never fall back to another account."
+      }
     }
   },
   "quota_management": {
