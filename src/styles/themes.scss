@@ -182,40 +182,40 @@
 
 // 深色主题（#191919）
 [data-theme='dark'] {
-  // 极简暖灰：深色模式（提升对比度与层级）
-  --bg-secondary: #151412; // 页面背景
-  --bg-primary: #1d1b18; // 容器/卡片背景
-  --bg-tertiary: #262320; // hover/次级背景
-  --bg-hover: #2e2a26;
-  --bg-quinary: #191714;
+  // Linear 式深色：冷灰阶，内容画布略高于应用底色（画布布局见 layout.scss）。
+  --bg-secondary: #0f1011; // 页面背景（内嵌画布）
+  --bg-primary: #141516; // 容器/卡片背景
+  --bg-tertiary: #1c1d1f; // hover/次级背景
+  --bg-hover: #222326;
+  --bg-quinary: #121314;
   --bg-error-light: rgba(198, 87, 70, 0.18);
-  --floating-surface: #2a2723;
-  --floating-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
+  --floating-surface: #1a1b1d;
+  --floating-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 14px 36px rgba(0, 0, 0, 0.55);
 
-  --text-primary: #f6f4f1;
-  --text-secondary: #c9c3bb;
-  --text-tertiary: #9c958d;
-  --text-quaternary: #6f6962;
+  --text-primary: #f7f8f8;
+  --text-secondary: #b4b8c0;
+  --text-tertiary: #8a8f98;
+  --text-quaternary: #62666d;
   // 运营文本专用：深色下 --text-tertiary 已达 4.8–6.2:1，直接沿用。
   --text-operational-muted: var(--text-tertiary);
   --text-muted: var(--text-operational-muted);
 
-  --border-color: #3a3530;
+  --border-color: #23252a;
   --border-secondary: var(--border-color);
-  --border-primary: #4a453f;
-  --border-hover: #5a544d;
+  --border-primary: #2c2e33;
+  --border-hover: #393b41;
 
-  --primary-color: #8b8680;
-  --primary-hover: #9a948e;
-  --primary-active: #a6a099;
+  --primary-color: #5e6ad2;
+  --primary-hover: #6c78e0;
+  --primary-active: #8a93ec;
   --primary-contrast: #ffffff;
-  // 按钮文字需 ≥4.5:1、按钮填充对各表面 ≥3:1；--primary-color 配白字仅 3.61:1，因此单独取色。
-  --btn-primary-bg: #8b8680;
-  --btn-primary-bg-hover: #9a948e;
-  --btn-primary-fg: #151412;
+  // 按钮文字需 ≥4.5:1、按钮填充对各表面 ≥3:1；悬停取更深的靛蓝以保持白字对比度。
+  --btn-primary-bg: #5e6ad2;
+  --btn-primary-bg-hover: #5a66cf;
+  --btn-primary-fg: #ffffff;
   --btn-danger-bg: #d4604d;
   --btn-danger-bg-hover: #de7261;
-  --btn-danger-fg: #151412;
+  --btn-danger-fg: #0f1011;
 
   --success-color: #10b981;
   --quota-medium-color: #ffd862;
@@ -236,11 +236,11 @@
   --failure-badge-text: #f1b0a6;
   --failure-badge-border: rgba(198, 87, 70, 0.5);
 
-  --count-badge-bg: rgba(139, 134, 128, 0.28);
-  --count-badge-text: var(--primary-active);
+  --count-badge-bg: rgba(94, 106, 210, 0.2);
+  --count-badge-text: #b6bcf5;
 
-  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3);
+  --shadow: none;
+  --shadow-lg: 0 8px 24px rgb(0 0 0 / 0.4);
 
   --radius-md: 8px;
 
