@@ -9,6 +9,7 @@ import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useAuthStore } from '@/stores';
 import { useClientProfilesStore } from '@/stores/useClientProfilesStore';
+import { SharedRoutingBand } from '@/features/config/routing/SharedRoutingBand';
 import { gatewayDisplayHost } from '@/utils/connection';
 import type { ClientProfileProvider } from '@/types/clientProfiles';
 import {
@@ -23,7 +24,6 @@ import { ClientRoutesMatrix } from './components/ClientRoutesMatrix';
 import { EnforcementNotice, FailureNotice, Notice } from './components/Notices';
 import { PolicySheet } from './components/PolicySheet';
 import { ProfileSheet } from './components/ProfileSheet';
-import { SharedPoolSlot } from './components/SharedPoolSlot';
 import styles from './ClientRoutesPage.module.scss';
 
 type SheetState =
@@ -52,7 +52,7 @@ export function ClientRoutesPage() {
   const refreshing = useClientProfilesStore((state) => state.refreshing);
   const load = useClientProfilesStore((state) => state.load);
   const apiBase = useAuthStore((state) => state.apiBase);
-  const { files, strategy, affinity, apiKeys, wsAuth, refresh } = useClientRoutesData();
+  const { files, strategy, apiKeys, wsAuth, refresh } = useClientRoutesData();
 
   const [contextVersion, setContextVersion] = useState(0);
   const contexts = useMemo(
@@ -129,12 +129,10 @@ export function ClientRoutesPage() {
         )}
       </header>
 
-      {/* Slot for CPA-008's <SharedRoutingBand automaticClientCount={n} />. */}
+      {/* Shared load balancing for Automatic rules (CPA-008); Only rules ignore it. */}
       {status !== 'unsupported' && (
-        <SharedPoolSlot
+        <SharedRoutingBand
           automaticClientCount={snapshot ? countAutomaticProfiles(snapshot) : undefined}
-          strategy={strategy}
-          affinity={affinity}
         />
       )}
 

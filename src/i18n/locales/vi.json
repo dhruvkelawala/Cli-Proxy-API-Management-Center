@@ -2455,22 +2455,6 @@
       "title": "Chưa có hồ sơ máy khách",
       "body": "Hồ sơ là danh tính mà máy khách dùng khi kết nối. Hãy tạo một hồ sơ, rồi liên kết một khóa máy khách với nó."
     },
-    "shared_pool": {
-      "label": "Nhóm dùng chung",
-      "hint": "Dùng cho quy tắc Tự động",
-      "strategy": "Chiến lược: {{strategy}}",
-      "strategy_unknown": "Chưa tải chiến lược",
-      "affinity_on": "Hội thoại giữ trên một tài khoản",
-      "affinity_off": "Mỗi yêu cầu được phân độc lập",
-      "affects_one": "Áp dụng cho {{count}} hồ sơ có quy tắc Tự động, trên mọi máy dùng cổng này",
-      "affects_other": "Áp dụng cho {{count}} hồ sơ có quy tắc Tự động, trên mọi máy dùng cổng này",
-      "edit": "Đổi trong Cấu hình",
-      "strategies": {
-        "round_robin": "Luân phiên đều",
-        "weighted_round_robin": "Chia theo trọng số",
-        "fill_first": "Tập trung vào một"
-      }
-    },
     "connection": {
       "label": "Cách máy khách này kết nối tới cổng",
       "option_unset": "Chưa đặt",
@@ -2578,7 +2562,7 @@
       "rotate_value": "Giá trị khóa mới",
       "rotate_generate": "Tạo",
       "rotate_copy": "Sao chép",
-      "rotate_hint": "Giá trị cũ sẽ ngừng hoạt động. Đưa giá trị mới cho máy khách rồi kết nối lại.",
+      "rotate_hint": "Giá trị cũ bị thu hồi và ngừng hoạt động, kể cả khi sau này được thêm lại trong Cấu hình. Đưa giá trị mới cho máy khách rồi kết nối lại.",
       "rotate_save": "Thay giá trị",
       "rotated": "Đã thay giá trị khóa. Hãy cập nhật máy khách và kết nối lại.",
       "copied": "Đã sao chép vào bộ nhớ tạm.",
@@ -2586,7 +2570,7 @@
       "revoke": "Thu hồi",
       "revoke_aria": "Thu hồi {{name}}",
       "revoke_confirm_title": "Thu hồi “{{name}}”?",
-      "revoke_confirm": "Khóa sẽ bị xóa khỏi cổng. Máy khách dùng nó mất quyền truy cập ngay. Nó không trở thành khóa không giới hạn.",
+      "revoke_confirm": "Khóa sẽ bị xóa khỏi cổng và giá trị của nó bị thu hồi. Máy khách dùng nó mất quyền truy cập ngay. Thêm lại cùng giá trị trong Cấu hình không khôi phục được; chỉ liên kết lại với một hồ sơ mới khôi phục. Nó không bao giờ trở thành khóa không giới hạn.",
       "revoked": "Đã thu hồi khóa.",
       "ws_auth_off": "Để liên kết khóa cần bật xác thực WebSocket (oauth.providers.aistudio.ws-auth). Cổng sẽ không tự đổi thiết lập này.",
       "open_config": "Mở Cấu hình",

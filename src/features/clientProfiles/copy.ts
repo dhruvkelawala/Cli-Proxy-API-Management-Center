@@ -6,7 +6,6 @@
 import type { TFunction } from 'i18next';
 import type { ClientProfilesFailure } from '@/stores/useClientProfilesStore';
 import type { ClientProfileTargetState } from '@/types/clientProfiles';
-import type { RoutingStrategy } from '@/types/visualConfig';
 import type { PolicyCell } from './model';
 
 export const CR = 'client_routes';
@@ -28,9 +27,6 @@ export const failureOffersReload = (failure: Pick<ClientProfilesFailure, 'kind'>
     'credential_changed',
     'target_invalid',
   ].includes(failure.kind);
-
-export const strategyLabelKey = (strategy: RoutingStrategy): string =>
-  `${CR}.shared_pool.strategies.${strategy.replace(/-/g, '_')}`;
 
 export const providerLabelKey = (provider: string): string => `${CR}.providers.${provider}`;
 

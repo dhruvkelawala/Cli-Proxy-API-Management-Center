@@ -2442,21 +2442,6 @@
       "title": "还没有客户端配置",
       "body": "配置是客户端连接时使用的身份。先创建一个，再为其关联客户端密钥。"
     },
-    "shared_pool": {
-      "label": "共享账号池",
-      "hint": "供自动规则使用",
-      "strategy": "策略：{{strategy}}",
-      "strategy_unknown": "策略未加载",
-      "affinity_on": "对话固定在同一账号",
-      "affinity_off": "每个请求独立分配",
-      "affects": "影响 {{count}} 个含自动规则的配置，覆盖使用此网关的所有机器",
-      "edit": "在配置面板中修改",
-      "strategies": {
-        "round_robin": "均匀轮换",
-        "weighted_round_robin": "按权重分配",
-        "fill_first": "集中使用一个"
-      }
-    },
     "connection": {
       "label": "此客户端如何连接网关",
       "option_unset": "未设置",
@@ -2562,7 +2547,7 @@
       "rotate_value": "新的密钥值",
       "rotate_generate": "生成",
       "rotate_copy": "复制",
-      "rotate_hint": "旧值将失效。把新值交给客户端，然后让它重新连接。",
+      "rotate_hint": "旧值会被吊销并失效，即使之后在配置面板中重新添加也一样。把新值交给客户端，然后让它重新连接。",
       "rotate_save": "替换值",
       "rotated": "密钥值已替换。请更新客户端并重新连接。",
       "copied": "已复制到剪贴板。",
@@ -2570,7 +2555,7 @@
       "revoke": "吊销",
       "revoke_aria": "吊销 {{name}}",
       "revoke_confirm_title": "吊销“{{name}}”？",
-      "revoke_confirm": "这会从网关删除该密钥，使用它的客户端会立即失去访问权限。它不会变成不受限制的密钥。",
+      "revoke_confirm": "这会从网关删除该密钥并吊销其值，使用它的客户端会立即失去访问权限。之后在配置面板中重新添加同一个值不会恢复它，只有再次关联到某个配置才会恢复。它绝不会变成不受限制的密钥。",
       "revoked": "密钥已吊销。",
       "ws_auth_off": "关联密钥需要开启 WebSocket 认证（oauth.providers.aistudio.ws-auth）。网关不会替你修改此设置。",
       "open_config": "打开配置面板",

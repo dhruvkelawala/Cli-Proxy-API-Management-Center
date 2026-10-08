@@ -3,11 +3,13 @@ import { apiClient, authFilesApi } from '@/services/api';
 import { useConfigStore } from '@/stores';
 import { useClientProfilesStore } from '@/stores/useClientProfilesStore';
 import type { AuthFileItem } from '@/types';
+import { AUTH_FILES_CHANGED_EVENT } from '@/features/authFiles/authFilesEvents';
 import { readRoutingStrategy } from '../model';
 
 /**
  * Everything the Client routes page reads: client profiles (store), the Accounts list for the
- * illustrative pool, and the saved config (strategy, client keys, WebSocket auth).
+ * illustrative pool, and the saved config (strategy, client keys, WebSocket auth). The shared
+ * routing band refreshes the config store itself after saving the strategy.
  * Account list results from a previous connection are dropped.
  */
 export function useClientRoutesData() {
@@ -38,6 +40,16 @@ export function useClientRoutesData() {
     [fetchConfig, load, loadFiles]
   );
 
+  // Priority/weight/enablement edits (including the shared routing band) change the pool.
+  useEffect(() => {
+    const handleChange = () => {
+      void loadFiles();
+      void load({ force: false });
+    };
+    window.addEventListener(AUTH_FILES_CHANGED_EVENT, handleChange);
+    return () => window.removeEventListener(AUTH_FILES_CHANGED_EVENT, handleChange);
+  }, [load, loadFiles]);
+
   useEffect(() => {
     void Promise.allSettled([load(), loadFiles(), fetchConfig()]);
     return () => {
@@ -45,16 +57,9 @@ export function useClientRoutesData() {
     };
   }, [fetchConfig, load, loadFiles]);
 
-  const rawRouting = config?.raw?.routing;
-  const affinity =
-    rawRouting && typeof rawRouting === 'object' && !Array.isArray(rawRouting)
-      ? (rawRouting as Record<string, unknown>)['session-affinity'] === true
-      : null;
-
   return {
     files,
     strategy: readRoutingStrategy(config?.routingStrategy),
-    affinity,
     apiKeys: config ? (config.apiKeys ?? []) : null,
     wsAuth: config ? config.wsAuth !== false : null,
     refresh,

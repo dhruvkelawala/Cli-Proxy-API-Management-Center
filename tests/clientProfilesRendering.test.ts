@@ -10,7 +10,6 @@ import { PolicySheet } from '@/features/clientProfiles/components/PolicySheet';
 import { ProfileSheet } from '@/features/clientProfiles/components/ProfileSheet';
 import { AccountClientLinks } from '@/features/clientProfiles/components/AccountClientLinks';
 import { EnforcementNotice, FailureNotice } from '@/features/clientProfiles/components/Notices';
-import { SharedPoolSlot } from '@/features/clientProfiles/components/SharedPoolSlot';
 import { buildAccountClientLinks } from '@/features/clientProfiles/accountLinks';
 import {
   buildPoolPreview,
@@ -356,7 +355,7 @@ describe('profile sheet keys', () => {
   });
 });
 
-describe('notices, shared pool slot and account links', () => {
+describe('notices, shared routing band and account links', () => {
   test('enforcement off is a calm notice that does not announce active selection', () => {
     const markup = render(createElement(EnforcementNotice));
     expect(markup).toContain(t('client_routes.enforcement.title'));
@@ -376,17 +375,14 @@ describe('notices, shared pool slot and account links', () => {
     expect(markup).not.toContain(t('client_routes.editor.saved'));
   });
 
-  test('the shared pool slot is read-only and links to Config', () => {
-    const markup = render(
-      createElement(SharedPoolSlot, {
-        automaticClientCount: 3,
-        strategy: 'fill-first',
-        affinity: false,
-      })
+  test('the page embeds the shared routing band with the Automatic profile count', async () => {
+    const source = await Bun.file('src/features/clientProfiles/ClientRoutesPage.tsx').text();
+    expect(source).toContain(
+      "import { SharedRoutingBand } from '@/features/config/routing/SharedRoutingBand';"
     );
-    expect(markup).toContain(t('client_routes.shared_pool.strategies.fill_first'));
-    expect(markup).toContain('href="/config?field=routingStrategy"');
-    expect(markup).not.toContain('<input');
+    expect(source).toMatch(
+      /<SharedRoutingBand\s+automaticClientCount=\{snapshot \? countAutomaticProfiles\(snapshot\) : undefined\}/
+    );
   });
 
   test('account cards show pinned clients and will-fail when the account is off', () => {

@@ -2449,22 +2449,6 @@
       "title": "No client profiles yet",
       "body": "A profile is the identity a client connects with. Create one, then link a client key to it."
     },
-    "shared_pool": {
-      "label": "Shared pool",
-      "hint": "Used by Automatic rules",
-      "strategy": "Strategy: {{strategy}}",
-      "strategy_unknown": "Strategy not loaded",
-      "affinity_on": "Conversations stay on one account",
-      "affinity_off": "Each request assigned independently",
-      "affects_one": "Applies to {{count}} profile with an Automatic rule, on every machine using this gateway",
-      "affects_other": "Applies to {{count}} profiles with an Automatic rule, on every machine using this gateway",
-      "edit": "Change in Config",
-      "strategies": {
-        "round_robin": "Rotate evenly",
-        "weighted_round_robin": "Weighted split",
-        "fill_first": "Concentrate on one"
-      }
-    },
     "connection": {
       "label": "How this client reaches the gateway",
       "option_unset": "Not set",
@@ -2572,7 +2556,7 @@
       "rotate_value": "New key value",
       "rotate_generate": "Generate",
       "rotate_copy": "Copy",
-      "rotate_hint": "The old value stops working. Give the new value to the client, then reconnect it.",
+      "rotate_hint": "The old value is revoked and stops working, even if it is added back in Config later. Give the new value to the client, then reconnect it.",
       "rotate_save": "Replace value",
       "rotated": "Key value replaced. Update the client and reconnect it.",
       "copied": "Copied to clipboard.",
@@ -2580,7 +2564,7 @@
       "revoke": "Revoke",
       "revoke_aria": "Revoke {{name}}",
       "revoke_confirm_title": "Revoke “{{name}}”?",
-      "revoke_confirm": "This deletes the key from the gateway. Clients using it lose access immediately. It is not turned into an unrestricted key.",
+      "revoke_confirm": "This deletes the key from the gateway and revokes its value. Clients using it lose access immediately. Adding the same value back in Config does not restore it; only linking it to a profile again does. It is never turned into an unrestricted key.",
       "revoked": "Key revoked.",
       "ws_auth_off": "Linking keys needs WebSocket authentication (oauth.providers.aistudio.ws-auth) turned on. The gateway won't change it for you.",
       "open_config": "Open Config",

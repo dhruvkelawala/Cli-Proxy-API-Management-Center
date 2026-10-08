@@ -2468,21 +2468,6 @@
       "title": "還沒有用戶端設定檔",
       "body": "設定檔是用戶端連線時使用的身分。先建立一個，再為它連結用戶端金鑰。"
     },
-    "shared_pool": {
-      "label": "共用帳號池",
-      "hint": "供自動規則使用",
-      "strategy": "策略：{{strategy}}",
-      "strategy_unknown": "策略未載入",
-      "affinity_on": "對話固定在同一帳號",
-      "affinity_off": "每個請求獨立分配",
-      "affects": "影響 {{count}} 個含自動規則的設定檔，涵蓋使用此閘道的所有機器",
-      "edit": "在設定面板中修改",
-      "strategies": {
-        "round_robin": "平均輪替",
-        "weighted_round_robin": "依權重分配",
-        "fill_first": "集中使用一個"
-      }
-    },
     "connection": {
       "label": "此用戶端如何連線到閘道",
       "option_unset": "未設定",
@@ -2588,7 +2573,7 @@
       "rotate_value": "新的金鑰值",
       "rotate_generate": "產生",
       "rotate_copy": "複製",
-      "rotate_hint": "舊值將失效。把新值交給用戶端，然後讓它重新連線。",
+      "rotate_hint": "舊值會被撤銷並失效，即使之後在設定面板中重新加入也一樣。把新值交給用戶端，然後讓它重新連線。",
       "rotate_save": "取代值",
       "rotated": "金鑰值已取代。請更新用戶端並重新連線。",
       "copied": "已複製到剪貼簿。",
@@ -2596,7 +2581,7 @@
       "revoke": "撤銷",
       "revoke_aria": "撤銷 {{name}}",
       "revoke_confirm_title": "撤銷「{{name}}」？",
-      "revoke_confirm": "這會從閘道刪除該金鑰，使用它的用戶端會立即失去存取權。它不會變成不受限制的金鑰。",
+      "revoke_confirm": "這會從閘道刪除該金鑰並撤銷其值，使用它的用戶端會立即失去存取權。之後在設定面板中重新加入同一個值不會恢復它，只有再次連結到某個設定檔才會恢復。它絕不會變成不受限制的金鑰。",
       "revoked": "金鑰已撤銷。",
       "ws_auth_off": "連結金鑰需要開啟 WebSocket 驗證（oauth.providers.aistudio.ws-auth）。閘道不會替你變更此設定。",
       "open_config": "開啟設定面板",
