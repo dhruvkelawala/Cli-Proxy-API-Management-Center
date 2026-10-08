@@ -1,6 +1,6 @@
 # CPA-004: Make account labels, enablement, availability and preference clear
 
-- **Status:** TODO
+- **Status:** IN REVIEW — implemented on branch `cpa-004-account-presentation`; awaiting PR review and merge into `sumo/main`.
 - **Tracking issue:** https://github.com/dhruvkelawala/CLIProxyAPI/issues/5
 - **Issue:** https://github.com/dhruvkelawala/Cli-Proxy-API-Management-Center/issues/1
 - **Priority:** P1
@@ -36,12 +36,12 @@ Use existing identity helpers, notes, status guards and theme/UI components. The
 6. Add regression cases using `tests/authFileStatusIdentity.test.ts`, `authFileProblemStatus.test.ts` and `authFileIdentity.test.ts` patterns. Update all four locales.
 
 ## Verification and done criteria
-- [ ] `bunx bun@1.3.14 test tests/accountPresentation.test.ts tests/authFileStatusIdentity.test.ts tests/authFileProblemStatus.test.ts tests/authFileIdentity.test.ts` exits 0.
-- [ ] Enabled-but-unavailable and deliberately-disabled fixtures produce consistent counts on both pages.
-- [ ] Bulk selection does not alter routing; switch text and compact notes match the account state.
-- [ ] `bunx bun@1.3.14 run verify` exits 0.
-- [ ] Browser inspection at 360px and 728px covers Accounts/detail/compact views in both themes with synthetic data. Save screenshots without credential fields.
-- [ ] Single-file build and hash routing remain intact.
+- [x] `bunx bun@1.3.14 test tests/accountPresentation.test.ts tests/authFileStatusIdentity.test.ts tests/authFileProblemStatus.test.ts tests/authFileIdentity.test.ts` exits 0.
+- [x] Enabled-but-unavailable and deliberately-disabled fixtures produce consistent counts on both pages.
+- [x] Bulk selection does not alter routing; switch text and compact notes match the account state.
+- [x] `bunx bun@1.3.14 run verify` exits 0.
+- [x] Browser inspection at 360px and 728px covers Accounts/detail/compact views in both themes with synthetic data. Save screenshots without credential fields.
+- [x] Single-file build and hash routing remain intact.
 
 ## Boundaries and stop conditions
 Do not implement client-profile policy controls until CPA-002/003 exist. Do not add v0 APIs, move unrelated feature folders, rewrite the theme or weaken management authentication. If friendly labels require new backend metadata beyond the existing note field, specify that dependency rather than editing backend code in this ticket.
@@ -59,3 +59,13 @@ Files/directories in scope:
 - `plans/`
 
 Do not change T3 source, live gateway configuration or unrelated files. Match existing repository conventions. Open a PR against the fork's `sumo/main` when publishing authorized implementation work; do not target upstream `main` by accident.
+
+## Implementation notes
+
+- Model: `src/features/authFiles/accountPresentation.ts` separates enablement (the `disabled` flag is authoritative; status only when the flag is absent), availability (available, cooling down, needs attention, unknown — exactly the Problem filter for the two failing states) and per-provider pool preference (highest usable priority tier, default 0; unknown availability counts as usable). The Accounts header and the dashboard overview both use `summarizeAccounts`.
+- Cards use the note as the title when set (email underneath; otherwise the email is the title) and show a state line in both regular and compact views; accessible names use the displayed title; switch text and accessible names follow the actual state; deliberately disabled accounts read "Off by choice" without a warning banner. Bulk checkboxes are labelled "for bulk actions" and never call the Management API.
+- The details sheet orders Account (purpose) → Routing (priority, weight, prefix, with session-affinity limits) → Connection & behavior, with raw JSON collapsed under "Advanced metadata".
+- Shared-gateway context comes from the configured management base (`gatewayDisplayHost`: host[:port] only) in the Accounts header and the sidebar brand subtitle.
+- Friendly labels use the existing `note` field only; no backend metadata was added. The auth-file list does not expose `prefix`, so pool preference is per provider and does not model prefix-scoped pools.
+- Verification: focused tests and `bunx bun@1.3.14 run verify` passed; screenshots were captured against a synthetic mock Management API (Accounts, compact, details sheet, dashboard; light/dark; 360px/728px).
+- Product decisions applied: note-as-title rule (cards, details sheet, accessible names; search matches note and email) and "Accounts" naming across all five locales; route `/auth-files` and code identifiers unchanged.

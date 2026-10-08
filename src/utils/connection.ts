@@ -11,6 +11,20 @@ export const normalizeApiBase = (input: string): string => {
   return base;
 };
 
+/**
+ * Host[:port] of the configured management base, for display only.
+ * Never includes credentials, paths or query strings from the configured URL.
+ */
+export const gatewayDisplayHost = (apiBase: string): string => {
+  const normalized = normalizeApiBase(apiBase);
+  if (!normalized) return '';
+  try {
+    return new URL(normalized).host;
+  } catch {
+    return '';
+  }
+};
+
 export const computeApiUrl = (base: string): string => {
   const normalized = normalizeApiBase(base);
   if (!normalized) return '';

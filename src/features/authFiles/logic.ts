@@ -12,7 +12,7 @@ import {
   type AuthFileQuotaFilter,
   type QuotaProviderType,
 } from './constants';
-import { deriveAuthFileIdentity } from './identity';
+import { deriveAccountTitle } from './identity';
 import type { AuthFilesSortMode } from './uiState';
 
 const escapeWildcardSearchSegment = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -39,7 +39,7 @@ export const resolveAuthFileQuotaType = (
 };
 
 /**
- * 搜索 haystack：文件名 + 类型 + 提供方 + 账号邮箱 + 项目 ID + 状态/错误信息。
+ * 搜索 haystack：文件名 + 类型 + 提供方 + 备注（卡片标题）+ 账号邮箱 + 项目 ID + 状态/错误信息。
  * 显式不含 account —— api-key 凭证的 account 就是 API key 本身，见 identity.ts。
  */
 export const matchesAuthFileSearch = (
@@ -53,6 +53,7 @@ export const matchesAuthFileSearch = (
     file.name,
     file.type,
     file.provider,
+    file.note,
     file.email,
     file.projectId,
     getAuthFileStatusMessage(file),
@@ -74,9 +75,9 @@ export const sortAuthFiles = (files: AuthFileItem[], mode: AuthFilesSortMode): A
       return a.name.localeCompare(b.name);
     });
   } else if (mode === 'az') {
-    // 按卡片主行排（有账号时即 email），所见即所排；同值用文件名决胜。
+    // 按卡片标题排（有备注时为备注，否则为 email 等账号），所见即所排；同值用文件名决胜。
     // 装饰一次，避免在比较器里重复派生。
-    const keys = new Map(copy.map((file) => [file, deriveAuthFileIdentity(file).primary]));
+    const keys = new Map(copy.map((file) => [file, deriveAccountTitle(file).title]));
     copy.sort(
       (a, b) => (keys.get(a) ?? '').localeCompare(keys.get(b) ?? '') || a.name.localeCompare(b.name)
     );

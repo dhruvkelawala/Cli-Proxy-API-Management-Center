@@ -2,12 +2,13 @@ import { useTranslation } from 'react-i18next';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { IconRefreshCw, IconUpload } from '@/components/ui/icons';
 import { useRevealGroup } from '@/hooks/motion';
+import type { AccountCounts } from '@/features/authFiles/accountPresentation';
 import styles from './VaultHeader.module.scss';
 
 export type VaultHeaderProps = {
-  totalCount: number;
-  activeCount: number;
-  problemCount: number;
+  counts: AccountCounts;
+  /** Host[:port] of the connected gateway; empty when it cannot be shown safely. */
+  gatewayHost: string;
   loading: boolean;
   refreshing: boolean;
   uploading: boolean;
@@ -25,9 +26,8 @@ export type VaultHeaderProps = {
  */
 export function VaultHeader(props: VaultHeaderProps) {
   const {
-    totalCount,
-    activeCount,
-    problemCount,
+    counts,
+    gatewayHost,
     loading,
     refreshing,
     uploading,
@@ -49,24 +49,49 @@ export function VaultHeader(props: VaultHeaderProps) {
         </h1>
         <p className={styles.meta} data-reveal>
           <span className={styles.metaTotal}>
-            {t('auth_files.meta_total', { count: totalCount })}
+            {t('auth_files.meta_total', { count: counts.total })}
           </span>
           <span className={styles.metaDot} aria-hidden="true">
             ·
           </span>
-          <span className={activeCount > 0 ? styles.metaActive : styles.metaMuted}>
-            {t('auth_files.meta_active', { count: activeCount })}
+          <span className={counts.available > 0 ? styles.metaActive : styles.metaMuted}>
+            {t('auth_files.meta_available', { count: counts.available })}
           </span>
-          {problemCount > 0 && (
+          {counts.needsAttention > 0 && (
             <>
               <span className={styles.metaDot} aria-hidden="true">
                 ·
               </span>
               <span className={styles.metaProblem}>
-                {t('auth_files.meta_problem', { count: problemCount })}
+                {t('auth_files.meta_attention', { count: counts.needsAttention })}
               </span>
             </>
           )}
+          {counts.unknown > 0 && (
+            <>
+              <span className={styles.metaDot} aria-hidden="true">
+                ·
+              </span>
+              <span className={styles.metaMuted}>
+                {t('auth_files.meta_unknown', { count: counts.unknown })}
+              </span>
+            </>
+          )}
+          {counts.disabled > 0 && (
+            <>
+              <span className={styles.metaDot} aria-hidden="true">
+                ·
+              </span>
+              <span className={styles.metaMuted}>
+                {t('auth_files.meta_disabled', { count: counts.disabled })}
+              </span>
+            </>
+          )}
+        </p>
+        <p className={styles.context} data-reveal>
+          {gatewayHost
+            ? t('auth_files.gateway_context', { host: gatewayHost })
+            : t('auth_files.gateway_context_unknown')}
         </p>
       </div>
       <div className={styles.actions} data-reveal>

@@ -10,6 +10,7 @@ import {
 } from '@/utils/recentRequests';
 import type { Config } from '@/types';
 import type { AuthFileItem } from '@/types/authFile';
+import { summarizeAccounts } from '@/features/authFiles/accountPresentation';
 import {
   TRAFFIC_BUCKET_MINUTES,
   type CredentialHealth,
@@ -101,6 +102,30 @@ export const getProviderKeyCounts = (config: Config) => ({
   vertex: config.vertexApiKeys?.length ?? 0,
   openai: config.openaiCompatibility?.length ?? 0,
 });
+
+/**
+ * 凭证健康度：与凭证页头部使用同一份 summarizeAccounts 计数，
+ * 停用（主动关闭）与启用但不可用分开统计，不再各自推导「活跃」。
+ */
+export const buildCredentialHealth = (files: AuthFileItem[]): CredentialHealth => {
+  const { total, available, needsAttention, unknown, disabled } = summarizeAccounts(files);
+  const countsByType = new Map<string, number>();
+  files.forEach((file) => {
+    const type = providerIdOfAuthFile(file);
+    countsByType.set(type, (countsByType.get(type) ?? 0) + 1);
+  });
+
+  return {
+    total,
+    available,
+    needsAttention,
+    unknown,
+    disabled,
+    byType: Array.from(countsByType.entries())
+      .map(([type, count]) => ({ type, count }))
+      .sort((a, b) => b.count - a.count || a.type.localeCompare(b.type)),
+  };
+};
 
 /**
  * 汇总仪表盘所需的全部数据。
@@ -242,33 +267,10 @@ export function useDashboardOverview() {
     };
   }, [usageByProvider, authFiles]);
 
-  const credentials = useMemo<CredentialHealth | null>(() => {
-    if (!authFiles) return null;
-
-    let disabled = 0;
-    let unavailable = 0;
-    const countsByType = new Map<string, number>();
-
-    authFiles.forEach((file) => {
-      if (file.disabled) {
-        disabled += 1;
-      } else if (file.unavailable) {
-        unavailable += 1;
-      }
-      const type = providerIdOfAuthFile(file);
-      countsByType.set(type, (countsByType.get(type) ?? 0) + 1);
-    });
-
-    return {
-      total: authFiles.length,
-      active: authFiles.length - disabled - unavailable,
-      disabled,
-      unavailable,
-      byType: Array.from(countsByType.entries())
-        .map(([type, count]) => ({ type, count }))
-        .sort((a, b) => b.count - a.count || a.type.localeCompare(b.type)),
-    };
-  }, [authFiles]);
+  const credentials = useMemo<CredentialHealth | null>(
+    () => (authFiles ? buildCredentialHealth(authFiles) : null),
+    [authFiles]
+  );
 
   const counts = useMemo<DashboardCounts>(
     () => ({

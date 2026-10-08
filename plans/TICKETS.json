@@ -46,7 +46,7 @@
     "priority": "P1",
     "dependsOn": [],
     "plan": "plans/004-accounts-ui.md",
-    "status": "TODO"
+    "status": "IN REVIEW"
   },
   {
     "id": "CPA-005",

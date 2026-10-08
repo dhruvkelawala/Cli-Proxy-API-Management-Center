@@ -17,9 +17,14 @@ describe('auth file card presentation contract', () => {
     expect(source).not.toContain('<img');
     expect(source).not.toContain('getAuthFileIcon');
     expect(source).not.toContain('stateBadge');
-    expect(source).toContain('<h3');
-    expect(source).toContain('{identity.primary}');
-    expect(source).toContain('{identity.secondary}');
+    const titleSource = readFileSync(
+      new URL('../src/features/authFiles/components/AuthFileAccountTitle.tsx', import.meta.url),
+      'utf8'
+    );
+    expect(titleSource).toContain('<h3');
+    expect(titleSource).not.toContain('<img');
+    expect(source).toContain('<AuthFileAccountHeading');
+    expect(source).toContain('<AuthFileAccountSubtitle title={accountTitle} />');
   });
 
   test('uses one footer toggle and credential-specific accessible names', () => {
@@ -27,14 +32,38 @@ describe('auth file card presentation contract', () => {
     const footer = source.split('<footer')[1].split('</footer>')[0];
     expect(source.match(/<ToggleSwitch/g)).toHaveLength(1);
     expect(header).not.toContain('<ToggleSwitch');
-    expect(header).toContain("ariaLabel={t('auth_files.card_select', { name: file.name })}");
+    expect(header).toContain("ariaLabel={t('auth_files.card_select', { name: accountName })}");
     expect(header).not.toContain('aria-label=');
     expect(footer).toContain('<ToggleSwitch');
-    expect(footer).toContain("t('auth_files.card_toggle', { name: file.name })");
-    expect(footer).toContain('checked={!file.disabled}');
+    expect(source).toContain('const enabled = !isAccountDisabled(file);');
+    expect(footer).toContain('checked={enabled}');
     expect(footer).toContain('statusUpdating[getAuthFileRefreshKey(file)] === true ||');
     expect(footer).toContain('isManualRefreshing');
     expect(footer).toContain('!isRuntimeOnly &&');
+  });
+
+  test('labels the switch from the actual account state', () => {
+    const footer = source.split('<footer')[1].split('</footer>')[0];
+    expect(footer).not.toContain('status_toggle_label');
+    expect(footer).toMatch(
+      /enabled\s*\?\s*t\('auth_files\.status_toggle_enabled'\)\s*:\s*t\('auth_files\.status_toggle_disabled'\)/
+    );
+    expect(footer).toMatch(
+      /enabled\s*\?\s*t\('auth_files\.card_toggle_enabled', \{ name: accountName \}\)\s*:\s*t\('auth_files\.card_toggle_disabled', \{ name: accountName \}\)/
+    );
+  });
+
+  test('keeps the account title and state visible in compact mode', () => {
+    // The note is the title when set, so it is never repeated as a separate line.
+    expect(source).not.toContain('noteValue');
+    expect(source).not.toMatch(/compact\s*&&[^\n]*AuthFileAccount/);
+    const stateLine = source.split('{stateKey && (')[1].split('</p>')[0];
+    expect(stateLine).toContain('STATE_LABEL_KEYS[stateKey]');
+    expect(stateLine).toContain('{poolLabel}');
+    expect(source).toMatch(
+      /presentation\.availability === 'attention' && presentation\.poolRole !== 'skipped'\s*\?\s*t\('auth_files\.pool_attention'\)/
+    );
+    expect(source).not.toMatch(/compact\s*&&[^\n]*stateKey/);
   });
 
   test('dims disabled card content but keeps the re-enable controls clear', () => {
@@ -75,7 +104,7 @@ describe('auth file card presentation contract', () => {
     ]) {
       expect(source).toContain(handler);
     }
-    expect(source).toContain('rawStatusMessage && hasStatusWarning');
+    expect(source).toContain('rawStatusMessage && hasStatusWarning && isProblemAuthFile(file)');
     expect(source).toContain('showManualRefreshButton');
     expect(source).toContain('file.disabled ||');
   });
