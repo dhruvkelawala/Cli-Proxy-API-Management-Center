@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Subscription selection and balancing</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;background:transparent;color:var(--foreground,#2d2a26);font-family:var(--font-sans,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)}
+body{font-size:14px;line-height:1.5}
+h1{font-size:23px;line-height:1.25;letter-spacing:-.025em;margin:0 0 8px;font-weight:650;text-wrap:balance}
+h2{font-size:17px;line-height:1.35;margin:0;font-weight:650}
+p{margin:0} .intro{margin-bottom:20px;max-width:68ch}.muted{color:var(--muted-foreground,#686158)}.small{font-size:12px}
+.screen{background:var(--card,#f4f2ed);border:1px solid var(--border,#d9d5ce);border-radius:var(--radius,12px);padding:20px}
+.head{padding-bottom:16px;border-bottom:1px solid var(--border,#d9d5ce)}.head p{margin-top:4px}
+.context{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--muted-foreground,#686158)}
+form{margin:0}fieldset{border:0;margin:0;padding:0;min-width:0}legend{font-weight:600;padding:0;margin-bottom:10px}
+.mode{padding-top:18px}.radio-row{display:flex;gap:10px;flex-wrap:wrap}
+.radio-choice{display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--input,#b6afa6);border-radius:var(--radius,8px);cursor:pointer;background:var(--background,#fff);min-height:44px}
+.radio-choice:has(input:checked){border-color:var(--foreground,#2d2a26);font-weight:550}
+input[type=checkbox],input[type=radio]{margin:0;accent-color:var(--foreground,#2d2a26);width:16px;height:16px;cursor:pointer}
+select,input[type=number]{width:100%;min-height:42px;padding:8px 10px;font:inherit;background:var(--background,#fff);color:inherit;border:1px solid var(--input,#b6afa6);border-radius:var(--radius,8px);caret-color:var(--foreground,#2d2a26)}
+button,select,input{font:inherit}select{cursor:pointer}
+select:hover,input[type=number]:hover{border-color:var(--muted-foreground,#686158)}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--ring,#706359);outline-offset:3px}
+input:disabled{cursor:default;opacity:.55}
+::selection{background:var(--accent-surface,#e5e0d6);color:var(--foreground,#2d2a26)}
+a{color:inherit;text-underline-offset:3px}
+.label{display:block;font-size:13px;font-weight:550;margin-bottom:6px}
+.strategy{margin-top:16px}.strategy-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;align-items:start}
+.check-label{display:flex;align-items:center;gap:9px;min-height:42px;cursor:pointer;font-size:13px}
+.help{font-size:12px;color:var(--muted-foreground,#686158);margin-top:6px;max-width:65ch}
+.accounts{margin-top:18px;border-top:1px solid var(--border,#d9d5ce);padding-top:14px}
+.account-head,.account-row{display:grid;grid-template-columns:minmax(135px,1fr) minmax(140px,.9fr) 88px;gap:14px;align-items:center}
+.account-head{font-size:12px;color:var(--muted-foreground,#686158);padding-bottom:4px}
+.account-row{padding:9px 0;border-bottom:1px solid var(--border,#d9d5ce)}
+.account-row:last-child{border-bottom:0}.account-name{font-weight:600}.account-name small{display:block;font-size:12px;color:var(--muted-foreground,#686158);font-weight:400}
+.account-row label{display:block}.mobile-label{display:none;font-size:12px;color:var(--muted-foreground,#686158);margin-bottom:4px}
+.scenario{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.scenario .check-label{min-height:34px;border:1px solid var(--border,#d9d5ce);border-radius:var(--radius,8px);padding:6px 10px;font-size:12px;background:var(--secondary,#eae7df)}
+.scenario-caption{font-size:12px;color:var(--muted-foreground,#686158);margin-right:2px}
+.only{margin-top:16px;max-width:330px}
+.preview{padding-top:17px;margin-top:17px;border-top:1px solid var(--border,#d9d5ce)}
+.preview-heading{font-size:14px;font-weight:600;margin-bottom:6px}
+.share-bar{display:flex;gap:2px;height:9px;margin:12px 0;border-radius:4px;overflow:hidden}
+.share-a{background:var(--foreground,#2d2a26)}.share-b{background:var(--muted-foreground,#686158)}
+.assignment-label{font-size:12px;color:var(--muted-foreground,#686158);margin:12px 0 6px}
+.assignments{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}
+.assignment{display:grid;place-items:center;min-height:33px;border-radius:5px;border:1px solid var(--border,#d9d5ce);font-size:12px;font-weight:600}
+.assignment.a{background:var(--foreground,#2d2a26);color:var(--background,#fff);border-color:var(--foreground,#2d2a26)}
+.assignment.b{background:var(--secondary,#eae7df);color:var(--foreground,#2d2a26)}
+.reason{font-size:12px;color:var(--muted-foreground,#686158);margin-top:10px}
+.error{color:var(--destructive,#b34235)}
+.notes{margin-top:18px}.notes p{font-size:13px;margin:0 0 10px}.notes strong{font-weight:600}
+details{margin-top:13px;font-size:12px}summary{cursor:pointer;font-weight:550}details p{margin-top:7px}
+[hidden]{display:none!important}
+@media(max-width:500px){h1{font-size:21px}.screen{padding:16px}.strategy-grid{grid-template-columns:1fr;gap:12px}.account-head{display:none}.account-row{grid-template-columns:1fr 80px;gap:9px 12px;padding:13px 0}.account-name{grid-column:1/-1}.mobile-label{display:block}.radio-row{display:grid;grid-template-columns:1fr 1fr;gap:7px}.radio-choice{padding:9px 10px;font-size:13px}.assignments{gap:3px}.context{display:block}.scenario{gap:6px}.scenario-caption{width:100%}}
+</style>
+</head>
+<body>
+<div class="intro">
+<h1>Choose a subscription, or share work across a pool.</h1>
+<p class="muted">I'd start with even rotation and sticky conversations. Add weights when one subscription should take more work.</p>
+</div>
+<section class="screen" aria-label="Illustrative subscription routing controls">
+<div class="head">
+<h2>Claude routing</h2>
+<p class="small muted">Mini gateway · shared by Mini and MacBook</p>
+<div class="context">Interactive proposal. Example accounts and scenarios; these controls change only this demo.</div>
+</div>
+<form onsubmit="return false">
+<fieldset class="mode">
+<legend>Account policy for an example T3 client profile</legend>
+<div class="radio-row">
+<label class="radio-choice"><input type="radio" name="mode" value="pool" checked>Use shared pool</label>
+<label class="radio-choice"><input type="radio" name="mode" value="only">Use only one</label>
+</div>
+</fieldset>
+<div id="pool-controls">
+<div class="strategy">
+<div class="strategy-grid">
+<div><label class="label" for="strategy">Shared pool strategy</label>
+<select id="strategy"><option value="round-robin">Rotate evenly</option><option value="weighted-round-robin" selected>Weighted split</option><option value="fill-first">Concentrate on one</option></select>
+<p class="help" id="strategy-help"></p></div>
+<div><span class="label">Conversation continuity</span>
+<label class="check-label" for="sticky"><input type="checkbox" id="sticky" checked>Keep conversations on one account</label>
+<p class="help">Balance new assignments. Reuse the account while it remains eligible.</p></div>
+</div>
+</div>
+<div class="accounts">
+<div class="account-head"><span>Example subscription</span><span>Priority tier</span><span>Weight</span></div>
+<div class="account-row">
+<div class="account-name">Claude A<small>Illustrative eligible account</small></div>
+<label><span class="mobile-label">Priority tier</span><select id="tier-a" aria-label="Claude A priority tier"><option value="10">Primary</option><option value="0">Backup</option></select></label>
+<label><span class="mobile-label">Weight</span><input type="number" id="weight-a" min="1" max="100" step="1" value="3" aria-label="Claude A weight"></label>
+</div>
+<div class="account-row">
+<div class="account-name">Claude B<small>Illustrative eligible account</small></div>
+<label><span class="mobile-label">Priority tier</span><select id="tier-b" aria-label="Claude B priority tier"><option value="10">Primary</option><option value="0">Backup</option></select></label>
+<label><span class="mobile-label">Weight</span><input type="number" id="weight-b" min="1" max="100" step="1" value="1" aria-label="Claude B weight"></label>
+</div>
+</div>
+<p class="help">Equal-priority accounts share work. A backup tier takes new assignments when the primary tier is unavailable. Weights apply only to Weighted split.</p>
+</div>
+<div class="only" id="only-controls" hidden>
+<label class="label" for="target">Selected subscription</label>
+<select id="target"><option value="a">Claude A</option><option value="b">Claude B</option></select>
+<p class="help">Other accounts stay enabled. This profile must use its selected account or return an error.</p>
+</div>
+<div class="scenario" aria-label="Illustrative failure scenarios">
+<span class="scenario-caption">Try a failure</span>
+<label class="check-label"><input type="checkbox" id="unavailable-a">A unavailable</label>
+<label class="check-label"><input type="checkbox" id="unavailable-b">B unavailable</label>
+</div>
+</form>
+<div class="preview" aria-live="polite" aria-atomic="true">
+<p class="preview-heading" id="outcome-title"></p>
+<p id="outcome"></p>
+<div id="distribution">
+<div class="share-bar" role="img" aria-label="Illustrative assignment ratio" id="share-bar"><div class="share-a" id="share-a"></div><div class="share-b" id="share-b"></div></div>
+<p class="assignment-label" id="assignment-label"></p>
+<div class="assignments" id="assignments" aria-label="Illustrative account assignments"></div>
+</div>
+<p class="reason" id="reason"></p>
+</div>
+<details><summary>How priority and stickiness interact</summary>
+<p>Priority selects the highest eligible tier for a new assignment. The strategy chooses an account within that tier. An existing conversation keeps its eligible account, even after a higher-priority account recovers. With weights 3 and 1, the intended assignment ratio is roughly 75% and 25%; tokens, cost and elapsed time can differ.</p>
+</details>
+</section>
+<div class="notes">
+<p><strong>First release.</strong> Bring the existing global strategies, account priorities and weights into one screen. The proposed strict account policy overrides pool selection for its client profile.</p>
+<p><strong>Later.</strong> Add a different pool and strategy per client or provider. That needs new proxy support, so choosing a Mini policy would not rewrite the MacBook's policy.</p>
+<p class="muted small">The current global strategy affects Automatic clients on both machines. This mock uses fresh assignments and steady availability; it is not a live request trace.</p>
+</div>
+<script>
+const byId=id=>document.getElementById(id);
+const state=()=>({
+ mode:document.querySelector('input[name=mode]:checked').value,
+ strategy:byId('strategy').value,sticky:byId('sticky').checked,target:byId('target').value,
+ a:{id:'a',tier:Number(byId('tier-a').value),weight:Math.max(1,Math.min(100,Number(byId('weight-a').value)||1)),available:!byId('unavailable-a').checked},
+ b:{id:'b',tier:Number(byId('tier-b').value),weight:Math.max(1,Math.min(100,Number(byId('weight-b').value)||1)),available:!byId('unavailable-b').checked}
+});
+const descriptions={
+ 'round-robin':'Alternate between eligible accounts in the highest priority tier.',
+ 'weighted-round-robin':'Distribute new assignments in proportion to account weights.',
+ 'fill-first':'Keep selecting the first eligible account. Use priority to express a preferred account.'
+};
+function simulate(s){
+ if(s.mode==='only')return s[s.target].available?{pool:[s[s.target]],shares:{[s.target]:1},picks:Array(8).fill(s.target)}:{pool:[],shares:{},picks:[]};
+ let pool=[s.a,s.b].filter(a=>a.available);
+ if(!pool.length)return{pool:[],shares:{},picks:[]};
+ const tier=Math.max(...pool.map(a=>a.tier));pool=pool.filter(a=>a.tier===tier);
+ let shares={},picks=[],current={a:0,b:0};
+ if(s.strategy==='fill-first'){shares[pool[0].id]=1;picks=Array(8).fill(pool[0].id);}
+ else{
+ const weighted=s.strategy==='weighted-round-robin',sum=pool.reduce((n,a)=>n+(weighted?a.weight:1),0);
+ pool.forEach(a=>shares[a.id]=(weighted?a.weight:1)/sum);
+ for(let i=0;i<8;i++){
+ if(!weighted){picks.push(pool[i%pool.length].id);continue;}
+ pool.forEach(a=>current[a.id]+=a.weight);
+ let selected=pool[0];pool.forEach(a=>{if(current[a.id]>current[selected.id])selected=a;});
+ current[selected.id]-=sum;picks.push(selected.id);
+ }
+ }
+ return{pool,shares,picks};
+}
+function update(){
+ const s=state(),r=simulate(s),only=s.mode==='only',weighted=s.strategy==='weighted-round-robin';
+ byId('pool-controls').hidden=only;byId('only-controls').hidden=!only;
+ byId('strategy-help').textContent=descriptions[s.strategy];
+ ['a','b'].forEach(a=>byId('weight-'+a).disabled=!weighted||only);
+ const title=byId('outcome-title'),outcome=byId('outcome'),reason=byId('reason');
+ title.classList.toggle('error',!r.pool.length);outcome.classList.toggle('error',!r.pool.length);
+ byId('distribution').hidden=!r.pool.length;
+ if(only){
+ title.textContent=r.pool.length?'Strict selection':'Selected subscription unavailable';
+ outcome.textContent=r.pool.length?'Every applicable request uses Claude '+s.target.toUpperCase()+'.':'Return an explicit error. Claude '+(s.target==='a'?'B':'A')+' cannot substitute.';
+ reason.textContent='This constraint must also cover retries, helpers, streams and WebSocket reconnects using this profile.';
+ }else if(!r.pool.length){
+ title.textContent='No eligible account';
+ outcome.textContent='Return an explicit error until an account in the shared pool can serve the request.';
+ reason.textContent='Pool fallback stays within the accounts allowed by the profile.';
+ }else{
+ title.textContent=(s.sticky?'New conversation assignments':'New request assignments');
+ outcome.textContent=['a','b'].filter(a=>(r.shares[a]||0)>0).map(a=>'Claude '+a.toUpperCase()+' '+Math.round(r.shares[a]*100)+'%').join(' · ');
+ const one=r.pool.length===1;
+ reason.textContent=(one?'Only Claude '+r.pool[0].id.toUpperCase()+' is eligible in the highest available priority tier. ':s.strategy==='fill-first'?'With equal priority, fill-first uses a stable internal account order. Set a higher priority to choose the primary. ':'Both accounts are in the same priority tier. ')+(s.sticky?'Existing conversations keep their eligible binding; an unavailable account can fail over within the allowed pool.':'Continuity is off. The pool strategy can choose an account for each request.');
+ }
+ byId('share-a').style.width=((r.shares.a||0)*100)+'%';
+ byId('share-b').style.width=((r.shares.b||0)*100)+'%';
+ byId('share-bar').setAttribute('aria-label',outcome.textContent);
+ byId('assignment-label').textContent=only?'Example requests using this profile':s.sticky?'Example: eight new conversation assignments':'Example: eight new request assignments';
+ byId('assignments').replaceChildren(...r.picks.map(a=>{const e=document.createElement('div');e.className='assignment '+a;e.textContent=a.toUpperCase();e.setAttribute('aria-label','Claude '+a.toUpperCase());return e;}));
+}
+document.querySelectorAll('input,select').forEach(el=>el.addEventListener('change',update));
+update();
+const s=state(),assert=(ok,label)=>{if(!ok)throw Error(label);};
+assert(simulate(s).picks.filter(a=>a==='a').length===6,'Weighted 3:1 assigns six of eight to A');
+assert(simulate({...s,strategy:'round-robin'}).picks.filter(a=>a==='a').length===4,'Round-robin assigns four of eight to A');
+assert(simulate({...s,b:{...s.b,tier:0}}).picks.every(a=>a==='a'),'Backup tier receives no cold assignments while primary eligible');
+assert(simulate({...s,a:{...s.a,available:false}}).picks.every(a=>a==='b'),'Pool can fail over');
+assert(simulate({...s,mode:'only',a:{...s.a,available:false}}).picks.length===0,'Only A cannot fall back to B');
+assert(simulate({...s,strategy:'fill-first'}).picks.every(a=>a==='a'),'Fresh fill-first example uses stable first account');
+requestAnimationFrame(()=>console.log(JSON.stringify({demoChecks:6,horizontalOverflow:document.documentElement.scrollWidth>innerWidth,scope:'local illustration only'})));
+</script>
+</body></html>
