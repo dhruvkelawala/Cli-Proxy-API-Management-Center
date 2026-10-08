@@ -16,7 +16,6 @@ export interface RoutingTuningSheetProps {
   strategy: RoutingStrategy;
   sessionAffinity: { enabled: boolean; ttl?: string };
   accounts: RoutingAccounts;
-  automaticClientCount?: number;
 }
 
 export function RoutingTuningSheet({
@@ -25,7 +24,6 @@ export function RoutingTuningSheet({
   strategy,
   sessionAffinity,
   accounts,
-  automaticClientCount,
 }: RoutingTuningSheetProps) {
   const { t } = useTranslation();
   const status = describeAccountSaveStatus(t, accounts);
@@ -44,7 +42,7 @@ export function RoutingTuningSheet({
       description={t('config_management.routing_settings.sheet.description')}
       footer={
         <RoutingSaveRow
-          scope={accountsScopeText(t, automaticClientCount)}
+          scope={accountsScopeText(t)}
           status={status.text}
           tone={status.tone}
           saveLabel={t('config_management.routing_settings.sheet.save')}

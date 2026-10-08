@@ -1,5 +1,6 @@
 import { useId } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { getTypeLabel } from '@/features/authFiles/constants';
@@ -77,6 +78,7 @@ export function RoutingTuningPanel({
 }: RoutingTuningPanelProps) {
   const { t } = useTranslation();
   const idPrefix = useId();
+  const hintId = `${idPrefix}-hint`;
 
   if (error !== null) {
     return (
@@ -122,28 +124,35 @@ export function RoutingTuningPanel({
 
   return (
     <div className={styles.panel}>
-      {weightsInactive && (
-        <p className={styles.note}>{t('config_management.routing_settings.sheet.inactive_note')}</p>
-      )}
+      <div className={styles.intro}>
+        <p id={hintId} className={styles.hint}>
+          <span>
+            <strong>{t('config_management.routing_settings.sheet.priority_label')}</strong>{' '}
+            {t('config_management.routing_settings.sheet.priority_hint')}
+          </span>
+          <span>
+            <strong>{t('config_management.routing_settings.sheet.weight_label')}</strong>{' '}
+            {weightsInactive
+              ? t('config_management.routing_settings.sheet.weight_hint_inactive')
+              : t('config_management.routing_settings.sheet.weight_hint')}
+          </span>
+        </p>
+        {weightsInactive && (
+          <p className={styles.note}>
+            {t('config_management.routing_settings.sheet.inactive_note')}
+          </p>
+        )}
+        <p className={styles.keys}>
+          <Trans
+            i18nKey="config_management.routing_settings.sheet.config_keys_note"
+            components={{ providersLink: <Link className={styles.link} to="/ai-providers" /> }}
+          />
+        </p>
+      </div>
       {groups.map(({ pool, rows }) => {
-        const groupHintId = `${idPrefix}-${pool.provider}-hint`;
         return (
           <section key={pool.provider} className={styles.group}>
-            <div className={styles.groupHead}>
-              <h3 className={styles.groupTitle}>{getTypeLabel(t, pool.provider)}</h3>
-              <p id={groupHintId} className={styles.groupHint}>
-                <span>
-                  <strong>{t('config_management.routing_settings.sheet.priority_label')}</strong>{' '}
-                  {t('config_management.routing_settings.sheet.priority_hint')}
-                </span>
-                <span>
-                  <strong>{t('config_management.routing_settings.sheet.weight_label')}</strong>{' '}
-                  {weightsInactive
-                    ? t('config_management.routing_settings.sheet.weight_hint_inactive')
-                    : t('config_management.routing_settings.sheet.weight_hint')}
-                </span>
-              </p>
-            </div>
+            <h3 className={styles.groupTitle}>{getTypeLabel(t, pool.provider)}</h3>
             <ul className={styles.rows}>
               {rows.map(({ file, account }) => {
                 const identity = deriveAccountTitle(file);
@@ -207,9 +216,7 @@ export function RoutingTuningPanel({
                           name: accessibleName,
                         })}
                         aria-invalid={rowErrors?.priority ? true : undefined}
-                        aria-describedby={
-                          priorityNote ? `${id}-priority-note ${groupHintId}` : groupHintId
-                        }
+                        aria-describedby={priorityNote ? `${id}-priority-note ${hintId}` : hintId}
                         onChange={(event) => onChange(file.name, { priority: event.target.value })}
                       />
                       {priorityNote && (
@@ -238,9 +245,7 @@ export function RoutingTuningPanel({
                           name: accessibleName,
                         })}
                         aria-invalid={rowErrors?.weight ? true : undefined}
-                        aria-describedby={
-                          weightNote ? `${id}-weight-note ${groupHintId}` : groupHintId
-                        }
+                        aria-describedby={weightNote ? `${id}-weight-note ${hintId}` : hintId}
                         onChange={(event) => onChange(file.name, { weight: event.target.value })}
                       />
                       {weightNote && (
@@ -253,7 +258,10 @@ export function RoutingTuningPanel({
                       )}
                     </div>
                     <div className={styles.status}>
-                      <span className={`${styles.role} ${styles[`role_${account.status}`]}`}>
+                      <span
+                        className={`${styles.role} ${styles[`role_${account.status}`]}`}
+                        title={t(account.reasonKey)}
+                      >
                         {t(`config_management.routing_settings.role.${ROLE_KEYS[account.reason]}`)}
                         {account.sharePercent !== null && account.reason !== 'standby' && (
                           <span className={styles.share}>
@@ -261,7 +269,9 @@ export function RoutingTuningPanel({
                           </span>
                         )}
                       </span>
-                      <p className={styles.reason}>{t(account.reasonKey)}</p>
+                      {(account.status === 'excluded' || account.reason === 'standby') && (
+                        <p className={styles.reason}>{t(account.reasonKey)}</p>
+                      )}
                     </div>
                     {failure !== undefined && (
                       <p className={styles.failure} role="alert">

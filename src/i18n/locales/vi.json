@@ -1561,7 +1561,6 @@
       "scope": "Toàn cục · ảnh hưởng đến mọi client Tự động trên cổng dùng chung (cả hai máy Mac)",
       "scope_count_one": "Toàn cục · ảnh hưởng đến {{count}} client Tự động trên cổng dùng chung (cả hai máy Mac)",
       "scope_count_other": "Toàn cục · ảnh hưởng đến {{count}} client Tự động trên cổng dùng chung (cả hai máy Mac)",
-      "only_ignores": "Các client đặt ở chế độ Chỉ một tài khoản sẽ bỏ qua các cài đặt này.",
       "strategy_legend": "Chiến lược chọn",
       "strategy_saved": "Đã lưu: {{label}}",
       "strategy": {
@@ -1569,7 +1568,7 @@
         "weighted_round_robin": "Chia theo trọng số",
         "fill_first": "Dồn vào một tài khoản"
       },
-      "recommend": "Khuyến nghị cho lập trình: Xoay vòng đều và giữ hội thoại trên một tài khoản. Chiến lược đã lưu không bao giờ bị tự động thay đổi.",
+      "recommend": "Khuyến nghị cho lập trình: Xoay vòng đều và giữ hội thoại trên một tài khoản.",
       "affinity_label": "Giữ hội thoại trên một tài khoản",
       "affinity_ttl_prefix": "trong",
       "affinity_ttl_aria": "Thời gian một hội thoại ở lại tài khoản của nó",
@@ -1627,9 +1626,7 @@
         "share_caption": "Tỷ lệ minh họa của các phân bổ mới theo {{strategy}} · không phải lưu lượng, token hay chi phí thực tế",
         "share_unknown": "sọc = chưa rõ khả năng dùng",
         "share_standby": "Dự phòng",
-        "scope": "Toàn cục · ảnh hưởng đến mọi client Tự động có thể dùng các tài khoản này, trên cả hai máy Mac",
-        "scope_count_one": "Toàn cục · ảnh hưởng đến các client Tự động có thể dùng các tài khoản này (tối đa {{count}} client), trên cả hai máy Mac",
-        "scope_count_other": "Toàn cục · ảnh hưởng đến các client Tự động có thể dùng các tài khoản này (tối đa {{count}} client), trên cả hai máy Mac",
+        "scope": "Toàn cục · ảnh hưởng đến mọi client Tự động đang dùng các tài khoản này, trên cả hai máy Mac",
         "save": "Lưu tài khoản",
         "status": {
           "clean": "Khớp với các tài khoản đã lưu",
@@ -1639,8 +1636,17 @@
           "partial": "Đã lưu {{saved}} trên {{total}} tài khoản. Chưa lưu, bản nháp được giữ: {{names}}",
           "failed": "Không có tài khoản nào được lưu. Bản nháp được giữ: {{names}}",
           "invalid": "Hãy sửa các giá trị được đánh dấu để lưu"
-        }
-      }
+        },
+        "config_keys_note": "Các khóa API trong cấu hình của cùng provider cũng tham gia, nên danh sách này không phải toàn bộ nhóm. Chỉnh sửa tại <providersLink>AI Provider</providersLink>."
+      },
+      "strategy_short": {
+        "round_robin": "Xoay vòng các phân bổ mới qua các tài khoản đủ điều kiện ở nhóm ưu tiên cao nhất.",
+        "weighted_round_robin": "Chia các phân bổ mới trong nhóm ưu tiên cao nhất theo trọng số. Trọng số từ 0 trở xuống bị bỏ qua.",
+        "fill_first": "Gửi các phân bổ mới đến tài khoản đủ điều kiện đầu tiên. Đặt ưu tiên cao hơn cho một tài khoản để ưu tiên nó."
+      },
+      "muted_on": "Hội thoại ở lại tài khoản của nó trong {{ttl}}. Các client đặt ở chế độ Chỉ một tài khoản sẽ bỏ qua các cài đặt này.",
+      "muted_off": "Mỗi yêu cầu được phân bổ riêng. Các client đặt ở chế độ Chỉ một tài khoản sẽ bỏ qua các cài đặt này.",
+      "how_title": "Cách hoạt động"
     }
   },
   "quota_management": {

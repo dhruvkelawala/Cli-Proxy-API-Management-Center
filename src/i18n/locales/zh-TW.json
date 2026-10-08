@@ -1625,7 +1625,6 @@
       "scope": "全域 · 影響共用閘道上的所有自動用戶端（兩台 Mac）",
       "scope_count_one": "全域 · 影響共用閘道上的 {{count}} 個自動用戶端（兩台 Mac）",
       "scope_count_other": "全域 · 影響共用閘道上的 {{count}} 個自動用戶端（兩台 Mac）",
-      "only_ignores": "設為「僅使用某個帳號」的用戶端會忽略這些設定。",
       "strategy_legend": "選擇策略",
       "strategy_saved": "已儲存：{{label}}",
       "strategy": {
@@ -1633,7 +1632,7 @@
         "weighted_round_robin": "依權重分配",
         "fill_first": "集中到一個帳號"
       },
-      "recommend": "程式開發建議：平均輪替，並讓對話保持在同一帳號。已儲存的策略不會被自動變更。",
+      "recommend": "程式開發建議：平均輪替，並讓對話保持在同一帳號。",
       "affinity_label": "讓對話保持在同一帳號",
       "affinity_ttl_prefix": "時長",
       "affinity_ttl_aria": "對話保持在同一帳號的時長",
@@ -1691,9 +1690,7 @@
         "share_caption": "{{strategy}}下新分配的示意占比 · 並非實際流量、權杖或費用",
         "share_unknown": "斜紋 = 可用性未知",
         "share_standby": "備用",
-        "scope": "全域 · 影響所有可使用這些帳號的自動用戶端（兩台 Mac）",
-        "scope_count_one": "全域 · 影響可使用這些帳號的自動用戶端（最多 {{count}} 個，兩台 Mac）",
-        "scope_count_other": "全域 · 影響可使用這些帳號的自動用戶端（最多 {{count}} 個，兩台 Mac）",
+        "scope": "全域 · 影響所有使用這些帳號的自動用戶端（兩台 Mac）",
         "save": "儲存帳號",
         "status": {
           "clean": "與已儲存的帳號一致",
@@ -1703,8 +1700,17 @@
           "partial": "已儲存 {{total}} 個帳號中的 {{saved}} 個。未儲存並保留草稿：{{names}}",
           "failed": "沒有帳號被儲存。已保留草稿：{{names}}",
           "invalid": "請先修正標示的值再儲存"
-        }
-      }
+        },
+        "config_keys_note": "同一供應商的設定 API 金鑰也會參與分配，因此此清單並非完整帳號池。請在 <providersLink>AI 供應商</providersLink> 中編輯。"
+      },
+      "strategy_short": {
+        "round_robin": "讓新的分配在最高優先順序層的可用帳號間依序輪替。",
+        "weighted_round_robin": "依權重在最高優先順序層內分配新請求。權重為 0 或更低的帳號會被略過。",
+        "fill_first": "把新的分配交給第一個可用帳號。給某個帳號較高的優先順序即可優先使用它。"
+      },
+      "muted_on": "對話會在其帳號上保持 {{ttl}}。設為「僅使用某個帳號」的用戶端會忽略這些設定。",
+      "muted_off": "每個請求獨立分配。設為「僅使用某個帳號」的用戶端會忽略這些設定。",
+      "how_title": "運作方式"
     }
   },
   "quota_management": {

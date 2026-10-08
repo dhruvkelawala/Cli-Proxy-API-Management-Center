@@ -21,6 +21,12 @@ import styles from './SharedRoutingBand.module.scss';
 
 const ROOT = 'config_management.routing_settings';
 
+const SHORT_KEYS: Record<RoutingStrategy, string> = {
+  'round-robin': `${ROOT}.strategy_short.round_robin`,
+  'weighted-round-robin': `${ROOT}.strategy_short.weighted_round_robin`,
+  'fill-first': `${ROOT}.strategy_short.fill_first`,
+};
+
 export interface SharedRoutingBandProps {
   /**
    * Number of client profiles currently set to Automatic. When given, the scope notice names
@@ -103,25 +109,32 @@ export function RoutingBandView({
       </div>
 
       <div className={styles.controls}>
-        <fieldset className={styles.strategy} disabled={saving}>
-          <legend className={styles.srOnly}>{t(`${ROOT}.strategy_legend`)}</legend>
-          {ROUTING_STRATEGIES.map((strategy: RoutingStrategy) => (
-            <label
-              key={strategy}
-              className={`${styles.option} ${values.strategy === strategy ? styles.optionOn : ''}`}
-            >
-              <input
-                type="radio"
-                name={radioName}
-                value={strategy}
-                checked={values.strategy === strategy}
-                onChange={() => onChange({ strategy })}
-              />
-              <span className={styles.optionLabel}>{t(STRATEGY_LABEL_KEYS[strategy])}</span>
-              <span className={styles.optionName}>{strategy}</span>
-            </label>
-          ))}
-        </fieldset>
+        <div className={styles.strategyGroup}>
+          <fieldset className={styles.strategy} disabled={saving}>
+            <legend className={styles.srOnly}>{t(`${ROOT}.strategy_legend`)}</legend>
+            {ROUTING_STRATEGIES.map((strategy: RoutingStrategy) => (
+              <label
+                key={strategy}
+                className={`${styles.option} ${values.strategy === strategy ? styles.optionOn : ''}`}
+              >
+                <input
+                  type="radio"
+                  name={radioName}
+                  value={strategy}
+                  checked={values.strategy === strategy}
+                  onChange={() => onChange({ strategy })}
+                />
+                <span className={styles.optionLabel}>{t(STRATEGY_LABEL_KEYS[strategy])}</span>
+                <span className={styles.optionName}>{strategy}</span>
+              </label>
+            ))}
+          </fieldset>
+          {values.strategy !== saved.strategy && (
+            <span className={styles.savedPill}>
+              {t(`${ROOT}.strategy_saved`, { label: t(STRATEGY_LABEL_KEYS[saved.strategy]) })}
+            </span>
+          )}
+        </div>
 
         <div className={styles.affinity}>
           <ToggleSwitch
@@ -159,19 +172,16 @@ export function RoutingBandView({
       </div>
 
       <div className={styles.explain}>
-        <p>
-          {t(presentation.strategyExplanationKey)}
-          {values.strategy !== saved.strategy && (
-            <span className={styles.savedNote}>
-              {' '}
-              {t(`${ROOT}.strategy_saved`, { label: t(STRATEGY_LABEL_KEYS[saved.strategy]) })}
-            </span>
-          )}
-        </p>
-        <p className={styles.muted}>{t(presentation.affinity.explanationKey, { ttl: ttlLabel })}</p>
+        <p>{t(SHORT_KEYS[values.strategy])}</p>
         <p className={styles.muted}>
-          {t(`${ROOT}.only_ignores`)} {t(`${ROOT}.recommend`)}
+          {t(values.sessionAffinity ? `${ROOT}.muted_on` : `${ROOT}.muted_off`, { ttl: ttlLabel })}
         </p>
+        <details className={styles.how}>
+          <summary>{t(`${ROOT}.how_title`)}</summary>
+          <p>{t(presentation.strategyExplanationKey)}</p>
+          <p>{t(presentation.affinity.explanationKey, { ttl: ttlLabel })}</p>
+          <p>{t(`${ROOT}.recommend`)}</p>
+        </details>
       </div>
 
       <RoutingSaveRow
@@ -236,7 +246,6 @@ export function SharedRoutingBand({ automaticClientCount }: SharedRoutingBandPro
           ttl: routing.values.sessionAffinityTtl || undefined,
         }}
         accounts={routing.accounts}
-        automaticClientCount={automaticClientCount}
       />
     </>
   );
