@@ -5,7 +5,11 @@ import styles from './PolicyPill.module.scss';
 
 const MAX_SHARE_CAPTION = 2;
 
-/** Visual summary of one rule. The surrounding button carries the accessible name. */
+/**
+ * Visual summary of one rule. Its text is part of the surrounding button's accessible name (the
+ * button adds hidden context around it), so everything shown here is read; decorative dots and
+ * bars are aria-hidden.
+ */
 export function PolicyPill({ cell }: { cell: PolicyCell }) {
   const { t } = useTranslation();
 
@@ -14,6 +18,7 @@ export function PolicyPill({ cell }: { cell: PolicyCell }) {
       <span className={styles.cell}>
         <span className={`${styles.pill} ${styles.pillFail}`}>
           {t(`${CR}.pill.unknown_rule`)}
+          <span className={styles.srSeparator}>, </span>
           <span className={styles.failTag}>{t(`${CR}.pill.will_fail`)}</span>
         </span>
         <span className={`${styles.caption} ${styles.captionFail}`}>
@@ -30,6 +35,7 @@ export function PolicyPill({ cell }: { cell: PolicyCell }) {
         <span className={styles.cell}>
           <span className={`${styles.pill} ${styles.pillFail}`}>
             {t(`${CR}.pill.only`, { account: name })}
+            <span className={styles.srSeparator}>, </span>
             <span className={styles.failTag}>{t(`${CR}.pill.will_fail`)}</span>
           </span>
           <span className={`${styles.caption} ${styles.captionFail}`}>
@@ -60,7 +66,12 @@ export function PolicyPill({ cell }: { cell: PolicyCell }) {
     <span className={styles.cell}>
       <span className={`${styles.pill} ${cell.willFail ? styles.pillFail : styles.pillAuto}`}>
         {t(`${CR}.pill.automatic`)}
-        {cell.willFail && <span className={styles.failTag}>{t(`${CR}.pill.will_fail`)}</span>}
+        {cell.willFail && (
+          <>
+            <span className={styles.srSeparator}>, </span>
+            <span className={styles.failTag}>{t(`${CR}.pill.will_fail`)}</span>
+          </>
+        )}
       </span>
       <PoolCaption pool={cell.pool} />
     </span>
