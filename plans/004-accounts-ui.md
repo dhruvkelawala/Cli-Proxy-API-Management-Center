@@ -1,6 +1,6 @@
 # CPA-004: Make account labels, enablement, availability and preference clear
 
-- **Status:** IN REVIEW — implemented on branch `cpa-004-account-presentation`; awaiting PR review and merge into `sumo/main`.
+- **Status:** DONE — merged in #6.
 - **Tracking issue:** https://github.com/dhruvkelawala/CLIProxyAPI/issues/5
 - **Issue:** https://github.com/dhruvkelawala/Cli-Proxy-API-Management-Center/issues/1
 - **Priority:** P1

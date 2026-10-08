@@ -1,6 +1,6 @@
 # CPA-008: Expose shared load-balancing strategies with priority, weights and session affinity
 
-- **Status:** In review (UI steps 1-4 implemented on `cpa-008-shared-load-balancing`; step 5 fixture proof pending backend CPA-003)
+- **Status:** DONE — UI merged in #7; step 5 end-to-end proof recorded on issue #4.
 - **Issue:** https://github.com/dhruvkelawala/Cli-Proxy-API-Management-Center/issues/4
 - **Tracking issue:** https://github.com/dhruvkelawala/CLIProxyAPI/issues/5
 - **Priority:** P2; follow strict subscription selection

@@ -1,6 +1,6 @@
 # CPA-006: Make account and client-route controls accessible in both themes
 
-- **Status:** IN REVIEW — part 1 merged (#5); part 2 implemented on branch `cpa-006-accessibility-part2`, awaiting PR review and merge into `sumo/main`.
+- **Status:** DONE — part 1 merged in #5; part 2 merged from `cpa-006-accessibility-part2`.
 - **Tracking issue:** https://github.com/dhruvkelawala/CLIProxyAPI/issues/5
 - **Issue:** https://github.com/dhruvkelawala/Cli-Proxy-API-Management-Center/issues/3
 - **Priority:** P2

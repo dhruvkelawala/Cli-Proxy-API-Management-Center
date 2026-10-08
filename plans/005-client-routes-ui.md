@@ -1,6 +1,6 @@
 # CPA-005: Let the dashboard choose and enforce a subscription for each client
 
-- **Status:** In review (branch `cpa-005-client-routes`); end-to-end proxy proof pending backend CPA-003
+- **Status:** DONE — merged in #9; end-to-end proof against the enforcing backend (CLIProxyAPI `4033d21`) recorded on issue #2.
 - **Tracking issue:** https://github.com/dhruvkelawala/CLIProxyAPI/issues/5
 - **Issue:** https://github.com/dhruvkelawala/Cli-Proxy-API-Management-Center/issues/2
 - **Priority:** P1
