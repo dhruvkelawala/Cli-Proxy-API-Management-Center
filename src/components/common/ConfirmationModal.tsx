@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '@/components/ui/Modal';
 import { createOpenerFocusTracker, getActiveHtmlElement } from './trackOpenerFocus';
@@ -15,7 +15,7 @@ export function ConfirmationModal() {
 
   // This component unmounts as soon as the confirmation closes, so <Modal> never gets to restore
   // focus itself. Remember the opener and return focus to it (skipped if it no longer exists).
-  const trackOpener = useRef(createOpenerFocusTracker(getActiveHtmlElement)).current;
+  const [trackOpener] = useState(() => createOpenerFocusTracker(getActiveHtmlElement));
   useEffect(() => {
     trackOpener(isOpen);
   }, [isOpen, trackOpener]);
