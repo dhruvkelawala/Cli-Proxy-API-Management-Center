@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Sheet } from '@/components/ui/Sheet';
@@ -18,6 +18,7 @@ import type {
 } from '@/types/clientProfiles';
 import { accountDisplayLabel, pinnedProfilesFor, planPinChanges } from '../model';
 import { CR, providerLabelKey } from '../copy';
+import { useSheetCloseGuard } from '../sheetGuard';
 import { FailureNotice, Notice } from './Notices';
 import styles from './AccountPinSheet.module.scss';
 
@@ -44,7 +45,6 @@ export function AccountPinSheet(props: AccountPinSheetProps) {
   const enroll = useClientProfilesStore((state) => state.enroll);
   const load = useClientProfilesStore((state) => state.load);
   const showNotification = useNotificationStore((state) => state.showNotification);
-  const showConfirmation = useNotificationStore((state) => state.showConfirmation);
 
   const providerName = t(providerLabelKey(provider));
   const accountName = account ? accountDisplayLabel(account, files) : fallbackLabel;
@@ -65,20 +65,8 @@ export function AccountPinSheet(props: AccountPinSheetProps) {
   const changes = account ? planPinChanges(account, snapshot, checked) : [];
   const dirty = changes.length > 0;
 
-  const confirmClose = useCallback((): boolean | Promise<boolean> => {
-    if (!dirty || saving) return true;
-    return new Promise<boolean>((resolve) => {
-      showConfirmation({
-        title: t('providersPage.unsavedChanges.title'),
-        message: t('providersPage.unsavedChanges.message'),
-        variant: 'danger',
-        confirmText: t('providersPage.unsavedChanges.discard'),
-        cancelText: t('providersPage.unsavedChanges.keepEditing'),
-        onConfirm: () => resolve(true),
-        onCancel: () => resolve(false),
-      });
-    });
-  }, [dirty, saving, showConfirmation, t]);
+  const busy = saving || enrolling;
+  const confirmClose = useSheetCloseGuard({ busy, dirty });
 
   const toggle = (profileRef: string) =>
     setChecked((current) => {
@@ -162,6 +150,7 @@ export function AccountPinSheet(props: AccountPinSheetProps) {
       eyebrow={t(`${CR}.accounts.sheet_eyebrow`, { provider: providerName })}
       title={t(`${CR}.accounts.sheet_title`, { account: accountName })}
       confirmClose={confirmClose}
+      closeDisabled={busy}
       footer={footer}
     >
       <div className={styles.body}>

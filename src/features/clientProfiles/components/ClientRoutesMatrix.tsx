@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { CLIENT_PROFILE_PROVIDERS, type ClientProfileProvider } from '@/types/clientProfiles';
 import type { ConnectionContext } from '../connectionContext';
-import type { ProfileRow } from '../model';
+import { matrixCellId, type ProfileRow } from '../model';
 import { CR, describeCellText, providerLabelKey } from '../copy';
 import { PolicyPill } from './PolicyPill';
 import { ConnectionContextLine } from './ConnectionContextLine';
@@ -68,7 +68,7 @@ export function ClientRoutesMatrix({
                       <button
                         type="button"
                         className={`${styles.cellButton} ${cell.willFail ? styles.cellFail : ''}`}
-                        data-cell={`${profile.profileRef}:${provider}`}
+                        data-cell={matrixCellId(profile.profileRef, provider)}
                         aria-label={t(`${CR}.matrix.cell_label`, {
                           provider: providerName,
                           profile: profile.label,

@@ -1,14 +1,11 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sheet } from '@/components/ui/Sheet';
 import { Button } from '@/components/ui/Button';
 import { apiClient } from '@/services/api/client';
 import { clientProfilesApi } from '@/services/api/clientProfiles';
 import { useNotificationStore } from '@/stores';
-import {
-  useClientProfilesStore,
-  type ClientProfilesFailure,
-} from '@/stores/useClientProfilesStore';
+import { useClientProfilesStore } from '@/stores/useClientProfilesStore';
 import type { AuthFileItem } from '@/types';
 import type {
   ClientProfile,
@@ -31,6 +28,8 @@ import {
   type TargetOption,
 } from '../model';
 import type { ConnectionContext } from '../connectionContext';
+import { initialPolicyEditorState, policyEditorReducer } from '../policyEditorState';
+import { continueAfterClose, useSheetCloseGuard } from '../sheetGuard';
 import { CR, providerLabelKey } from '../copy';
 import { ConnectionContextLine } from './ConnectionContextLine';
 import { FailureNotice, Notice } from './Notices';
@@ -49,6 +48,7 @@ export type PolicySheetProps = {
   context: ConnectionContext | null;
   onClose: () => void;
   onDirtyChange: (dirty: boolean) => void;
+  /** Called only after the unsaved-changes check passed and nothing is in flight. */
   onOpenProfile: () => void;
 };
 
@@ -76,7 +76,6 @@ export function PolicySheet(props: PolicySheetProps) {
   } = props;
   const { t } = useTranslation();
   const showNotification = useNotificationStore((state) => state.showNotification);
-  const showConfirmation = useNotificationStore((state) => state.showConfirmation);
   const mutate = useClientProfilesStore((state) => state.mutate);
   const enroll = useClientProfilesStore((state) => state.enroll);
   const load = useClientProfilesStore((state) => state.load);
@@ -85,12 +84,17 @@ export function PolicySheet(props: PolicySheetProps) {
 
   const savedPolicy = profile?.policies[provider] ?? null;
   const savedWritable = savedPolicy ? toWritablePolicy(savedPolicy) : null;
-  const [draft, setDraft] = useState<WritableClientProfilePolicy | null>(savedWritable);
-  const [saving, setSaving] = useState(false);
-  const [failure, setFailure] = useState<ClientProfilesFailure | null>(null);
+  const [editor, dispatch] = useReducer(
+    policyEditorReducer,
+    savedWritable,
+    initialPolicyEditorState
+  );
+  const { draft, saving, enrolling, failure, reloaded } = editor;
+  const setDraft = useCallback(
+    (policy: WritableClientProfilePolicy) => dispatch({ type: 'select', policy }),
+    []
+  );
   const [reloading, setReloading] = useState(false);
-  const [reloaded, setReloaded] = useState(false);
-  const [enrolling, setEnrolling] = useState<string | null>(null);
 
   const dirty = Boolean(draft && savedPolicy && !samePolicy(draft, savedPolicy));
   useEffect(() => {
@@ -157,27 +161,14 @@ export function PolicySheet(props: PolicySheetProps) {
     return matches.length === 1 ? accountDisplayLabel(matches[0], files) : null;
   }, [draft, files, snapshot.accounts]);
 
-  const confirmClose = useCallback((): boolean | Promise<boolean> => {
-    if (!dirty || saving) return true;
-    return new Promise<boolean>((resolve) => {
-      showConfirmation({
-        title: t('providersPage.unsavedChanges.title'),
-        message: t('providersPage.unsavedChanges.message'),
-        variant: 'danger',
-        confirmText: t('providersPage.unsavedChanges.discard'),
-        cancelText: t('providersPage.unsavedChanges.keepEditing'),
-        onConfirm: () => resolve(true),
-        onCancel: () => resolve(false),
-      });
-    });
-  }, [dirty, saving, showConfirmation, t]);
+  const busy = saving || enrolling !== null;
+  const confirmClose = useSheetCloseGuard({ busy, dirty });
 
   const handleReload = useCallback(async () => {
     setReloading(true);
     try {
-      await load();
-      setFailure(null);
-      setReloaded(true);
+      await load({ fresh: true });
+      dispatch({ type: 'reload_done' });
     } finally {
       setReloading(false);
     }
@@ -187,20 +178,18 @@ export function PolicySheet(props: PolicySheetProps) {
     if (!profile || !draft || !dirty) return;
     const policies = policiesWithEdit(profile, provider, draft);
     if (!policies) return;
-    setSaving(true);
-    setFailure(null);
-    setReloaded(false);
+    dispatch({ type: 'save_start' });
     const outcome = await mutate((revision) =>
       clientProfilesApi.updateProfile(revision, profile.profileRef, {
         label: profile.label,
         policies,
       })
     );
-    setSaving(false);
     if (!outcome.ok) {
-      setFailure(outcome);
+      dispatch({ type: 'save_failed', failure: outcome });
       return;
     }
+    dispatch({ type: 'save_done' });
     onDirtyChange(false);
     showNotification(
       outcome.sessionBehavior === 'fresh_session_required'
@@ -213,15 +202,13 @@ export function PolicySheet(props: PolicySheetProps) {
 
   const handleEnroll = useCallback(
     async (option: TargetOption) => {
-      setEnrolling(option.account.credentialRef);
-      setFailure(null);
+      dispatch({ type: 'enroll_start', credentialRef: option.account.credentialRef });
       const outcome = await enroll(option.account.credentialRef);
-      setEnrolling(null);
       if (!outcome.ok) {
-        setFailure(outcome);
+        dispatch({ type: 'enroll_failed', failure: outcome });
         return;
       }
-      if (outcome.result) setDraft({ mode: 'only', accountRef: outcome.result });
+      dispatch({ type: 'enroll_done', accountRef: outcome.result || null });
       showNotification(t(`${CR}.editor.enroll_done`, { account: option.label }), 'success');
     },
     [enroll, showNotification, t]
@@ -236,7 +223,11 @@ export function PolicySheet(props: PolicySheetProps) {
         {dirty && <p className={styles.unsaved}>{t(`${CR}.editor.unsaved`)}</p>}
       </div>
       <div className={styles.footerActions}>
-        <Button variant="ghost" onClick={() => setDraft(savedWritable)} disabled={!dirty || saving}>
+        <Button
+          variant="ghost"
+          onClick={() => dispatch({ type: 'discard', saved: savedWritable })}
+          disabled={!dirty || saving}
+        >
           {t(`${CR}.editor.discard`)}
         </Button>
         <Button
@@ -258,6 +249,7 @@ export function PolicySheet(props: PolicySheetProps) {
       eyebrow={t(`${CR}.editor.eyebrow`, { provider: providerName })}
       title={profile?.label ?? t(`${CR}.errors.not_found_title`)}
       confirmClose={confirmClose}
+      closeDisabled={busy}
       footer={profile ? footer : undefined}
     >
       {!profile ? (
@@ -269,7 +261,11 @@ export function PolicySheet(props: PolicySheetProps) {
           <ConnectionContextLine context={context} />
 
           {failure && (
-            <FailureNotice failure={failure} onReload={handleReload} reloading={reloading} />
+            <FailureNotice
+              failure={failure}
+              onReload={() => void handleReload()}
+              reloading={reloading}
+            />
           )}
           {reloaded && !failure && (
             <Notice live>
@@ -382,7 +378,12 @@ export function PolicySheet(props: PolicySheetProps) {
 
           <p className={styles.sessionNote}>{t(`${CR}.editor.session_note`)}</p>
 
-          <button type="button" className={styles.profileLink} onClick={onOpenProfile}>
+          <button
+            type="button"
+            className={styles.profileLink}
+            onClick={() => void continueAfterClose(confirmClose, onOpenProfile)}
+            disabled={busy}
+          >
             {t(`${CR}.editor.manage_profile`)}
           </button>
         </div>

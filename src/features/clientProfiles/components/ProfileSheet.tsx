@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sheet } from '@/components/ui/Sheet';
 import { Button } from '@/components/ui/Button';
@@ -19,6 +19,7 @@ import type {
 import { CONNECTION_CONTEXTS, type ConnectionContext } from '../connectionContext';
 import { DEFAULT_NEW_PROFILE_POLICIES, toWritablePolicy } from '../model';
 import { CR } from '../copy';
+import { continueAfterClose, useSheetCloseGuard } from '../sheetGuard';
 import { FailureNotice, Notice } from './Notices';
 import { ProfileKeys } from './ProfileKeys';
 import styles from './ProfileSheet.module.scss';
@@ -62,6 +63,8 @@ export function ProfileSheet(props: ProfileSheetProps) {
   const load = useClientProfilesStore((state) => state.load);
   const showNotification = useNotificationStore((state) => state.showNotification);
   const showConfirmation = useNotificationStore((state) => state.showConfirmation);
+  // Key link/move/rotate/revoke writes run through the store; they block closing too.
+  const mutating = useClientProfilesStore((state) => state.mutating);
 
   const savedLabel = profile?.label ?? '';
   const [name, setName] = useState(mode === 'new' ? '' : savedLabel);
@@ -89,20 +92,8 @@ export function ProfileSheet(props: ProfileSheetProps) {
   const renamePolicies =
     renameClaude && renameCodex ? { claude: renameClaude, codex: renameCodex } : null;
 
-  const confirmClose = useCallback((): boolean | Promise<boolean> => {
-    if (!dirty || saving) return true;
-    return new Promise<boolean>((resolve) => {
-      showConfirmation({
-        title: t('providersPage.unsavedChanges.title'),
-        message: t('providersPage.unsavedChanges.message'),
-        variant: 'danger',
-        confirmText: t('providersPage.unsavedChanges.discard'),
-        cancelText: t('providersPage.unsavedChanges.keepEditing'),
-        onConfirm: () => resolve(true),
-        onCancel: () => resolve(false),
-      });
-    });
-  }, [dirty, saving, showConfirmation, t]);
+  const busy = saving || mutating;
+  const confirmClose = useSheetCloseGuard({ busy, dirty });
 
   const handleReload = async () => {
     setReloading(true);
@@ -195,7 +186,8 @@ export function ProfileSheet(props: ProfileSheetProps) {
       <div className={styles.footer}>
         <Button
           variant="ghost"
-          onClick={() => void Promise.resolve(confirmClose()).then((ok) => ok && onClose())}
+          onClick={() => void continueAfterClose(confirmClose, onClose)}
+          disabled={busy}
         >
           {t('common.cancel')}
         </Button>
@@ -217,6 +209,7 @@ export function ProfileSheet(props: ProfileSheetProps) {
           : (profile?.label ?? t(`${CR}.errors.not_found_title`))
       }
       confirmClose={confirmClose}
+      closeDisabled={busy}
       footer={footer}
     >
       {mode === 'edit' && !profile ? (

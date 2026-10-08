@@ -2,6 +2,11 @@ import { afterEach, beforeEach, describe, expect, spyOn, test } from 'bun:test';
 import { apiClient } from '@/services/api/client';
 import { classifyClientProfileError, clientProfilesApi } from '@/services/api/clientProfiles';
 import { useClientProfilesStore } from '@/stores/useClientProfilesStore';
+import {
+  initialPolicyEditorState,
+  policyEditorReducer,
+} from '@/features/clientProfiles/policyEditorState';
+import { continueAfterClose, sheetCloseDecision } from '@/features/clientProfiles/sheetGuard';
 import { sharedBandWroteConfig } from '@/features/clientProfiles/sharedBand';
 import type { SharedRoutingBandState } from '@/features/config/routing/SharedRoutingBand';
 import {
@@ -292,18 +297,68 @@ describe('client profiles store: writes', () => {
     expect(useClientProfilesStore.getState().mutating).toBe(false);
   });
 
-  test('412 stale is classified so the editor can keep the draft and offer Reload', async () => {
-    await ready();
-    track(
-      spyOn(clientProfilesApi, 'updateProfile').mockRejectedValue(apiError(412, 'stale_revision'))
+  test('412 stale keeps the editor draft through Reload, then saves on the new ETag', async () => {
+    const list = await ready();
+    const update = track(
+      spyOn(clientProfilesApi, 'updateProfile').mockRejectedValueOnce(
+        apiError(412, 'stale_revision')
+      )
     );
-    const outcome = await useClientProfilesStore
-      .getState()
-      .mutate((revision) =>
-        clientProfilesApi.updateProfile(revision, P_MBP, { label: 'x', policies })
-      );
+    const onlyA = { mode: 'only' as const, accountRef: A_REF };
+    // The rule editor's own state machine, driven as PolicySheet drives it.
+    let editor = initialPolicyEditorState({ mode: 'automatic' });
+    editor = policyEditorReducer(editor, { type: 'select', policy: onlyA });
+    editor = policyEditorReducer(editor, { type: 'save_start' });
+    const outcome = await useClientProfilesStore.getState().mutate((revision) =>
+      clientProfilesApi.updateProfile(revision, P_MINI, {
+        label: 'Mini · T3 Claude',
+        policies: { claude: onlyA, codex: { mode: 'automatic' } },
+      })
+    );
     expect(outcome).toMatchObject({ ok: false, kind: 'stale', error: { status: 412 } });
-    expect(useClientProfilesStore.getState().snapshot?.revision).toBe('"r1"');
+    if (outcome.ok) throw new Error('expected a stale failure');
+    editor = policyEditorReducer(editor, { type: 'save_failed', failure: outcome });
+    expect(editor).toMatchObject({ draft: onlyA, saving: false, failure: { kind: 'stale' } });
+
+    // Reload re-reads the list (new ETag) without touching the draft.
+    list.mockResolvedValueOnce({ ...snapshot, revision: '"r2"' });
+    await useClientProfilesStore.getState().load({ fresh: true });
+    editor = policyEditorReducer(editor, { type: 'reload_done' });
+    expect(editor).toMatchObject({ draft: onlyA, failure: null, reloaded: true });
+    expect(useClientProfilesStore.getState().snapshot?.revision).toBe('"r2"');
+
+    update.mockResolvedValueOnce({
+      revision: '"r3"',
+      result: snapshot.profiles[0],
+      sessionBehavior: 'fresh_session_required',
+    });
+    const retry = await useClientProfilesStore.getState().mutate((revision) =>
+      clientProfilesApi.updateProfile(revision, P_MINI, {
+        label: 'Mini · T3 Claude',
+        policies: { claude: editor.draft ?? onlyA, codex: { mode: 'automatic' } },
+      })
+    );
+    expect(retry.ok).toBe(true);
+    expect(update.mock.calls[1][0]).toBe('"r2"');
+    expect(update.mock.calls[1][2].policies.claude).toEqual(onlyA);
+  });
+
+  test('a fresh load never reuses a list read that started before another config write', async () => {
+    const list = await ready();
+    let release: () => void = () => {};
+    list.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          release = () => resolve({ ...snapshot, revision: '"before-band-save"' });
+        })
+    );
+    const stale = useClientProfilesStore.getState().load();
+    list.mockResolvedValueOnce({ ...snapshot, revision: '"after-band-save"' });
+    const fresh = useClientProfilesStore.getState().load({ fresh: true });
+    release();
+    await Promise.all([stale, fresh]);
+    expect(list).toHaveBeenCalledTimes(3);
+    expect(useClientProfilesStore.getState().snapshot?.revision).toBe('"after-band-save"');
   });
 
   test('a write that completes after a connection switch is not applied', async () => {
@@ -496,6 +551,35 @@ describe('client routes presentation model', () => {
       'sk-a',
       ' sk-b ',
     ]);
+  });
+
+  test('sheets cannot close while a save is in flight; unsaved edits ask first', async () => {
+    expect(sheetCloseDecision({ busy: true, dirty: false })).toBe('blocked');
+    expect(sheetCloseDecision({ busy: true, dirty: true })).toBe('blocked');
+    expect(sheetCloseDecision({ busy: false, dirty: true })).toBe('confirm');
+    expect(sheetCloseDecision({ busy: false, dirty: false })).toBe('close');
+
+    // "Manage profile" switches sheets only after the rule sheet agreed to close.
+    const switched: string[] = [];
+    expect(
+      await continueAfterClose(
+        () => false,
+        () => switched.push('blocked')
+      )
+    ).toBe(false);
+    expect(
+      await continueAfterClose(
+        () => Promise.resolve(false),
+        () => switched.push('kept editing')
+      )
+    ).toBe(false);
+    expect(
+      await continueAfterClose(
+        () => Promise.resolve(true),
+        () => switched.push('profile')
+      )
+    ).toBe(true);
+    expect(switched).toEqual(['profile']);
   });
 
   test('a shared band save that wrote the config is reported once', () => {

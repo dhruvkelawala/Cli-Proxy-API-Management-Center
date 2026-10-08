@@ -270,6 +270,10 @@ export type PolicyCell =
     }
   | { kind: 'unknown'; provider: ClientProfileProvider; rawMode: string; willFail: true };
 
+/** `data-cell` value of a matrix cell; sheets opened from a cell return focus to it. */
+export const matrixCellId = (profileRef: string, provider: ClientProfileProvider): string =>
+  `${profileRef}:${provider}`;
+
 export type ProfileRow = {
   profile: ClientProfile;
   keyCount: number;

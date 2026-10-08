@@ -16,7 +16,7 @@ import {
   saveConnectionContext,
   type ConnectionContext,
 } from './connectionContext';
-import { buildPoolPreview, buildProfileRows, countAutomaticProfiles } from './model';
+import { buildPoolPreview, buildProfileRows, countAutomaticProfiles, matrixCellId } from './model';
 import { CR } from './copy';
 import { useClientRoutesData } from './hooks/useClientRoutesData';
 import { ClientRoutesMatrix } from './components/ClientRoutesMatrix';
@@ -105,6 +105,18 @@ export function ClientRoutesPage() {
     setSheet({ kind: 'policy', profileRef, provider, open: true, id: (sheetSequence += 1) });
   const openProfile = (profileRef: string | null) =>
     setSheet({ kind: 'profile', profileRef, open: true, id: (sheetSequence += 1) });
+  /**
+   * "Manage profile" from the rule editor (its unsaved-changes check already passed). Focus moves
+   * to the originating cell first, so closing the profile sheet returns there rather than to a
+   * button in the rule sheet that no longer exists.
+   */
+  const switchToProfile = (profileRef: string, provider: ClientProfileProvider) => {
+    document
+      .querySelector<HTMLElement>(`[data-cell="${matrixCellId(profileRef, provider)}"]`)
+      ?.focus({ preventScroll: true });
+    setSheetDirty(false);
+    openProfile(profileRef);
+  };
   // The band writes the config file; client profile ETags hash that file, so re-read the list.
   const handleBandConfigWritten = useCallback(() => void load({ fresh: true }), [load]);
 
@@ -210,7 +222,7 @@ export function ClientRoutesPage() {
           context={contexts[sheet.profileRef] ?? null}
           onClose={closeSheet}
           onDirtyChange={setSheetDirty}
-          onOpenProfile={() => openProfile(sheet.profileRef)}
+          onOpenProfile={() => switchToProfile(sheet.profileRef, sheet.provider)}
         />
       )}
       {ready && sheet?.kind === 'profile' && (
