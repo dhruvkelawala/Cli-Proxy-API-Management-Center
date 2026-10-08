@@ -1,0 +1,114 @@
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+}
+
+.heading {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-operational-muted, var(--text-secondary));
+}
+
+.target {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.targetLabel {
+  font-size: 12px;
+  color: var(--text-operational-muted, var(--text-secondary));
+}
+
+.targetName {
+  font-size: 16px;
+  font-weight: 650;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.state,
+.stateFail {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.state {
+  color: var(--text-secondary);
+}
+
+.stateFail,
+.fail {
+  color: var(--failure-badge-text);
+}
+
+.lead,
+.fail {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.lead {
+  color: var(--text-primary);
+}
+
+.fail {
+  font-weight: 600;
+}
+
+.note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-operational-muted, var(--text-secondary));
+}
+
+.members {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.member {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.memberHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.memberName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.memberShare {
+  font-family: $font-mono;
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.memberReason {
+  font-size: 12px;
+  color: var(--text-operational-muted, var(--text-secondary));
+}

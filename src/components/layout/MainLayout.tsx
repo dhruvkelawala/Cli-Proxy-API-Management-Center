@@ -19,6 +19,7 @@ import { MainRoutes } from '@/router/MainRoutes';
 import { authFilesApi, pluginsApi } from '@/services/api';
 import {
   IconSidebarAuthFiles,
+  IconSidebarClientRoutes,
   IconSidebarConfig,
   IconSidebarDashboard,
   IconSidebarLogs,
@@ -59,6 +60,7 @@ const sidebarIcons: Record<string, ReactNode> = {
   quickStart: <IconSidebarQuickStart size={18} />,
   aiProviders: <IconSidebarProviders size={18} />,
   authFiles: <IconSidebarAuthFiles size={18} />,
+  clientRoutes: <IconSidebarClientRoutes size={18} />,
   oauth: <IconSidebarOauth size={18} />,
   quota: <IconSidebarQuota size={18} />,
   plugins: <IconSidebarPlugins size={18} />,
@@ -630,6 +632,12 @@ export function MainLayout() {
               ? t('sidebar.auth_files_count', { count: authFilesCount })
               : undefined,
           icon: sidebarIcons.authFiles,
+        },
+        {
+          path: '/client-routes',
+          labelKey: 'nav.client_routes',
+          metaKey: 'nav_meta.client_routes',
+          icon: sidebarIcons.clientRoutes,
         },
         {
           path: '/oauth',
