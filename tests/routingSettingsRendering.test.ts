@@ -166,7 +166,7 @@ describe('shared routing band', () => {
   test('states the global scope beside the save action', () => {
     const markup = band();
     expect(markup).toContain(
-      'Global · affects all Automatic clients on the shared gateway (both Macs)'
+      'Global · affects all Automatic clients on the shared gateway (both Macs). Saving resets current conversation bindings.'
     );
     expect(markup).toContain('Save shared settings');
   });
@@ -194,6 +194,23 @@ describe('shared routing band', () => {
     const ttlAttribute = 'aria-label="How long a conversation stays on its account"';
     expect(inputTag(on, ttlAttribute)).not.toContain('disabled');
     expect(inputTag(off, ttlAttribute)).toContain('disabled=""');
+  });
+
+  test('a write that succeeded but could not be reloaded is not reported as not saved', () => {
+    const markup = band({ save: { phase: 'reload_failed' }, dirty: true });
+    expect(markup).toContain(
+      'Saved, but the latest settings couldn&#x27;t be reloaded. Reload before editing again.'
+    );
+    expect(markup).not.toContain('Not saved');
+    expect(markup).not.toContain('Unsaved changes');
+  });
+
+  test('locks the controls without a connection', () => {
+    const markup = band({ disabled: true, dirty: true });
+    expect(inputTag(markup, 'type="checkbox"')).toContain('disabled=""');
+    expect(markup).toMatch(/<fieldset[^>]*disabled/);
+    expect(markup.match(/<button[^>]*disabled=""[^>]*>/g)?.length).toBe(3);
+    expect(band({ dirty: true })).not.toMatch(/<fieldset[^>]*disabled/);
   });
 
   test('shows each save state truthfully', () => {
@@ -366,6 +383,24 @@ describe('priorities and weights panel', () => {
     expect(standby).not.toContain('>Participates in the shared pool.<');
   });
 
+  test('explains that a non-positive weight also moves a bound conversation', () => {
+    const markup = panel({
+      strategy: 'weighted-round-robin',
+      files: [file('a', { weight: 0 }), file('b', { weight: 2 })],
+    });
+    expect(markup).toContain(
+      'the account stays enabled. A conversation bound to it moves to another account.'
+    );
+  });
+
+  test('locks the inputs without a connection but not while a save is running', () => {
+    expect(panel({ disabled: true })).toMatch(/<input[^>]*disabled=""/);
+    const saving = panel({
+      save: { phase: 'saving', outcome: null, savedCount: 0, failures: [] },
+    });
+    expect(saving).not.toContain('disabled');
+  });
+
   test('shows draft values and an unsaved marker, with field errors', () => {
     const markup = panel({
       files: [file('claude-a', { priority: 1 })],
@@ -422,7 +457,7 @@ describe('scope notices', () => {
       'Global · affects every Automatic client using these accounts, on both Macs'
     );
     expect(bandScopeText(t, 3)).toBe(
-      'Global · affects 3 Automatic clients on the shared gateway (both Macs)'
+      'Global · affects 3 Automatic clients on the shared gateway (both Macs). Saving resets current conversation bindings.'
     );
     expect(bandScopeText(t)).toContain('affects all Automatic clients');
   });
@@ -457,6 +492,21 @@ describe('account save status line', () => {
     );
     expect(failed.tone).toBe('failed');
     expect(failed.text).toContain('No accounts were saved');
+  });
+
+  test('pluralizes the saved count per language', () => {
+    const status = (language: string, count: number) =>
+      describeAccountSaveStatus(
+        i18n.cloneInstance({ lng: language }).t.bind(i18n.cloneInstance({ lng: language })),
+        state({ phase: 'done', outcome: 'saved', savedCount: count })
+      ).text;
+    expect(status('en', 1)).toBe('Saved 1 account');
+    expect(status('en', 2)).toBe('Saved 2 accounts');
+    expect(status('ru', 1)).toBe('Сохранён 1 аккаунт');
+    expect(status('ru', 3)).toBe('Сохранено 3 аккаунта');
+    expect(status('ru', 5)).toBe('Сохранено 5 аккаунтов');
+    expect(status('zh-CN', 2)).toBe('已保存 2 个账号');
+    expect(status('vi', 1)).toBe('Đã lưu 1 tài khoản');
   });
 
   test('reports saved only when every attempted account was written and nothing is pending', () => {

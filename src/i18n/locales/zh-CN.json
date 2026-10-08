@@ -1596,9 +1596,9 @@
       "title": "共享账号池",
       "subtitle": "自动客户端如何选择账号",
       "loading": "正在加载共享路由设置…",
-      "scope": "全局 · 影响共享网关上的所有自动客户端（两台 Mac）",
-      "scope_count_one": "全局 · 影响共享网关上的 {{count}} 个自动客户端（两台 Mac）",
-      "scope_count_other": "全局 · 影响共享网关上的 {{count}} 个自动客户端（两台 Mac）",
+      "scope": "全局 · 影响共享网关上的所有自动客户端（两台 Mac）。保存会重置当前对话绑定。",
+      "scope_count_one": "全局 · 影响共享网关上的 {{count}} 个自动客户端（两台 Mac）。保存会重置当前对话绑定。",
+      "scope_count_other": "全局 · 影响共享网关上的 {{count}} 个自动客户端（两台 Mac）。保存会重置当前对话绑定。",
       "strategy_legend": "选择策略",
       "strategy_saved": "已保存：{{label}}",
       "strategy": {
@@ -1625,7 +1625,7 @@
         "failed": "未保存：{{message}} 你的更改已保留。",
         "failed_no_detail": "未保存。你的更改已保留。"
       },
-      "reload_failed": "更改已发送，但无法重新加载已保存的配置。再次保存前请先重新加载。",
+      "reload_failed": "已保存，但无法重新加载最新设置。再次编辑前请先重新加载。",
       "role": {
         "participating": "参与分配",
         "standby": "备用",
@@ -1652,7 +1652,7 @@
         "weight_label": "权重",
         "weight_hint": "默认 1 · 最大 1,000,000",
         "weight_hint_inactive": "仅“按权重分配”使用",
-        "weight_hint_zero": "0 或更低只会跳过加权调度；账号仍保持启用",
+        "weight_hint_zero": "0 或更低只会跳过加权调度；账号仍保持启用。已绑定到它的对话会转移到其他账号。",
         "weight_placeholder": "1",
         "weight_aria": "{{name}} 的权重",
         "inactive_note": "当前策略不使用权重，但你仍可以编辑。",
@@ -1670,7 +1670,8 @@
           "clean": "与已保存的账号一致",
           "dirty": "有未保存的更改",
           "saving": "正在保存账号…",
-          "saved": "已保存 {{count}} 个账号",
+          "saved_one": "已保存 {{count}} 个账号",
+          "saved_other": "已保存 {{count}} 个账号",
           "partial": "已保存 {{total}} 个账号中的 {{saved}} 个。未保存并保留草稿：{{names}}",
           "failed": "没有账号被保存。已保留草稿：{{names}}",
           "invalid": "请先修正高亮的值再保存"

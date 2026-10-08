@@ -44,6 +44,8 @@ export interface RoutingTuningPanelProps {
   edits: Record<string, AccountTuningEdits>;
   errors: Record<string, AccountTuningErrors>;
   save: AccountSaveState;
+  /** Inputs stay editable while a save runs (newer typing is kept); only a lost connection locks them. */
+  disabled?: boolean;
   onChange: (name: string, edits: AccountTuningEdits) => void;
   onRetry: () => void;
 }
@@ -73,6 +75,7 @@ export function RoutingTuningPanel({
   edits,
   errors,
   save,
+  disabled = false,
   onChange,
   onRetry,
 }: RoutingTuningPanelProps) {
@@ -208,6 +211,7 @@ export function RoutingTuningPanel({
                         className={`input ${styles.input}`}
                         inputMode="numeric"
                         autoComplete="off"
+                        disabled={disabled}
                         value={text.priority}
                         placeholder={t(
                           'config_management.routing_settings.sheet.priority_placeholder'
@@ -237,6 +241,7 @@ export function RoutingTuningPanel({
                         className={`input ${styles.input}`}
                         inputMode="numeric"
                         autoComplete="off"
+                        disabled={disabled}
                         value={text.weight}
                         placeholder={t(
                           'config_management.routing_settings.sheet.weight_placeholder'

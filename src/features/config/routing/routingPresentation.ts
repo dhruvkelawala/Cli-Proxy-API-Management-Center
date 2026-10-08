@@ -78,7 +78,12 @@ export interface RoutingAffinityPresentation {
   enabled: boolean;
   ttl: string | undefined;
   explanationKey: string;
-  /** Healthy established bindings persist across tiers and priority/weight edits. */
+  /**
+   * A healthy established binding persists across priority tiers and priority edits. Under
+   * weighted-round-robin it does not survive its account's weight dropping to 0 or below:
+   * that removes the account from the candidates, so the binding moves. Saving the strategy,
+   * affinity or TTL settings rebuilds the selector and resets all current bindings.
+   */
   retainsExistingBindings: boolean;
 }
 

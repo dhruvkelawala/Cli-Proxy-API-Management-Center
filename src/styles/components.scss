@@ -24,6 +24,16 @@
       background-color: var(--btn-primary-bg-hover, var(--primary-hover));
       border-color: var(--btn-primary-bg-hover, var(--primary-hover));
     }
+
+    // A disabled primary must not read as a dimmed enabled one: drop the fill for a muted
+    // surface so the two states stay distinguishable in both themes.
+    &:disabled,
+    &:disabled:hover {
+      background-color: var(--bg-tertiary);
+      border-color: var(--border-color);
+      color: var(--text-secondary);
+      opacity: 0.8;
+    }
   }
 
   &.btn-secondary {

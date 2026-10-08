@@ -41,6 +41,8 @@ export interface RoutingBandViewProps {
   dirty: boolean;
   ttlInvalid: boolean;
   save: SaveStatus;
+  /** True while the connection is not established: editing and saving are unavailable. */
+  disabled?: boolean;
   automaticClientCount?: number;
   onChange: (edits: RoutingSettingsEdits) => void;
   onSave: () => void;
@@ -55,6 +57,9 @@ const bandStatus = (
   ttlInvalid: boolean
 ): { text: string; tone: RoutingSaveTone } => {
   if (save.phase === 'saving') return { text: t(`${ROOT}.status.saving`), tone: 'saving' };
+  if (save.phase === 'reload_failed') {
+    return { text: t(`${ROOT}.reload_failed`), tone: 'warning' };
+  }
   if (save.phase === 'failed') {
     return {
       text: save.message
@@ -76,6 +81,7 @@ export function RoutingBandView({
   dirty,
   ttlInvalid,
   save,
+  disabled = false,
   automaticClientCount,
   onChange,
   onSave,
@@ -97,6 +103,7 @@ export function RoutingBandView({
   });
   const status = bandStatus(t, save, dirty, ttlInvalid);
   const saving = save.phase === 'saving';
+  const locked = saving || disabled;
   const ttlLabel = values.sessionAffinityTtl.trim() || t(`${ROOT}.ttl_default`);
 
   return (
@@ -110,7 +117,7 @@ export function RoutingBandView({
 
       <div className={styles.controls}>
         <div className={styles.strategyGroup}>
-          <fieldset className={styles.strategy} disabled={saving}>
+          <fieldset className={styles.strategy} disabled={locked}>
             <legend className={styles.srOnly}>{t(`${ROOT}.strategy_legend`)}</legend>
             {ROUTING_STRATEGIES.map((strategy: RoutingStrategy) => (
               <label
@@ -139,7 +146,7 @@ export function RoutingBandView({
         <div className={styles.affinity}>
           <ToggleSwitch
             checked={values.sessionAffinity}
-            disabled={saving}
+            disabled={locked}
             onChange={(sessionAffinity) => onChange({ sessionAffinity })}
             label={t(`${ROOT}.affinity_label`)}
           />
@@ -150,7 +157,7 @@ export function RoutingBandView({
               className="input"
               value={values.sessionAffinityTtl}
               placeholder="1h"
-              disabled={!values.sessionAffinity || saving}
+              disabled={!values.sessionAffinity || locked}
               autoComplete="off"
               spellCheck={false}
               aria-label={t(`${ROOT}.affinity_ttl_aria`)}
@@ -166,7 +173,7 @@ export function RoutingBandView({
           </div>
         </div>
 
-        <Button variant="secondary" size="sm" onClick={onOpenTuning}>
+        <Button variant="secondary" size="sm" disabled={disabled} onClick={onOpenTuning}>
           <IconSlidersHorizontal size={15} aria-hidden="true" /> {t(`${ROOT}.priorities_button`)}
         </Button>
       </div>
@@ -189,8 +196,8 @@ export function RoutingBandView({
         status={status.text}
         tone={status.tone}
         saveLabel={t(`${ROOT}.actions.save`)}
-        saveDisabled={!dirty || ttlInvalid || saving}
-        discardDisabled={!dirty && save.phase !== 'failed'}
+        saveDisabled={!dirty || ttlInvalid || locked}
+        discardDisabled={disabled || (!dirty && save.phase !== 'failed')}
         saving={saving}
         onSave={onSave}
         onDiscard={onDiscard}
@@ -228,6 +235,7 @@ export function SharedRoutingBand({ automaticClientCount }: SharedRoutingBandPro
         dirty={routing.dirty}
         ttlInvalid={routing.ttlError !== null}
         save={routing.globalSave}
+        disabled={!routing.connected}
         automaticClientCount={automaticClientCount}
         onChange={routing.setEdit}
         onSave={() => void routing.saveGlobal()}
@@ -246,6 +254,7 @@ export function SharedRoutingBand({ automaticClientCount }: SharedRoutingBandPro
           ttl: routing.values.sessionAffinityTtl || undefined,
         }}
         accounts={routing.accounts}
+        disabled={!routing.connected}
       />
     </>
   );
