@@ -298,11 +298,11 @@ const THEME_CARDS: Array<{
     key: 'dark',
     labelKey: 'theme.dark',
     colors: {
-      bg: '#151412',
-      card: '#1d1b18',
-      border: '#3a3530',
-      text: '#f6f4f1',
-      textMuted: '#9c958d',
+      bg: '#0f1011',
+      card: '#141516',
+      border: '#23252a',
+      text: '#f7f8f8',
+      textMuted: '#8a8f98',
     },
   },
 ];

@@ -1016,3 +1016,66 @@
     }
   }
 }
+
+// 深色主题：Linear 式外壳。侧栏与应用底色同为更深一级，内容区作为内嵌画布浮起。
+[data-theme='dark'] {
+  --shell-ground: #08090a;
+
+  .app-shell,
+  .sidebar {
+    background: var(--shell-ground);
+  }
+
+  .sidebar {
+    border-right: 0;
+
+    .nav-item {
+      font-weight: 500;
+      border-radius: 6px;
+      color: color-mix(in srgb, var(--text-primary) 84%, transparent);
+
+      &:hover {
+        background: rgb(255 255 255 / 0.04);
+        border-color: transparent;
+        transform: none;
+      }
+
+      &.active {
+        background: rgb(255 255 255 / 0.07);
+        border-color: transparent;
+        box-shadow: none;
+        color: var(--text-primary);
+
+        .nav-icon {
+          color: var(--text-primary);
+        }
+      }
+    }
+  }
+
+  // 画布自带边界，顶部渐隐遮罩会在圆角外露出，故隐藏。
+  .top-gradient-blur {
+    display: none;
+  }
+
+  .content {
+    margin: 8px 8px 8px 0;
+    height: calc(100vh - 16px);
+    border: 1px solid #1e2023;
+    border-radius: 10px;
+    background: var(--bg-secondary);
+
+    @supports (height: 100dvh) {
+      height: calc(100dvh - 16px);
+    }
+  }
+
+  @media (max-width: $breakpoint-mobile) {
+    .content {
+      margin: 0;
+      height: auto;
+      border: 0;
+      border-radius: 0;
+    }
+  }
+}
