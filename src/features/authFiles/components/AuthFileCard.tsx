@@ -41,6 +41,8 @@ import type { AuthFileStatusBarData } from '@/features/authFiles/hooks/useAuthFi
 import { AuthFileQuotaSection } from '@/features/authFiles/components/AuthFileQuotaSection';
 import { AuthFileCooldownSection } from './AuthFileCooldownSection';
 import { AuthFileAccountHeading, AuthFileAccountSubtitle } from './AuthFileAccountTitle';
+import type { AccountClientLinks as ClientRouteLinks } from '@/features/clientProfiles/accountLinks';
+import { AccountClientLinks } from '@/features/clientProfiles/components/AccountClientLinks';
 import styles from './AuthFileCard.module.scss';
 
 const STATE_LABEL_KEYS: Record<AccountAvailability | 'off', string> = {
@@ -83,6 +85,10 @@ export type AuthFileCardProps = {
   onDelete: (name: string) => void;
   onToggleStatus: (file: AuthFileItem, enabled: boolean) => void;
   onToggleSelect: (name: string) => void;
+  /** Client profiles pinned to this account; null when not linkable (or unsupported backend). */
+  clientRoutes?: ClientRouteLinks | null;
+  clientRoutesDisabled?: boolean;
+  onUseOnlyFor?: (file: AuthFileItem) => void;
 };
 
 export function AuthFileCard(props: AuthFileCardProps) {
@@ -109,6 +115,9 @@ export function AuthFileCard(props: AuthFileCardProps) {
     onDelete,
     onToggleStatus,
     onToggleSelect,
+    clientRoutes,
+    clientRoutesDisabled = false,
+    onUseOnlyFor,
   } = props;
 
   const isRuntimeOnly = isRuntimeOnlyAuthFile(file);
@@ -215,6 +224,15 @@ export function AuthFileCard(props: AuthFileCardProps) {
           <IconInfo className={styles.warningIcon} size={14} />
           <span>{rawStatusMessage}</span>
         </div>
+      )}
+
+      {clientRoutes && onUseOnlyFor && !isRuntimeOnly && (
+        <AccountClientLinks
+          links={clientRoutes}
+          accountName={accountName}
+          disabled={clientRoutesDisabled}
+          onUseOnlyFor={() => onUseOnlyFor(file)}
+        />
       )}
 
       <AuthFileCooldownSection

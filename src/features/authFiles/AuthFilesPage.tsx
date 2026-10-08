@@ -42,6 +42,7 @@ import {
   sortAuthFiles,
 } from '@/features/authFiles/logic';
 import { useAuthFilesData } from '@/features/authFiles/hooks/useAuthFilesData';
+import { useAccountClientRoutes } from '@/features/clientProfiles/hooks/useAccountClientRoutes';
 import { useAuthFilesModels } from '@/features/authFiles/hooks/useAuthFilesModels';
 import { useAuthFilesOauth } from '@/features/authFiles/hooks/useAuthFilesOauth';
 import { useAuthFilesPrefixProxyEditor } from '@/features/authFiles/hooks/useAuthFilesPrefixProxyEditor';
@@ -159,6 +160,7 @@ export function AuthFilesPage() {
   } = useAuthFilesData({ onFilesMutated: invalidateDerivedCaches });
 
   const statusBarCache = useAuthFilesStatusBarCache(files);
+  const accountClientRoutes = useAccountClientRoutes(files);
 
   const {
     excluded,
@@ -734,6 +736,9 @@ export function AuthFilesPage() {
                 onDelete={handleDelete}
                 onToggleStatus={handleStatusToggle}
                 onToggleSelect={toggleSelect}
+                clientRoutes={accountClientRoutes.linksFor(file)}
+                clientRoutesDisabled={disableControls || accountClientRoutes.disabled}
+                onUseOnlyFor={accountClientRoutes.open}
               />
             ))}
           </div>
@@ -823,6 +828,8 @@ export function AuthFilesPage() {
         onSave={handlePrefixProxySave}
         onChange={handlePrefixProxyChange}
       />
+
+      {accountClientRoutes.sheet}
 
       <BatchActionBar
         selectionCount={selectionCount}
