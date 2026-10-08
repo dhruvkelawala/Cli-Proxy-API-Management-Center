@@ -15,6 +15,7 @@ import {
 } from '../fields/FieldPrimitives';
 import { ProxyUrlField, SponsorHintSpacer } from '../fields/sharedFields';
 import { getValidationMessage } from '../blocks/shared';
+import { buildRoutingPresentation } from '../../routing/routingPresentation';
 
 const Icon = CONFIG_TAB_ICONS.network;
 
@@ -39,6 +40,16 @@ export function SectionNetwork({
     t,
     validationErrors?.authAutoRefreshWorkers
   );
+
+  // Same explanations as the shared pool band, so both places agree.
+  const routingPresentation = buildRoutingPresentation({
+    strategy: values.routingStrategy,
+    sessionAffinity: {
+      enabled: values.routingSessionAffinity,
+      ttl: values.routingSessionAffinityTTL.trim() || undefined,
+    },
+    accounts: [],
+  });
 
   const disableImageGenerationOptions = [
     {
@@ -123,7 +134,7 @@ export function SectionNetwork({
             <FieldShell
               label={t('config_management.visual.sections.network.routing_strategy')}
               labelId={routingStrategyLabelId}
-              hint={t('config_management.visual.sections.network.routing_strategy_hint')}
+              hint={t(routingPresentation.strategyExplanationKey)}
               hintId={routingStrategyHintId}
             >
               <Select
@@ -275,6 +286,11 @@ export function SectionNetwork({
           <FieldAnchor fieldId="routingSessionAffinity">
             <ToggleRow
               title={t('config_management.visual.sections.network.session_affinity')}
+              description={t(routingPresentation.affinity.explanationKey, {
+                ttl:
+                  values.routingSessionAffinityTTL.trim() ||
+                  t('config_management.routing_settings.ttl_default'),
+              })}
               checked={values.routingSessionAffinity}
               disabled={disabled}
               onChange={(routingSessionAffinity) => onChange({ routingSessionAffinity })}
