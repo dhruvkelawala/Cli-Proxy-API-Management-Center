@@ -553,7 +553,7 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: color-mix(in srgb, var(--text-primary) 42%, transparent);
+    color: var(--text-operational-muted);
     user-select: none;
   }
 
@@ -942,6 +942,12 @@
     width: var(--sidebar-panel-width);
     height: auto;
     transform: translateX(calc(-100% - 24px));
+    /* The closed drawer is off-screen: keep its links out of the tab order and the a11y tree
+       (hidden only after the slide-out finishes). */
+    visibility: hidden;
+    transition:
+      transform $transition-normal,
+      visibility 0s linear 300ms;
     background: var(--bg-primary);
     border: 0;
     border-right: 1px solid color-mix(in srgb, var(--border-color) 78%, transparent);
@@ -950,6 +956,18 @@
 
     &.open {
       transform: translateX(0);
+      visibility: visible;
+      transition:
+        transform $transition-normal,
+        visibility 0s;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+
+      &.open {
+        transition: none;
+      }
     }
 
     &.collapsed {

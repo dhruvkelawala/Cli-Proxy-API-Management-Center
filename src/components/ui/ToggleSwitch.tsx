@@ -34,6 +34,7 @@ export function ToggleSwitch({
     <label className={className}>
       <input
         type="checkbox"
+        role="switch"
         checked={checked}
         onChange={handleChange}
         disabled={disabled}

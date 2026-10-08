@@ -10,6 +10,7 @@ import {
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { IconX } from '../icons';
+import { isTopmostDialog } from '../dialogStack';
 import { FOCUSABLE_SELECTOR, lockScroll, unlockScroll } from '../scrollLock';
 import styles from './Sheet.module.scss';
 
@@ -163,6 +164,7 @@ export function Sheet({
   useEffect(() => {
     if (!open) return;
     const handleKey = (event: KeyboardEvent) => {
+      if (!isTopmostDialog(sheetRef.current)) return;
       if (event.key === 'Escape') {
         if (closeDisabled) return;
         event.preventDefault();

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
@@ -10,6 +11,20 @@ export function ConfirmationModal() {
   const setConfirmationLoading = useNotificationStore((state) => state.setConfirmationLoading);
 
   const { isOpen, isLoading, options } = confirmation;
+
+  // This component unmounts as soon as the confirmation closes, so <Modal> never gets to restore
+  // focus itself. Remember the opener and return focus to it (skipped if it no longer exists).
+  const openerRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (isOpen) {
+      openerRef.current =
+        document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      return;
+    }
+    const opener = openerRef.current;
+    openerRef.current = null;
+    if (opener?.isConnected) opener.focus({ preventScroll: true });
+  }, [isOpen]);
 
   if (!isOpen || !options) {
     return null;
