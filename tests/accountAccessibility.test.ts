@@ -4,7 +4,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import i18n from '@/i18n';
 import { AuthFileModelList } from '@/features/authFiles/components/AuthFileModelsModal';
-import { contrastRatio, loadThemeTokens, readScssVariable } from './helpers/wcagContrast';
+import { contrastRatio, loadThemeTokens } from './helpers/wcagContrast';
 
 const read = (relative: string) => readFileSync(new URL(`../${relative}`, import.meta.url), 'utf8');
 
@@ -14,6 +14,14 @@ const TEXT_MIN = 4.5; // WCAG 1.4.3, normal text
 const CONTROL_MIN = 3; // WCAG 1.4.11, control boundaries and focus indicators
 
 // Surfaces operational text is actually drawn on (page, card, floating dialog, hover/secondary).
+// Every surface a button can sit on, including dialogs/sheets and hover fills.
+const BUTTON_SURFACES = [
+  '--bg-secondary',
+  '--bg-primary',
+  '--floating-surface',
+  '--bg-tertiary',
+  '--bg-hover',
+];
 const SURFACES = ['--bg-secondary', '--bg-primary', '--floating-surface', '--bg-tertiary'];
 
 describe('WCAG contrast helper', () => {
@@ -47,18 +55,17 @@ describe('theme contrast', () => {
       expect(tokens['--text-muted']).toBe(tokens['--text-operational-muted']);
     });
 
-    test(`${name}: enabled primary button text is 4.5:1 and the control is 3:1 against its surface`, () => {
-      for (const bg of ['--btn-primary-bg', '--btn-primary-bg-hover']) {
-        expect(contrastRatio(tokens['--btn-primary-fg'], tokens[bg])).toBeGreaterThanOrEqual(
-          TEXT_MIN
-        );
-      }
-      for (const surface of ['--bg-secondary', '--bg-primary']) {
-        expect(contrastRatio(tokens['--btn-primary-bg'], tokens[surface])).toBeGreaterThanOrEqual(
-          CONTROL_MIN
-        );
-      }
-    });
+    for (const kind of ['primary', 'danger'] as const) {
+      test(`${name}: ${kind} button text is 4.5:1 and its fill is 3:1 on every surface it sits on`, () => {
+        for (const state of ['', '-hover']) {
+          const fill = tokens[`--btn-${kind}-bg${state}`];
+          expect(contrastRatio(tokens[`--btn-${kind}-fg`], fill)).toBeGreaterThanOrEqual(TEXT_MIN);
+          for (const surface of BUTTON_SURFACES) {
+            expect(contrastRatio(fill, tokens[surface])).toBeGreaterThanOrEqual(CONTROL_MIN);
+          }
+        }
+      });
+    }
 
     test(`${name}: focus ring colour (--text-secondary) is 3:1 on dialog and card surfaces`, () => {
       for (const surface of [
@@ -74,16 +81,14 @@ describe('theme contrast', () => {
     });
   }
 
-  test('danger button label is 4.5:1', () => {
-    const bg = readScssVariable('components.scss', 'btn-danger-bg');
-    expect(contrastRatio('#ffffff', bg)).toBeGreaterThanOrEqual(TEXT_MIN);
-  });
-
-  test('primary button styles consume the accessible button tokens', () => {
+  test('button styles consume the themed button tokens and dark mode does not override them', () => {
     const components = read('src/styles/components.scss');
     expect(components).toContain('background-color: var(--btn-primary-bg, var(--primary-color))');
     expect(components).toContain('color: var(--btn-primary-fg, var(--primary-contrast, #fff))');
-    expect(components).toContain('background-color: $btn-danger-bg');
+    expect(components).toContain('background-color: var(--btn-danger-bg,');
+    expect(components).toContain('color: var(--btn-danger-fg, #fff)');
+    // `[data-theme='dark'] .btn { color: #fff }` would otherwise beat the equal-specificity variants.
+    expect(components).toContain('.btn:not(.btn-primary):not(.btn-danger) {');
   });
 });
 
@@ -124,11 +129,18 @@ describe('AuthFileModelList copy buttons', () => {
     expect(markup.match(/<li\b/g)).toHaveLength(models.length);
   });
 
-  test('keeps the disabled badge visible while the model stays copyable', async () => {
+  test('keeps the disabled badge visible and describes the excluded Copy button', async () => {
     await i18n.changeLanguage('en');
     const markup = render({ codex: ['gpt-5.5-mini'] });
     expect(markup).toContain('Disabled');
     expect(markup.match(/<button\b/g)).toHaveLength(models.length);
+    const describedBy = markup.match(/aria-describedby="([^"]+)"/);
+    expect(describedBy).not.toBeNull();
+    expect(markup.match(/aria-describedby=/g)).toHaveLength(1);
+    expect(markup).toMatch(
+      new RegExp(`id="${describedBy![1]}"[^>]*>This OAuth model is disabled</span>`)
+    );
+    expect(render()).not.toContain('aria-describedby');
   });
 
   test('localizes the accessible name in every shipped locale', async () => {
@@ -148,5 +160,6 @@ describe('AuthFileModelList copy buttons', () => {
     expect(styles).toContain(':focus-visible');
     expect(styles).not.toContain('opacity: 0.55');
     expect(styles).not.toContain('var(--text-tertiary)');
+    expect(styles).not.toContain('.item:hover');
   });
 });

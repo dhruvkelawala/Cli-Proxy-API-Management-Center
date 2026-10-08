@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
@@ -31,10 +32,15 @@ export function AuthFileModelList({
   onCopyText,
 }: AuthFileModelListProps) {
   const { t } = useTranslation();
+  const baseId = useId();
+  const excludedHint = t('auth_files.models_excluded_hint', {
+    defaultValue: '此 OAuth 模型已被禁用',
+  });
   return (
     <ul className={styles.list}>
-      {models.map((model) => {
+      {models.map((model, index) => {
         const excludedModel = isModelExcluded(model.id, fileType, excluded);
+        const hintId = `${baseId}-excluded-${index}`;
         return (
           <li
             key={model.id}
@@ -47,12 +53,7 @@ export function AuthFileModelList({
               )}
               {model.type && <span className={styles.modelType}>{model.type}</span>}
               {excludedModel && (
-                <span
-                  className={styles.excludedBadge}
-                  title={t('auth_files.models_excluded_hint', {
-                    defaultValue: '此 OAuth 模型已被禁用',
-                  })}
-                >
+                <span className={styles.excludedBadge} title={excludedHint}>
                   {t('auth_files.models_excluded_badge', { defaultValue: '已禁用' })}
                 </span>
               )}
@@ -61,6 +62,7 @@ export function AuthFileModelList({
               variant="ghost"
               size="sm"
               className={styles.copyButton}
+              aria-describedby={excludedModel ? hintId : undefined}
               aria-label={t('auth_files.models_copy_aria', {
                 id: model.id,
                 defaultValue: 'Copy model ID {{id}}',
@@ -71,6 +73,11 @@ export function AuthFileModelList({
             >
               {t('common.copy')}
             </Button>
+            {excludedModel && (
+              <span id={hintId} className={styles.visuallyHidden}>
+                {excludedHint}
+              </span>
+            )}
           </li>
         );
       })}

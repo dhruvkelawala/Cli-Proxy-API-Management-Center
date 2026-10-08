@@ -18,7 +18,7 @@
   --text-secondary: #6d6760;
   --text-tertiary: #a29c95;
   --text-quaternary: #c0bab3;
-  // 运营文本专用：--text-tertiary 低于 4.5:1，且同时用于装饰填充，故不全局加深。
+  // 运营文本专用：--text-tertiary 同时用于装饰填充，故不全局加深；浅色下它低于 4.5:1。
   --text-operational-muted: #6a645d;
   --text-muted: var(--text-operational-muted);
 
@@ -31,10 +31,13 @@
   --primary-hover: #7f7a74;
   --primary-active: #726d67;
   --primary-contrast: #ffffff;
-  // 主按钮：白字需 ≥4.5:1，--primary-color 仅 3.61:1，因此按钮单独取色。
+  // 按钮文字需 ≥4.5:1、按钮填充对各表面 ≥3:1；--primary-color 配白字仅 3.61:1，因此单独取色。
   --btn-primary-bg: #6d6760;
   --btn-primary-bg-hover: #625d57;
   --btn-primary-fg: #ffffff;
+  --btn-danger-bg: #bd4d3c;
+  --btn-danger-bg-hover: #a94434;
+  --btn-danger-fg: #ffffff;
 
   --success-color: #10b981;
   --quota-medium-color: #e0aa14;
@@ -113,7 +116,7 @@
   --text-secondary: #6d6760;
   --text-tertiary: #a29c95;
   --text-quaternary: #c0bab3;
-  // 运营文本专用：--text-tertiary 低于 4.5:1，且同时用于装饰填充，故不全局加深。
+  // 运营文本专用：--text-tertiary 同时用于装饰填充，故不全局加深；浅色下它低于 4.5:1。
   --text-operational-muted: #6a645d;
   --text-muted: var(--text-operational-muted);
 
@@ -126,10 +129,13 @@
   --primary-hover: #7f7a74;
   --primary-active: #726d67;
   --primary-contrast: #ffffff;
-  // 主按钮：白字需 ≥4.5:1，--primary-color 仅 3.61:1，因此按钮单独取色。
+  // 按钮文字需 ≥4.5:1、按钮填充对各表面 ≥3:1；--primary-color 配白字仅 3.61:1，因此单独取色。
   --btn-primary-bg: #6d6760;
   --btn-primary-bg-hover: #625d57;
   --btn-primary-fg: #ffffff;
+  --btn-danger-bg: #bd4d3c;
+  --btn-danger-bg-hover: #a94434;
+  --btn-danger-fg: #ffffff;
 
   --success-color: #10b981;
   --quota-medium-color: #e0aa14;
@@ -190,7 +196,7 @@
   --text-secondary: #c9c3bb;
   --text-tertiary: #9c958d;
   --text-quaternary: #6f6962;
-  // 运营文本专用：--text-tertiary 低于 4.5:1，且同时用于装饰填充，故不全局加深。
+  // 运营文本专用：深色下 --text-tertiary 已达 4.8–6.2:1，直接沿用。
   --text-operational-muted: var(--text-tertiary);
   --text-muted: var(--text-operational-muted);
 
@@ -203,10 +209,13 @@
   --primary-hover: #9a948e;
   --primary-active: #a6a099;
   --primary-contrast: #ffffff;
-  // 主按钮：白字需 ≥4.5:1，--primary-color 仅 3.61:1，因此按钮单独取色。
-  --btn-primary-bg: #6d6760;
-  --btn-primary-bg-hover: #7a746d;
-  --btn-primary-fg: #ffffff;
+  // 按钮文字需 ≥4.5:1、按钮填充对各表面 ≥3:1；--primary-color 配白字仅 3.61:1，因此单独取色。
+  --btn-primary-bg: #8b8680;
+  --btn-primary-bg-hover: #9a948e;
+  --btn-primary-fg: #151412;
+  --btn-danger-bg: #d4604d;
+  --btn-danger-bg-hover: #de7261;
+  --btn-danger-fg: #151412;
 
   --success-color: #10b981;
   --quota-medium-color: #ffd862;

@@ -81,9 +81,3 @@ export const loadThemeTokens = (): Record<'light' | 'white' | 'dark', ThemeToken
   }
   return out;
 };
-
-export const readScssVariable = (file: string, name: string): string => {
-  const m = readStyle(file).match(new RegExp(`^\\$${name}:\\s*([^;]+);`, 'm'));
-  if (!m) throw new Error(`Missing $${name} in ${file}`);
-  return m[1].trim();
-};
