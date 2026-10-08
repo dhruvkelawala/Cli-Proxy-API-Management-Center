@@ -2571,7 +2571,9 @@
       "revoked": "密钥已吊销。",
       "ws_auth_off": "关联密钥需要开启 WebSocket 认证（oauth.providers.aistudio.ws-auth）。网关不会替你修改此设置。",
       "open_config": "打开配置面板",
-      "strict_warning": "此配置含有“仅”规则。在严格路由强制执行之前，使用这些密钥的请求会被拒绝。"
+      "strict_warning": "此配置含有“仅”规则。在严格路由强制执行之前，使用这些密钥的请求会被拒绝。",
+      "all_linked": "所有客户端密钥都已关联到配置文件。请先在配置中添加另一个密钥。",
+      "selection_cleared": "客户端密钥列表已变化，你的选择已被清除。请重新选择密钥。"
     },
     "errors": {
       "title": "未保存",

@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
+import { apiClient } from '@/services/api/client';
 import { clientProfilesApi } from '@/services/api/clientProfiles';
 import { useConfigStore, useNotificationStore } from '@/stores';
 import {
@@ -19,6 +20,13 @@ import type {
   ClientProfileKey,
   ClientProfilesSnapshot,
 } from '@/types/clientProfiles';
+import {
+  clientKeyListSignature,
+  effectiveKeySelection,
+  linkableClientKeys,
+  resolveKeyToLink,
+  type ClientKeySelection,
+} from '../model';
 import { CR } from '../copy';
 import { FailureNotice, Notice } from './Notices';
 import styles from './ProfileKeys.module.scss';
@@ -38,7 +46,8 @@ type Editing = { keyRef: string; action: 'move' | 'rotate' } | null;
 
 /**
  * Client keys linked to a profile. Values are never shown: existing keys appear masked in the
- * picker (option values are list positions), and links show only their label.
+ * picker, and links show only their label. Picker options are identified by key fingerprint, never
+ * by list position, and the choice is re-resolved against the current list when linking.
  */
 export function ProfileKeys(props: ProfileKeysProps) {
   const { profile, snapshot, apiKeys, wsAuth, enforcement, hasOnlyRule, apiBase } = props;
@@ -52,7 +61,9 @@ export function ProfileKeys(props: ProfileKeysProps) {
 
   const [failure, setFailure] = useState<ClientProfilesFailure | null>(null);
   const [reloading, setReloading] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState('');
+  const [selection, setSelection] = useState<ClientKeySelection>(null);
+  /** Fingerprints already linked to any profile; null while unknown (the gateway still checks). */
+  const [linked, setLinked] = useState<Set<string> | null>(null);
   const [linkLabel, setLinkLabel] = useState('');
   const [editing, setEditing] = useState<Editing>(null);
   const [moveTarget, setMoveTarget] = useState('');
@@ -60,18 +71,37 @@ export function ProfileKeys(props: ProfileKeysProps) {
 
   const keys = snapshot.keys.filter((key) => key.profileRef === profile.profileRef);
   const names = useMemo(() => readApiKeyNames(apiBase), [apiBase]);
+  // Associations change with every profile/key write, so re-read them with each list revision.
+  useEffect(() => {
+    let cancelled = false;
+    const connection = apiClient.getConnectionRevision();
+    clientProfilesApi
+      .linkedKeyFingerprints()
+      .then((next) => {
+        if (!cancelled && connection === apiClient.getConnectionRevision()) setLinked(next);
+      })
+      .catch(() => {
+        if (!cancelled) setLinked(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [snapshot.revision]);
+
   const keyOptions = useMemo(
     () =>
-      (apiKeys ?? []).map((value, index) => {
+      linkableClientKeys(apiKeys, linked).map(({ fingerprint, value }) => {
         const name = names[apiKeyNameFingerprint(apiBase, value)];
         return {
-          value: String(index),
+          value: fingerprint,
           label: name ? `${name} · ${maskApiKey(value)}` : maskApiKey(value),
           name: name ?? '',
         };
       }),
-    [apiBase, apiKeys, names]
+    [apiBase, apiKeys, linked, names]
   );
+  // A re-fetched list with different contents (revoke, rotate, another tab) voids the choice.
+  const selected = effectiveKeySelection(selection, apiKeys, linked);
   const otherProfiles = snapshot.profiles.filter((item) => item.profileRef !== profile.profileRef);
 
   const finish = async (
@@ -91,9 +121,13 @@ export function ProfileKeys(props: ProfileKeysProps) {
   };
 
   const handleLink = async () => {
-    const value = apiKeys?.[Number(selectedIndex)];
-    if (!value) return;
-    const option = keyOptions[Number(selectedIndex)];
+    const value = resolveKeyToLink(selected, apiKeys, linked);
+    if (!value) {
+      setSelection(null);
+      setFailure({ kind: 'key_missing', error: { status: null, code: null, field: null } });
+      return;
+    }
+    const option = keyOptions.find((item) => item.value === selected);
     const label = linkLabel.trim() || option?.name || t(`${CR}.keys.default_label`);
     const ok = await finish(
       () =>
@@ -108,7 +142,7 @@ export function ProfileKeys(props: ProfileKeysProps) {
       false
     );
     if (ok) {
-      setSelectedIndex('');
+      setSelection(null);
       setLinkLabel('');
     }
   };
@@ -306,7 +340,7 @@ export function ProfileKeys(props: ProfileKeysProps) {
         </ul>
       )}
 
-      <div className={styles.link}>
+      <div className={styles.linkSection}>
         <h4 className={styles.linkTitle}>{t(`${CR}.keys.link_title`)}</h4>
         {wsAuth === false && (
           <Notice>
@@ -319,20 +353,32 @@ export function ProfileKeys(props: ProfileKeysProps) {
         {apiKeys === null ? (
           <p className={styles.empty}>{t(`${CR}.keys.config_unknown`)}</p>
         ) : keyOptions.length === 0 ? (
-          <p className={styles.empty}>{t(`${CR}.keys.none_available`)}</p>
+          <p className={styles.empty}>
+            {(apiKeys ?? []).length === 0
+              ? t(`${CR}.keys.none_available`)
+              : t(`${CR}.keys.all_linked`)}
+          </p>
         ) : (
           <>
             <Select
-              value={selectedIndex}
+              value={selected}
               onChange={(value) => {
-                setSelectedIndex(value);
-                setLinkLabel(keyOptions[Number(value)]?.name ?? '');
+                setSelection({
+                  fingerprint: value,
+                  listSignature: clientKeyListSignature(apiKeys),
+                });
+                setLinkLabel(keyOptions.find((item) => item.value === value)?.name ?? '');
               }}
               options={keyOptions.map(({ value, label }) => ({ value, label }))}
               placeholder={t(`${CR}.keys.link_placeholder`)}
               ariaLabel={t(`${CR}.keys.link_select`)}
               fullWidth
             />
+            {selection && !selected && (
+              <p className={styles.formHint} role="status">
+                {t(`${CR}.keys.selection_cleared`)}
+              </p>
+            )}
             <Input
               label={t(`${CR}.keys.link_label`)}
               value={linkLabel}
@@ -345,7 +391,7 @@ export function ProfileKeys(props: ProfileKeysProps) {
               size="sm"
               className={styles.linkButton}
               onClick={() => void handleLink()}
-              disabled={selectedIndex === '' || wsAuth === false}
+              disabled={selected === '' || wsAuth === false}
               loading={mutating}
             >
               {t(`${CR}.keys.link`)}

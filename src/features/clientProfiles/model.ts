@@ -58,8 +58,69 @@ export const credentialRefForAuthFile = (file: AuthFileItem): string | null => {
   return id ? `credential_${hex(id)}` : null;
 };
 
-/** Association records store SHA-256 of the trimmed key; used to tell which keys are linked. */
+/** Association records store SHA-256 of the trimmed key (backend `clientprofiles.Fingerprint`). */
 export const clientKeyFingerprint = (apiKey: string): string => hex(apiKey.trim());
+
+/* ------------------------------------------------------------------ */
+/* Key picker: selections are fingerprints, never list positions       */
+/* ------------------------------------------------------------------ */
+
+export type ClientKeyChoice = { fingerprint: string; value: string };
+
+/**
+ * Client keys that can still be linked: present in `api-keys` and not associated with any
+ * profile. `linked` is null when associations are unknown; every key is then offered and the
+ * gateway rejects a duplicate association itself.
+ */
+export const linkableClientKeys = (
+  apiKeys: readonly string[] | null,
+  linked: ReadonlySet<string> | null
+): ClientKeyChoice[] => {
+  const seen = new Set<string>();
+  const choices: ClientKeyChoice[] = [];
+  for (const value of apiKeys ?? []) {
+    if (!value.trim()) continue;
+    const fingerprint = clientKeyFingerprint(value);
+    if (seen.has(fingerprint) || linked?.has(fingerprint)) continue;
+    seen.add(fingerprint);
+    choices.push({ fingerprint, value });
+  }
+  return choices;
+};
+
+/** Identity of a key list's contents; a selection made against another list is void. */
+export const clientKeyListSignature = (apiKeys: readonly string[] | null): string =>
+  (apiKeys ?? []).map(clientKeyFingerprint).join(',');
+
+export type ClientKeySelection = { fingerprint: string; listSignature: string } | null;
+
+/** The fingerprint still selected, or '' once the key list changed or the key became linked. */
+export const effectiveKeySelection = (
+  selection: ClientKeySelection,
+  apiKeys: readonly string[] | null,
+  linked: ReadonlySet<string> | null
+): string => {
+  if (!selection || selection.listSignature !== clientKeyListSignature(apiKeys)) return '';
+  return linkableClientKeys(apiKeys, linked).some(
+    (choice) => choice.fingerprint === selection.fingerprint
+  )
+    ? selection.fingerprint
+    : '';
+};
+
+/**
+ * Resolve a selection against the key list as it is at submit time. Null when that exact key is
+ * gone or already linked: the caller refuses instead of linking whatever now sits in its place.
+ */
+export const resolveKeyToLink = (
+  fingerprint: string,
+  apiKeys: readonly string[] | null,
+  linked: ReadonlySet<string> | null
+): string | null =>
+  fingerprint
+    ? (linkableClientKeys(apiKeys, linked).find((choice) => choice.fingerprint === fingerprint)
+        ?.value ?? null)
+    : null;
 
 export const findAuthFileForAccount = (
   account: ClientProfileAccount,

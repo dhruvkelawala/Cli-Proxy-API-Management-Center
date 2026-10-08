@@ -3,6 +3,7 @@ import { apiClient } from '@/services/api/client';
 import {
   clientProfilesApi,
   normalizeClientProfilesSnapshot,
+  parseLinkedKeyFingerprints,
   readClientProfileError,
   serializeClientProfilePolicies,
 } from '@/services/api/clientProfiles';
@@ -369,5 +370,34 @@ describe('client profile domain errors', () => {
       code: null,
       field: null,
     });
+  });
+});
+
+describe('linked client key fingerprints', () => {
+  const A = 'a'.repeat(64);
+  const B = 'B'.repeat(64);
+  test('reads association fingerprints from the YAML backup, never raw key values', async () => {
+    const yaml = [
+      'api-keys:',
+      '  - sk-raw-fixture-value',
+      'access:',
+      '  client-profile-keys:',
+      `    - {key_ref: ${KEY_REF}, label: one, profile_ref: ${PROFILE_REF}, fingerprint: ${A}}`,
+      '    - {label: broken, fingerprint: not-a-fingerprint}',
+      'client-profile-keys:',
+      `  - {label: legacy flat layout, fingerprint: ${B}}`,
+    ].join('\n');
+    const linked = parseLinkedKeyFingerprints(yaml);
+    expect([...linked].sort()).toEqual([A, B.toLowerCase()].sort());
+    expect([...linked].join()).not.toContain('sk-raw');
+
+    const getRaw = mock('getRaw', { data: yaml });
+    expect((await clientProfilesApi.linkedKeyFingerprints()).has(A)).toBe(true);
+    expect(getRaw.mock.calls[0][0]).toBe('/config.yaml');
+  });
+
+  test('a config without associations links nothing', () => {
+    expect(parseLinkedKeyFingerprints('api-keys: [sk-x]\n').size).toBe(0);
+    expect(parseLinkedKeyFingerprints('').size).toBe(0);
   });
 });

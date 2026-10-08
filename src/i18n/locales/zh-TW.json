@@ -2597,7 +2597,9 @@
       "revoked": "金鑰已撤銷。",
       "ws_auth_off": "連結金鑰需要開啟 WebSocket 驗證（oauth.providers.aistudio.ws-auth）。閘道不會替你變更此設定。",
       "open_config": "開啟設定面板",
-      "strict_warning": "此設定檔含有「僅」規則。在嚴格路由強制執行之前，使用這些金鑰的請求會被拒絕。"
+      "strict_warning": "此設定檔含有「僅」規則。在嚴格路由強制執行之前，使用這些金鑰的請求會被拒絕。",
+      "all_linked": "所有用戶端金鑰都已連結到設定檔。請先在設定中新增另一個金鑰。",
+      "selection_cleared": "用戶端金鑰清單已變更，你的選擇已被清除。請重新選擇金鑰。"
     },
     "errors": {
       "title": "未儲存",

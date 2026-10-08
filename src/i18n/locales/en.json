@@ -2580,7 +2580,9 @@
       "revoked": "Key revoked.",
       "ws_auth_off": "Linking keys needs WebSocket authentication (oauth.providers.aistudio.ws-auth) turned on. The gateway won't change it for you.",
       "open_config": "Open Config",
-      "strict_warning": "This profile has an Only rule. While strict routing isn't enforced, requests with these keys are rejected."
+      "strict_warning": "This profile has an Only rule. While strict routing isn't enforced, requests with these keys are rejected.",
+      "all_linked": "Every client key is already linked to a profile. Add another key in Config first.",
+      "selection_cleared": "The client key list changed, so your choice was cleared. Choose a key again."
     },
     "errors": {
       "title": "Not saved",

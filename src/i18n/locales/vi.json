@@ -2586,7 +2586,9 @@
       "revoked": "Đã thu hồi khóa.",
       "ws_auth_off": "Để liên kết khóa cần bật xác thực WebSocket (oauth.providers.aistudio.ws-auth). Cổng sẽ không tự đổi thiết lập này.",
       "open_config": "Mở Cấu hình",
-      "strict_warning": "Hồ sơ này có quy tắc Chỉ. Khi định tuyến nghiêm ngặt chưa được áp dụng, yêu cầu dùng các khóa này bị từ chối."
+      "strict_warning": "Hồ sơ này có quy tắc Chỉ. Khi định tuyến nghiêm ngặt chưa được áp dụng, yêu cầu dùng các khóa này bị từ chối.",
+      "all_linked": "Mọi khóa máy khách đều đã được liên kết với một hồ sơ. Hãy thêm khóa khác trong Cấu hình trước.",
+      "selection_cleared": "Danh sách khóa máy khách đã thay đổi nên lựa chọn của bạn đã bị xóa. Hãy chọn lại khóa."
     },
     "errors": {
       "title": "Chưa lưu",

@@ -6,6 +6,10 @@ import {
   buildPoolPreview,
   buildProfileRows,
   clientKeyFingerprint,
+  clientKeyListSignature,
+  effectiveKeySelection,
+  linkableClientKeys,
+  resolveKeyToLink,
   countAutomaticProfiles,
   credentialRefForAuthFile,
   findAccountForAuthFile,
@@ -458,6 +462,38 @@ describe('client routes presentation model', () => {
     const unenrolled = findAccountForAuthFile(files[2], accounts) as ClientProfileAccount;
     expect(pinnedProfilesFor(unenrolled, snapshot)).toEqual([]);
     expect(planPinChanges(unenrolled, snapshot, new Set([P_MINI]))).toEqual([]);
+  });
+
+  test('the key picker never links a different key when the list shifts under it', () => {
+    const [k1, k2, k3] = ['sk-fixture-one', 'sk-fixture-two', 'sk-fixture-three'];
+    const before = [k1, k2, k3];
+    const picked = clientKeyFingerprint(k2);
+    const selection = { fingerprint: picked, listSignature: clientKeyListSignature(before) };
+    expect(effectiveKeySelection(selection, before, null)).toBe(picked);
+    expect(resolveKeyToLink(picked, before, null)).toBe(k2);
+
+    // k1 revoked elsewhere: position 1 now holds k3, but the picked key is still k2.
+    const shifted = [k2, k3];
+    expect(resolveKeyToLink(picked, shifted, null)).toBe(k2);
+    expect(effectiveKeySelection(selection, shifted, null)).toBe('');
+
+    // k2 itself removed or rotated: refuse rather than link whatever sits there now.
+    expect(resolveKeyToLink(picked, [k1, k3], null)).toBeNull();
+    // k2 linked to a profile meanwhile (e.g. from another tab): refuse as well.
+    expect(resolveKeyToLink(picked, before, new Set([picked]))).toBeNull();
+    expect(effectiveKeySelection(selection, before, new Set([picked]))).toBe('');
+    // An identical re-fetch keeps the choice.
+    expect(effectiveKeySelection(selection, [...before], null)).toBe(picked);
+  });
+
+  test('keys already linked to any profile are not offered; unknown links offer all', () => {
+    const keys = ['sk-a', ' sk-b ', 'sk-a', ''];
+    const linked = new Set([clientKeyFingerprint('sk-b')]);
+    expect(linkableClientKeys(keys, linked).map((choice) => choice.value)).toEqual(['sk-a']);
+    expect(linkableClientKeys(keys, null).map((choice) => choice.value)).toEqual([
+      'sk-a',
+      ' sk-b ',
+    ]);
   });
 
   test('key fingerprints follow the contract (SHA-256 of the trimmed value)', () => {

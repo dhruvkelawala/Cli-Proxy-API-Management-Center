@@ -6,7 +6,9 @@
  * keys or OAuth metadata: only whitelisted fields are copied.
  */
 
+import { parse as parseYaml } from 'yaml';
 import { apiClient } from './client';
+import { configFileApi } from './configFile';
 import { isRecord } from '@/utils/helpers';
 import {
   CLIENT_PROFILE_PROVIDERS,
@@ -272,6 +274,31 @@ export const isClientProfilesNotFound = (error: unknown): boolean =>
 
 export type KeyUpdate = { apiKey?: string; label?: string; profileRef?: string };
 
+const FINGERPRINT_PATTERN = /^[0-9a-f]{64}$/;
+
+const readFingerprints = (value: unknown, into: Set<string>) => {
+  if (!Array.isArray(value)) return;
+  for (const entry of value) {
+    const fingerprint = isRecord(entry) ? readTrimmed(entry.fingerprint).toLowerCase() : '';
+    if (FINGERPRINT_PATTERN.test(fingerprint)) into.add(fingerprint);
+  }
+};
+
+/**
+ * Fingerprints of client keys already associated with a profile, from the saved YAML.
+ * JSON reads (`/client-profiles`, `/config`) redact them by contract; the authenticated YAML
+ * backup keeps them under `access.client-profile-keys` (or the older flat `client-profile-keys`).
+ * Raw values in that document are never returned from here.
+ */
+export const parseLinkedKeyFingerprints = (yamlText: string): Set<string> => {
+  const root: unknown = parseYaml(yamlText);
+  const linked = new Set<string>();
+  if (!isRecord(root)) return linked;
+  if (isRecord(root.access)) readFingerprints(root.access['client-profile-keys'], linked);
+  readFingerprints(root['client-profile-keys'], linked);
+  return linked;
+};
+
 export const clientProfilesApi = {
   /** Capability probe. 404 or an unknown contract means Unsupported; other errors throw. */
   async probe(): Promise<ClientProfilesSupport> {
@@ -396,6 +423,10 @@ export const clientProfilesApi = {
       await apiClient.delete<unknown>(`/client-profile-keys/${encodeRef(keyRef)}`, config),
       normalizeDeleted
     );
+  },
+
+  async linkedKeyFingerprints(): Promise<Set<string>> {
+    return parseLinkedKeyFingerprints(await configFileApi.fetchConfigYaml());
   },
 
   async listAccounts(): Promise<ClientProfileAccount[]> {
