@@ -1525,7 +1525,35 @@
     "source_changes_before_visual": "Lưu hoặc hủy các chỉnh sửa mã nguồn chưa lưu trước khi chuyển sang chế độ trực quan.",
     "precise_save_incomplete": "Quá trình lưu chính xác chưa hoàn tất; một số thay đổi có thể đã được áp dụng. Bản nháp của bạn được giữ lại. Hãy lưu lại để xem xét các khác biệt còn lại trên máy chủ.",
     "concurrent_list_conflict": "Danh sách trên máy chủ {{path}} đã thay đổi sau mốc cơ sở bản nháp của bạn. Thao tác lưu bị chặn để tránh ghi đè các thay đổi đó. Bản nháp của bạn được giữ lại; hãy ghi lại các chỉnh sửa, sau đó tải lại cấu hình và hợp nhất.",
-    "precise_save_recovery_required": "Không thể đọc lại kết quả lưu. Đã tạm dừng chỉnh sửa. Lưu lại để khôi phục mốc cơ sở của bản nháp, hoặc tải lại cấu hình."
+    "precise_save_recovery_required": "Không thể đọc lại kết quả lưu. Đã tạm dừng chỉnh sửa. Lưu lại để khôi phục mốc cơ sở của bản nháp, hoặc tải lại cấu hình.",
+    "routing_presentation": {
+      "strategy": {
+        "round_robin": "Xoay vòng đều: các lượt phân bổ mới lần lượt đi qua những tài khoản đủ điều kiện trong nhóm ưu tiên cao nhất.",
+        "weighted_round_robin": "Chia theo trọng số: các lượt phân bổ mới được chia trong nhóm ưu tiên cao nhất theo tỷ lệ trọng số của từng tài khoản. Tài khoản có trọng số bằng 0 hoặc nhỏ hơn sẽ bị bỏ qua.",
+        "fill_first": "Dồn vào một tài khoản: các lượt phân bổ mới đi tới tài khoản đủ điều kiện đầu tiên theo thứ tự ID nội bộ. Hãy tăng mức ưu tiên của tài khoản nếu muốn dùng nó trước."
+      },
+      "shares_assumption": "Tỷ lệ cấu hình chỉ mang tính minh họa. Chúng giả định mọi tài khoản đủ điều kiện đều khả dụng và không phản ánh số yêu cầu, token hay chi phí thực tế.",
+      "affinity": {
+        "enabled": "Gắn hội thoại với tài khoản đang bật. Liên kết hiện có và còn hoạt động sẽ giữ nguyên trên tài khoản của nó (lưu {{ttl}}), kể cả khi tài khoản ưu tiên cao hơn hoạt động trở lại hoặc mức ưu tiên thay đổi. Trọng số và mức ưu tiên chỉ quyết định hội thoại mới, yêu cầu không có phiên và khi chuyển dự phòng.",
+        "disabled": "Gắn hội thoại với tài khoản đang tắt. Mỗi yêu cầu được phân bổ độc lập theo chiến lược đã chọn."
+      },
+      "reason": {
+        "participating": "Tham gia nhóm dùng chung.",
+        "standby": "Đủ điều kiện, nhưng chỉ được dùng khi các tài khoản đứng trước không khả dụng.",
+        "unknown_availability": "Chưa biết tình trạng khả dụng. Được xem là ứng viên cho đến khi có trạng thái thực tế.",
+        "disabled": "Bị loại: tài khoản đã bị vô hiệu hóa.",
+        "unavailable": "Bị loại: tài khoản hiện không khả dụng.",
+        "lower_priority": "Tạm thời chưa tham gia: nhóm ưu tiên cao hơn đang có tài khoản đủ điều kiện. Nhóm này chỉ làm dự phòng.",
+        "non_positive_weight": "Bị loại: trọng số bằng 0 hoặc nhỏ hơn sẽ loại tài khoản khỏi cách chọn theo trọng số. Tài khoản không bị vô hiệu hóa."
+      },
+      "strict": {
+        "ready": "Mọi yêu cầu của hồ sơ này chỉ dùng tài khoản này. Chiến lược nhóm, mức ưu tiên và trọng số không áp dụng.",
+        "unknown": "Mọi yêu cầu của hồ sơ này chỉ dùng tài khoản này. Chưa biết tình trạng khả dụng của nó; nếu không dùng được, yêu cầu sẽ thất bại thay vì chuyển sang tài khoản khác.",
+        "disabled": "Tài khoản này đã bị vô hiệu hóa. Yêu cầu của hồ sơ này sẽ thất bại và không chuyển sang tài khoản khác.",
+        "unavailable": "Tài khoản này hiện không khả dụng. Yêu cầu của hồ sơ này sẽ thất bại và không chuyển sang tài khoản khác.",
+        "missing": "Không tìm thấy tài khoản đã chọn. Yêu cầu của hồ sơ này sẽ thất bại và không chuyển sang tài khoản khác."
+      }
+    }
   },
   "quota_management": {
     "title": "Quản lý Quota",
