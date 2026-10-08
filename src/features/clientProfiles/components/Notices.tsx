@@ -3,7 +3,15 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { IconAlertTriangle, IconInfo } from '@/components/ui/icons';
 import type { ClientProfilesFailure } from '@/stores/useClientProfilesStore';
-import { CR, failureKey, failureOffersReload, targetStateKey } from '../copy';
+import type { ClientProfilesCapabilities } from '@/types/clientProfiles';
+import {
+  CR,
+  failureKey,
+  failureOffersReload,
+  failureProvider,
+  providerLabelKey,
+  targetStateKey,
+} from '../copy';
 import styles from './Notices.module.scss';
 
 type Tone = 'info' | 'danger';
@@ -38,9 +46,17 @@ export function Notice({
   );
 }
 
-/** Calm notice: saved rules are stored, but strict requests are rejected until CPA-003. */
-export function EnforcementNotice() {
+/**
+ * Calm notice: saved rules are stored, but strict requests are rejected until CPA-003.
+ * Renders nothing once the gateway reports enforcement (`enforcement: true`).
+ */
+export function EnforcementNotice({
+  capabilities,
+}: {
+  capabilities: Pick<ClientProfilesCapabilities, 'enforcement'>;
+}) {
   const { t } = useTranslation();
+  if (capabilities.enforcement) return null;
   return (
     <Notice title={t(`${CR}.enforcement.title`)}>
       <p>{t(`${CR}.enforcement.body`)}</p>
@@ -66,6 +82,7 @@ export function FailureNotice({
     failure.kind === 'target_invalid' && failure.error.code
       ? t(targetStateKey(failure.error.code as Parameters<typeof targetStateKey>[0]))
       : '';
+  const provider = failure.kind === 'target_invalid' ? failureProvider(failure) : null;
   return (
     <Notice
       tone="danger"
@@ -79,7 +96,14 @@ export function FailureNotice({
         ) : undefined
       }
     >
-      <p>{t(failureKey(failure), { reason })}</p>
+      <p>
+        {provider
+          ? t(`${CR}.errors.target_invalid_provider`, {
+              provider: t(providerLabelKey(provider)),
+              reason,
+            })
+          : t(failureKey(failure), { reason })}
+      </p>
     </Notice>
   );
 }

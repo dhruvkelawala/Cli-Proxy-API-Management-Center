@@ -102,9 +102,10 @@ export function PolicySheet(props: PolicySheetProps) {
   }, [dirty, onDirtyChange]);
   useEffect(() => () => onDirtyChange(false), [onDirtyChange]);
 
+  const savedAccountRef = savedPolicy?.mode === 'only' ? savedPolicy.accountRef : null;
   const options = useMemo(
-    () => targetOptionsFor(provider, snapshot.accounts, files),
-    [files, provider, snapshot.accounts]
+    () => targetOptionsFor(provider, snapshot.accounts, files, savedAccountRef),
+    [files, provider, savedAccountRef, snapshot.accounts]
   );
   const otherRuleUnreadable = profile
     ? policiesWithEdit(profile, provider, AUTOMATIC_POLICY) === null
@@ -331,7 +332,9 @@ export function PolicySheet(props: PolicySheetProps) {
                     </span>
                   </div>
                   <p className={styles.cardDesc}>
-                    {t(`${CR}.editor.${option.status}_desc`, { account: option.label })}
+                    {option.status === 'will_fail'
+                      ? t(`${CR}.editor.unavailable_choice_desc`, { account: option.label })
+                      : t(`${CR}.editor.${option.status}_desc`, { account: option.label })}
                   </p>
                   {option.status === 'needs_enrollment' && (
                     <Button

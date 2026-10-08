@@ -473,13 +473,17 @@ describe('client routes presentation model', () => {
     expect(resolveTargetState('claude', only(A_REF), duplicated)).toBe('duplicate_account_ref');
   });
 
-  test('editor options: unenrolled can be prepared, unsupported is not selectable', () => {
+  test('editor options: an unavailable account is not a new choice, only a kept saved target', () => {
     const claude = targetOptionsFor('claude', accounts, files);
     expect(claude.map((option) => [option.label, option.status, option.selectable])).toEqual([
       ['Claude A', 'ready', true],
-      ['Claude B', 'will_fail', true],
+      ['Claude B', 'will_fail', false],
       ['claude credential', 'unsupported', false],
     ]);
+    // Already saved as the rule's target: stays visible and selected, with its warning.
+    const kept = targetOptionsFor('claude', accounts, files, B_REF);
+    expect(kept[1]).toMatchObject({ status: 'will_fail', selectable: true, saved: true });
+    expect(kept[0]).toMatchObject({ status: 'ready', selectable: true, saved: false });
     const codex = targetOptionsFor('codex', accounts, files);
     expect(codex[0]).toMatchObject({
       label: 'Codex',
@@ -511,10 +515,16 @@ describe('client routes presentation model', () => {
     expect(pinnedProfilesFor(b, snapshot).map((pin) => pin.profile.label)).toEqual([
       'MacBook · T3 Claude B',
     ]);
+    // B is unavailable: the gateway refuses new Only rules for it, so Mini is not pinned, but
+    // the client already pinned to it can still return to Automatic.
     const plan = planPinChanges(b, snapshot, new Set([P_MINI]));
     expect(plan.map((change) => [change.profile.label, change.policies?.claude])).toEqual([
-      ['Mini · T3 Claude', { mode: 'only', accountRef: B_REF }],
       ['MacBook · T3 Claude B', { mode: 'automatic' }],
+    ]);
+    const a = findAccountForAuthFile(files[0], accounts) as ClientProfileAccount;
+    const pinA = planPinChanges(a, snapshot, new Set([P_MINI]));
+    expect(pinA.map((change) => [change.profile.label, change.policies?.claude])).toEqual([
+      ['Mini · T3 Claude', { mode: 'only', accountRef: A_REF }],
     ]);
     const unenrolled = findAccountForAuthFile(files[2], accounts) as ClientProfileAccount;
     expect(pinnedProfilesFor(unenrolled, snapshot)).toEqual([]);

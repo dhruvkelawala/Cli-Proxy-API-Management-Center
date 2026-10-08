@@ -121,6 +121,13 @@ const capabilities: ClientProfilesCapabilities = {
   unsupported: [],
 };
 
+/** CPA-003: enforcement on, strict requests enforced. */
+const enforcedCapabilities: ClientProfilesCapabilities = {
+  ...capabilities,
+  enforcement: true,
+  strictRequests: 'enforced',
+};
+
 const render = (element: ReactElement) =>
   renderToStaticMarkup(createElement(MemoryRouter, null, element));
 /** Translated text as it appears in static markup (HTML-escaped). */
@@ -280,16 +287,52 @@ describe('editor sheet', () => {
       })
     );
 
-  test('offers Automatic and Only options; disabled targets stay selectable with a will-fail warning', () => {
+  test('a saved unavailable target stays visible and selected with its will-fail warning', () => {
     const markup = sheet(2);
     expect(markup).toContain(t('client_routes.editor.question', { provider: 'Claude' }));
+    // Automatic, Only Claude A, and the saved Only Claude B.
     expect(markup.match(/type="radio"/g)).toHaveLength(3);
     expect(markup).toContain(t('client_routes.editor.will_fail_desc', { account: 'Claude B' }));
     expect(markup).toContain(t('client_routes.editor.session_note'));
   });
 
+  test('an unavailable account is not offered as a new Only choice (the gateway returns 422)', () => {
+    const markup = sheet(0);
+    // Automatic and Only Claude A only; Claude B is explained, not selectable.
+    expect(markup.match(/type="radio"/g)).toHaveLength(2);
+    expect(markup).toContain(t('client_routes.editor.status_will_fail'));
+    expect(markup).toContain(
+      t('client_routes.editor.unavailable_choice_desc', { account: 'Claude B' })
+    );
+    expect(markup).not.toContain(t('client_routes.editor.will_fail_desc', { account: 'Claude B' }));
+  });
+
+  test('session note matches the contract: saving ends existing sessions', () => {
+    expect(t('client_routes.editor.session_note')).toContain('ends');
+    expect(t('client_routes.editor.session_note')).not.toContain('keep their old rule');
+  });
+
   test('enforcement off: a strict profile with keys warns that requests are rejected', () => {
     expect(sheet(2)).toContain(t('client_routes.editor.strict_keys_warning', { count: 1 }));
+  });
+
+  test('CPA-003 enforcement on: no not-enforced warning in the editor', () => {
+    const markup = render(
+      createElement(PolicySheet, {
+        open: true,
+        profile: snapshot.profiles[2],
+        provider: 'claude',
+        snapshot,
+        capabilities: enforcedCapabilities,
+        files,
+        pool: buildPoolPreview('claude', files, 'round-robin'),
+        context: null,
+        onClose: noop,
+        onDirtyChange: noop,
+        onOpenProfile: noop,
+      })
+    );
+    expect(markup).not.toContain(t('client_routes.editor.strict_keys_warning', { count: 1 }));
   });
 
   test('unenrolled accounts get a one-click prepare action instead of a radio', () => {
@@ -363,7 +406,7 @@ describe('profile sheet keys', () => {
 
 describe('notices and account links', () => {
   test('enforcement off is a calm notice that does not announce active selection', () => {
-    const markup = render(createElement(EnforcementNotice));
+    const markup = render(createElement(EnforcementNotice, { capabilities }));
     expect(markup).toContain(t('client_routes.enforcement.title'));
     expect(markup).not.toContain('role="alert"');
   });
@@ -379,6 +422,36 @@ describe('notices and account links', () => {
     expect(markup).toContain(t('client_routes.errors.reload'));
     expect(markup).toContain('role="alert"');
     expect(markup).not.toContain(t('client_routes.editor.saved'));
+  });
+
+  test('a refused Only rule names the provider from the error field', () => {
+    const markup = render(
+      createElement(FailureNotice, {
+        failure: {
+          kind: 'target_invalid',
+          error: { status: 422, code: 'target_unavailable', field: 'policies.codex' },
+        },
+      })
+    );
+    expect(markup).toContain(
+      t('client_routes.errors.target_invalid_provider', {
+        provider: 'Codex',
+        reason: i18n.t('client_routes.states.target_unavailable'),
+      })
+    );
+    const noField = render(
+      createElement(FailureNotice, {
+        failure: {
+          kind: 'target_invalid',
+          error: { status: 422, code: 'target_unavailable', field: null },
+        },
+      })
+    );
+    expect(noField).toContain(
+      t('client_routes.errors.target_invalid', {
+        reason: i18n.t('client_routes.states.target_unavailable'),
+      })
+    );
   });
 
   test('account cards show pinned clients and will-fail when the account is off', () => {
@@ -503,5 +576,38 @@ describe('collapsible shared routing band', () => {
     expect(markup).toContain('aria-expanded="true"');
     expect(markup).toContain(t('client_routes.shared_band.locked'));
     expect(markup).not.toContain('hidden=""');
+  });
+});
+
+describe('CPA-003 enforcement', () => {
+  test('the not-enforced banner shows while enforcement is off and hides once enforced', () => {
+    expect(render(createElement(EnforcementNotice, { capabilities }))).toContain(
+      t('client_routes.enforcement.title')
+    );
+    expect(render(createElement(EnforcementNotice, { capabilities: enforcedCapabilities }))).toBe(
+      ''
+    );
+  });
+
+  test('profile keys drop the strict-rejection warning once enforced', () => {
+    const keysSheet = (caps: ClientProfilesCapabilities) =>
+      render(
+        createElement(ProfileSheet, {
+          open: true,
+          mode: 'edit',
+          profile: snapshot.profiles[2],
+          snapshot,
+          capabilities: caps,
+          context: null,
+          apiKeys: [RAW_CLIENT_KEY],
+          wsAuth: true,
+          apiBase: 'http://127.0.0.1:1',
+          onContextChange: noop,
+          onClose: noop,
+          onDirtyChange: noop,
+        })
+      );
+    expect(keysSheet(capabilities)).toContain(t('client_routes.keys.strict_warning'));
+    expect(keysSheet(enforcedCapabilities)).not.toContain(t('client_routes.keys.strict_warning'));
   });
 });

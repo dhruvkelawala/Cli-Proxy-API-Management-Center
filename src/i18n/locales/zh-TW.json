@@ -2512,7 +2512,7 @@
       "enroll_done": "{{account}} 已可用於嚴格路由。",
       "no_accounts": "此閘道上沒有 {{provider}} 帳號。",
       "scope": "適用於使用「{{profile}}」的全部 {{provider}} 請求",
-      "session_note": "執行中的工作階段仍使用舊規則。用戶端需要重新連線才能套用變更。",
+      "session_note": "儲存會結束此用戶端現有的工作階段；它重新連線後使用新規則。已在進行中的請求仍按舊規則完成。",
       "save": "儲存規則",
       "saved": "規則已儲存。用戶端需要重新連線才能生效。",
       "saved_plain": "規則已儲存。",
@@ -2522,7 +2522,9 @@
       "other_rule_unknown": "此設定檔的另一條規則無法讀取，因此無法在此修改。請在設定檔案中修正。",
       "strict_keys_warning": "此設定檔有 {{count}} 個用戶端金鑰。在嚴格路由強制執行之前，只要有一條規則為「僅」，這些金鑰的請求就會被拒絕。",
       "will_fail_save_hint": "此閘道只接受指向可用帳號的新「僅」規則。若儲存被拒絕，請先啟用該帳號。",
-      "manage_profile": "設定檔與用戶端金鑰"
+      "manage_profile": "設定檔與用戶端金鑰",
+      "status_will_fail": "無法使用",
+      "unavailable_choice_desc": "{{account}} 已停用或無法使用。閘道只接受指向可用帳號的新「僅」規則，請先啟用它。"
     },
     "preview": {
       "title": "會發生什麼",
@@ -2625,7 +2627,8 @@
       "persistence": "閘道無法儲存變更，未套用任何內容。",
       "unknown": "請求失敗，未儲存任何內容。",
       "aborted": "操作完成前連線已切換，先前閘道的結果未被套用。",
-      "unsupported": "此閘道不提供用戶端路由。"
+      "unsupported": "此閘道不提供用戶端路由。",
+      "target_invalid_provider": "閘道拒絕了 {{provider}} 規則（{{reason}}）。儲存時會重新檢查每條「僅」規則，且只接受指向可用且已準備帳號的「僅」規則。"
     },
     "accounts": {
       "section_aria": "{{account}} 的用戶端路由",
@@ -2642,7 +2645,7 @@
       "now_this": "目前：僅此訂閱",
       "now_unknown": "目前：無法讀取的規則（請在設定檔案中修正）",
       "strict_warning": "嚴格：若 {{account}} 被停用或無法使用，這些用戶端會收到錯誤。其他訂閱保持啟用，但絕不會被改用。",
-      "will_fail_warning": "{{account}} 目前已停用或無法使用，勾選的用戶端在它恢復之前都會失敗。絕不會改用其他訂閱。",
+      "will_fail_warning": "{{account}} 目前已停用或無法使用。它恢復之前，閘道不會接受新的用戶端指向它，已固定到它的用戶端在此期間會失敗。你仍可將它們改回自動。絕不會改用其他訂閱。",
       "scope": "適用於使用所勾選設定檔的全部 {{provider}} 請求",
       "save": "儲存",
       "saved": "已儲存。受影響的用戶端需要重新連線。",

@@ -2493,7 +2493,7 @@
       "enroll_done": "{{account}} is ready for strict routing.",
       "no_accounts": "No {{provider}} accounts on this gateway.",
       "scope": "Applies to all {{provider}} requests using “{{profile}}”",
-      "session_note": "Running sessions keep their old rule. Clients must reconnect to pick up a change.",
+      "session_note": "Saving ends this client's existing sessions; it reconnects with the new rule. Requests already in progress finish under the old rule.",
       "save": "Save rule",
       "saved": "Rule saved. Clients must reconnect to pick it up.",
       "saved_plain": "Rule saved.",
@@ -2504,7 +2504,9 @@
       "strict_keys_warning_one": "This profile has {{count}} client key. While strict routing isn't enforced, its requests are rejected once a rule is Only.",
       "strict_keys_warning_other": "This profile has {{count}} client keys. While strict routing isn't enforced, their requests are rejected once a rule is Only.",
       "will_fail_save_hint": "This gateway only accepts a new Only rule for an available account. If saving is refused, enable the account first.",
-      "manage_profile": "Profile and client keys"
+      "manage_profile": "Profile and client keys",
+      "status_will_fail": "Unavailable",
+      "unavailable_choice_desc": "{{account}} is disabled or unavailable. The gateway only accepts a new Only rule for an available account, so enable it first."
     },
     "preview": {
       "title": "What happens",
@@ -2608,7 +2610,8 @@
       "persistence": "The gateway couldn't save the change. Nothing was applied.",
       "unknown": "The request failed. Nothing was saved.",
       "aborted": "The connection changed before this finished. Nothing from the previous gateway was applied.",
-      "unsupported": "Client routes aren't available on this gateway."
+      "unsupported": "Client routes aren't available on this gateway.",
+      "target_invalid_provider": "The gateway refused the {{provider}} rule ({{reason}}). Saving re-checks every Only rule, and it only accepts an Only rule for an available, prepared account."
     },
     "accounts": {
       "section_aria": "Client routes for {{account}}",
@@ -2626,7 +2629,7 @@
       "now_this": "Now: Only this subscription",
       "now_unknown": "Now: unreadable rule (fix it in the config file)",
       "strict_warning": "Strict: if {{account}} is disabled or unavailable, these clients get an error. Other subscriptions stay enabled and are never used instead.",
-      "will_fail_warning": "{{account}} is disabled or unavailable right now, so checked clients will fail until it's back. Other subscriptions are never used instead.",
+      "will_fail_warning": "{{account}} is disabled or unavailable right now. The gateway won't accept new clients for it until it's back, and clients already pinned to it fail meanwhile. You can still return them to Automatic. Other subscriptions are never used instead.",
       "scope": "Applies to all {{provider}} requests using the checked profiles",
       "save": "Save",
       "saved": "Saved. Affected clients must reconnect.",

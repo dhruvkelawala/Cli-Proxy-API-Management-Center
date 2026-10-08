@@ -151,7 +151,7 @@ export function ClientRoutesPage() {
         />
       )}
 
-      {ready && !capabilities.enforcement && <EnforcementNotice />}
+      {ready && <EnforcementNotice capabilities={capabilities} />}
 
       {(status === 'idle' || status === 'loading') && (
         <div className={styles.loading} role="status">

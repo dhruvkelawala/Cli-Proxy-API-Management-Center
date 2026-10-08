@@ -111,6 +111,27 @@ describe('client profile capability probe', () => {
     });
   });
 
+  test('CPA-003 enforcement (capabilities fixture from plans/client-profile-api.md)', async () => {
+    mock('get', {
+      contract_version: 1,
+      management: true,
+      enforcement: true,
+      strict_requests: 'enforced',
+      providers: ['claude', 'codex'],
+      modes: ['automatic', 'only'],
+      session_behavior: 'fresh_session_required',
+      binding_requires: ['websocket_auth_enabled'],
+      enrollment_stores: ['file'],
+      enrollment_storage: ['metadata', 'native_claude', 'native_codex'],
+      unsupported: ['home_strict', 'prefer', 'fallback'],
+    });
+    const support = await clientProfilesApi.probe();
+    expect(support.supported && support.capabilities).toMatchObject({
+      enforcement: true,
+      strictRequests: 'enforced',
+    });
+  });
+
   test('an older backend (404) is unsupported instead of inventing local policies', async () => {
     spies.push(spyOn(apiClient, 'get').mockRejectedValue(apiError(404, 'not_found')));
     expect(await clientProfilesApi.probe()).toEqual({ supported: false, reason: 'not_found' });

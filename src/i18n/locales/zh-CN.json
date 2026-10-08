@@ -2486,7 +2486,7 @@
       "enroll_done": "{{account}} 已可用于严格路由。",
       "no_accounts": "此网关上没有 {{provider}} 账号。",
       "scope": "适用于使用“{{profile}}”的全部 {{provider}} 请求",
-      "session_note": "正在运行的会话仍使用旧规则。客户端需要重新连接才能应用更改。",
+      "session_note": "保存会结束此客户端现有的会话；它重新连接后使用新规则。已在进行中的请求仍按旧规则完成。",
       "save": "保存规则",
       "saved": "规则已保存。客户端需要重新连接才能生效。",
       "saved_plain": "规则已保存。",
@@ -2496,7 +2496,9 @@
       "other_rule_unknown": "此配置的另一条规则无法读取，因此无法在此修改。请在配置文件中修正。",
       "strict_keys_warning": "此配置有 {{count}} 个客户端密钥。在严格路由强制执行之前，只要有一条规则为“仅”，这些密钥的请求就会被拒绝。",
       "will_fail_save_hint": "此网关只接受指向可用账号的新“仅”规则。如果保存被拒绝，请先启用该账号。",
-      "manage_profile": "配置与客户端密钥"
+      "manage_profile": "配置与客户端密钥",
+      "status_will_fail": "不可用",
+      "unavailable_choice_desc": "{{account}} 已停用或不可用。网关只接受指向可用账号的新“仅”规则，请先启用它。"
     },
     "preview": {
       "title": "会发生什么",
@@ -2599,7 +2601,8 @@
       "persistence": "网关无法保存更改，未应用任何内容。",
       "unknown": "请求失败，未保存任何内容。",
       "aborted": "操作完成前连接已切换，之前网关的结果未被应用。",
-      "unsupported": "此网关不提供客户端路由。"
+      "unsupported": "此网关不提供客户端路由。",
+      "target_invalid_provider": "网关拒绝了 {{provider}} 规则（{{reason}}）。保存时会重新检查每条“仅”规则，并且只接受指向可用且已准备账号的“仅”规则。"
     },
     "accounts": {
       "section_aria": "{{account}} 的客户端路由",
@@ -2616,7 +2619,7 @@
       "now_this": "当前：仅此订阅",
       "now_unknown": "当前：无法读取的规则（请在配置文件中修正）",
       "strict_warning": "严格：如果 {{account}} 被停用或不可用，这些客户端会收到错误。其他订阅保持启用，但绝不会被改用。",
-      "will_fail_warning": "{{account}} 当前已停用或不可用，勾选的客户端在它恢复之前都会失败。绝不会改用其他订阅。",
+      "will_fail_warning": "{{account}} 当前已停用或不可用。它恢复之前，网关不会接受新的客户端指向它，已固定到它的客户端在此期间会失败。你仍可将它们改回自动。绝不会改用其他订阅。",
       "scope": "适用于使用所勾选配置的全部 {{provider}} 请求",
       "save": "保存",
       "saved": "已保存。受影响的客户端需要重新连接。",

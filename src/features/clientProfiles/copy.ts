@@ -5,7 +5,11 @@
 
 import type { TFunction } from 'i18next';
 import type { ClientProfilesFailure } from '@/stores/useClientProfilesStore';
-import type { ClientProfileTargetState } from '@/types/clientProfiles';
+import {
+  CLIENT_PROFILE_PROVIDERS,
+  type ClientProfileProvider,
+  type ClientProfileTargetState,
+} from '@/types/clientProfiles';
 import type { PolicyCell } from './model';
 
 export const CR = 'client_routes';
@@ -14,6 +18,20 @@ export const targetStateKey = (state: ClientProfileTargetState): string => `${CR
 
 export const failureKey = (failure: Pick<ClientProfilesFailure, 'kind'>): string =>
   `${CR}.errors.${failure.kind}`;
+
+/**
+ * Provider whose rule the gateway rejected. ValidateTargets re-checks every Only rule on a
+ * save and reports the failing one as `field: "policies.<provider>"`.
+ */
+export const failureProvider = (
+  failure: Pick<ClientProfilesFailure, 'error'>
+): ClientProfileProvider | null => {
+  const match = /^policies\.(.+)$/.exec(failure.error.field ?? '');
+  const provider = match?.[1];
+  return provider && (CLIENT_PROFILE_PROVIDERS as readonly string[]).includes(provider)
+    ? (provider as ClientProfileProvider)
+    : null;
+};
 
 /** Failures where re-reading the gateway state is the right next step. */
 export const failureOffersReload = (failure: Pick<ClientProfilesFailure, 'kind'>): boolean =>

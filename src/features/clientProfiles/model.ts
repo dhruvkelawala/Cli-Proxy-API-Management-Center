@@ -49,9 +49,10 @@ export const readRoutingStrategy = (value: unknown): RoutingStrategy | null =>
 const hex = (input: string) => bytesToHex(sha256(new TextEncoder().encode(input)));
 
 /**
- * CPA-002 derives the opaque `credential_ref` as `credential_` + SHA-256(auth ID). The Accounts
- * list exposes the same auth ID, so this links an account card to its inventory record. If the
- * backend changes the derivation, cards simply show no client links.
+ * Mirrors the backend's `clientprofiles.CredentialRef(id)` (internal/clientprofiles/profiles.go):
+ * `credential_` + hex SHA-256 of the trimmed auth ID. The contract calls `credential_ref` opaque,
+ * so this is a display join only, never a policy target. The Accounts list exposes the same auth
+ * ID; if the backend changes the derivation, cards fail safe and simply show no client links.
  */
 export const credentialRefForAuthFile = (file: AuthFileItem): string | null => {
   const id = typeof file.id === 'string' ? file.id.trim() : '';
@@ -365,7 +366,10 @@ export const countAutomaticProfiles = (snapshot: ClientProfilesSnapshot | null):
 export type TargetOptionStatus =
   /** Enrolled, supported and available. */
   | 'ready'
-  /** Enrolled and supported, but disabled/unavailable: allowed, requests fail until it is back. */
+  /**
+   * Enrolled and supported, but disabled/unavailable. The gateway refuses it as a new Only target
+   * (422), so it is selectable only when it is already the saved target, shown with its warning.
+   */
   | 'will_fail'
   /** Not enrolled yet; can be prepared for strict routing in one step. */
   | 'needs_enrollment'
@@ -379,12 +383,15 @@ export type TargetOption = {
   label: string;
   status: TargetOptionStatus;
   selectable: boolean;
+  /** This account is the rule's saved target. */
+  saved: boolean;
 };
 
 export const describeTargetOption = (
   account: ClientProfileAccount,
   accounts: ClientProfileAccount[],
-  files: AuthFileItem[] | null
+  files: AuthFileItem[] | null,
+  savedAccountRef: string | null = null
 ): TargetOption => {
   const label = accountDisplayLabel(account, files);
   let status: TargetOptionStatus;
@@ -399,17 +406,26 @@ export const describeTargetOption = (
   } else {
     status = 'ready';
   }
-  return { account, label, status, selectable: status === 'ready' || status === 'will_fail' };
+  const saved = Boolean(account.accountRef) && account.accountRef === savedAccountRef;
+  return {
+    account,
+    label,
+    status,
+    selectable: status === 'ready' || (status === 'will_fail' && saved),
+    saved,
+  };
 };
 
+/** `savedAccountRef`: the rule's saved Only target, kept visible even if it can't be re-chosen. */
 export const targetOptionsFor = (
   provider: ClientProfileProvider,
   accounts: ClientProfileAccount[],
-  files: AuthFileItem[] | null
+  files: AuthFileItem[] | null,
+  savedAccountRef: string | null = null
 ): TargetOption[] =>
   accounts
     .filter((account) => account.provider === provider)
-    .map((account) => describeTargetOption(account, accounts, files));
+    .map((account) => describeTargetOption(account, accounts, files, savedAccountRef));
 
 /* ------------------------------------------------------------------ */
 /* Drafts                                                              */
@@ -471,9 +487,14 @@ export const pinnedProfilesFor = (
 export const isClientProfileProvider = (value: string): value is ClientProfileProvider =>
   (CLIENT_PROFILE_PROVIDERS as readonly string[]).includes(value);
 
+/** The gateway accepts a new Only rule only for an available account (ValidateTargets, 422). */
+export const acceptsNewOnlyRules = (account: ClientProfileAccount): boolean =>
+  account.available && account.state === 'available';
+
 /**
  * Per-profile edits for "Use only this subscription for…": checked profiles become Only this
  * account, unchecked profiles that were pinned to it return to Automatic. Others are untouched.
+ * An unavailable account gains no new pins; its existing pins can still be released.
  */
 export const planPinChanges = (
   account: ClientProfileAccount,
@@ -488,6 +509,7 @@ export const planPinChanges = (
     const pinned = policy.mode === 'only' && policy.accountRef === accountRef;
     const wantPinned = checked.has(profile.profileRef);
     if (pinned === wantPinned) return [];
+    if (wantPinned && !acceptsNewOnlyRules(account)) return [];
     const next: WritableClientProfilePolicy = wantPinned
       ? { mode: 'only', accountRef }
       : AUTOMATIC_POLICY;

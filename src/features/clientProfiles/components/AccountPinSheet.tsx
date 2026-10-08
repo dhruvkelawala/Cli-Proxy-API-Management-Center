@@ -16,7 +16,12 @@ import type {
   ClientProfilesCapabilities,
   ClientProfilesSnapshot,
 } from '@/types/clientProfiles';
-import { accountDisplayLabel, pinnedProfilesFor, planPinChanges } from '../model';
+import {
+  acceptsNewOnlyRules,
+  accountDisplayLabel,
+  pinnedProfilesFor,
+  planPinChanges,
+} from '../model';
 import { CR, providerLabelKey } from '../copy';
 import { useSheetCloseGuard } from '../sheetGuard';
 import { FailureNotice, Notice } from './Notices';
@@ -122,7 +127,7 @@ export function AccountPinSheet(props: AccountPinSheetProps) {
   };
 
   const canChoose = Boolean(account?.accountRef && account.targetSupported);
-  const unavailable = Boolean(account && (!account.available || account.state !== 'available'));
+  const unavailable = Boolean(account && !acceptsNewOnlyRules(account));
 
   const footer = canChoose ? (
     <div className={styles.footer}>
@@ -232,7 +237,9 @@ export function AccountPinSheet(props: AccountPinSheetProps) {
                       className={styles.checkbox}
                       checked={checked.has(profile.profileRef)}
                       onChange={() => toggle(profile.profileRef)}
-                      disabled={policy.mode === 'unknown'}
+                      // The gateway refuses a new Only rule for an unavailable account (422);
+                      // clients already pinned to it can still be returned to Automatic.
+                      disabled={policy.mode === 'unknown' || (unavailable && !isThis)}
                     />
                     <span className={styles.itemText}>
                       <span className={styles.itemLabel}>{profile.label}</span>
