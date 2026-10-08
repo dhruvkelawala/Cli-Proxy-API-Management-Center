@@ -2468,6 +2468,18 @@
       "title": "還沒有用戶端設定檔",
       "body": "設定檔是用戶端連線時使用的身分。先建立一個，再為它連結用戶端金鑰。"
     },
+    "shared_band": {
+      "label": "共用帳號池",
+      "loading": "載入中…",
+      "affinity_on": "對話固定在同一帳號",
+      "affinity_on_ttl": "對話固定在同一帳號，保持 {{ttl}}",
+      "affinity_off": "對話不固定在同一帳號",
+      "edit": "編輯",
+      "hide": "收合",
+      "edit_aria": "編輯共用帳號池設定",
+      "hide_aria": "收合共用帳號池設定",
+      "locked": "儲存或捨棄共用帳號池的變更後才能收合。"
+    },
     "connection": {
       "label": "此用戶端如何連線到閘道",
       "option_unset": "未設定",

@@ -2455,6 +2455,18 @@
       "title": "Chưa có hồ sơ máy khách",
       "body": "Hồ sơ là danh tính mà máy khách dùng khi kết nối. Hãy tạo một hồ sơ, rồi liên kết một khóa máy khách với nó."
     },
+    "shared_band": {
+      "label": "Nhóm dùng chung",
+      "loading": "Đang tải…",
+      "affinity_on": "Hội thoại giữ trên một tài khoản",
+      "affinity_on_ttl": "Hội thoại giữ trên một tài khoản trong {{ttl}}",
+      "affinity_off": "Hội thoại không giữ trên một tài khoản",
+      "edit": "Sửa",
+      "hide": "Ẩn",
+      "edit_aria": "Sửa thiết lập nhóm dùng chung",
+      "hide_aria": "Ẩn thiết lập nhóm dùng chung",
+      "locked": "Hãy lưu hoặc hủy thay đổi của nhóm dùng chung để thu gọn."
+    },
     "connection": {
       "label": "Cách máy khách này kết nối tới cổng",
       "option_unset": "Chưa đặt",

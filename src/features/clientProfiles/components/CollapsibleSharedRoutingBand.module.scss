@@ -1,0 +1,53 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.summaryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 10px 14px;
+  border: 1px dashed var(--border-hover, var(--border-color));
+  border-radius: 12px;
+  background: var(--bg-primary);
+  min-width: 0;
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 0;
+  margin: 0;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.label {
+  font-weight: 650;
+  color: var(--text-primary);
+}
+
+.part {
+  overflow-wrap: anywhere;
+}
+
+.dot {
+  margin: 0 6px;
+}
+
+.locked {
+  margin: 0;
+  font-size: 12px;
+  color: var(--amber-text, var(--text-secondary));
+}
+
+.region[hidden] {
+  display: none;
+}

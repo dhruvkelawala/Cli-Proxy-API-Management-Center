@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -27,12 +27,24 @@ const SHORT_KEYS: Record<RoutingStrategy, string> = {
   'fill-first': `${ROOT}.strategy_short.fill_first`,
 };
 
+/** What a host needs to summarise the band or keep it visible (unsaved edits, errors). */
+export interface SharedRoutingBandState {
+  /** Saved strategy/affinity; null until the config has loaded. */
+  saved: RoutingSettingsValues | null;
+  /** Unsaved strategy/affinity edits. */
+  dirty: boolean;
+  /** A save failed, its re-read failed, or an edit is invalid. */
+  attention: boolean;
+}
+
 export interface SharedRoutingBandProps {
   /**
    * Number of client profiles currently set to Automatic. When given, the scope notice names
    * it; otherwise the notice says the change affects all Automatic clients.
    */
   automaticClientCount?: number;
+  /** Optional: reports saved values, unsaved edits and failures to a host (e.g. a collapsible wrapper). */
+  onStateChange?: (state: SharedRoutingBandState) => void;
 }
 
 export interface RoutingBandViewProps {
@@ -211,10 +223,18 @@ export function RoutingBandView({
  * Priorities & weights sheet. Settings are global to the gateway, so it states that scope
  * beside each save. Strategy/affinity and account priority/weight are separate saves.
  */
-export function SharedRoutingBand({ automaticClientCount }: SharedRoutingBandProps) {
+export function SharedRoutingBand({ automaticClientCount, onStateChange }: SharedRoutingBandProps) {
   const { t } = useTranslation();
   const routing = useRoutingSettings();
   const [tuningOpen, setTuningOpen] = useState(false);
+  const saved = routing.saved ?? null;
+  const attention =
+    routing.globalSave.phase === 'failed' ||
+    routing.globalSave.phase === 'reload_failed' ||
+    routing.ttlError !== null;
+  useEffect(() => {
+    onStateChange?.({ saved, dirty: routing.dirty, attention });
+  }, [attention, onStateChange, routing.dirty, saved]);
 
   if (!routing.values || !routing.saved) {
     return (

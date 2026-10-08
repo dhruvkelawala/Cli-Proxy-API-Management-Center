@@ -2449,6 +2449,18 @@
       "title": "No client profiles yet",
       "body": "A profile is the identity a client connects with. Create one, then link a client key to it."
     },
+    "shared_band": {
+      "label": "Shared pool",
+      "loading": "Loading…",
+      "affinity_on": "Conversations kept on one account",
+      "affinity_on_ttl": "Conversations kept on one account for {{ttl}}",
+      "affinity_off": "Conversations not kept on one account",
+      "edit": "Edit",
+      "hide": "Hide",
+      "edit_aria": "Edit shared pool settings",
+      "hide_aria": "Hide shared pool settings",
+      "locked": "Save or discard the shared pool changes to collapse it."
+    },
     "connection": {
       "label": "How this client reaches the gateway",
       "option_unset": "Not set",

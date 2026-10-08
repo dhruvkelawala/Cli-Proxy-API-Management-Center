@@ -2442,6 +2442,18 @@
       "title": "还没有客户端配置",
       "body": "配置是客户端连接时使用的身份。先创建一个，再为其关联客户端密钥。"
     },
+    "shared_band": {
+      "label": "共享账号池",
+      "loading": "加载中…",
+      "affinity_on": "对话固定在同一账号",
+      "affinity_on_ttl": "对话固定在同一账号，保持 {{ttl}}",
+      "affinity_off": "对话不固定在同一账号",
+      "edit": "编辑",
+      "hide": "收起",
+      "edit_aria": "编辑共享账号池设置",
+      "hide_aria": "收起共享账号池设置",
+      "locked": "保存或放弃共享账号池的更改后才能收起。"
+    },
     "connection": {
       "label": "此客户端如何连接网关",
       "option_unset": "未设置",

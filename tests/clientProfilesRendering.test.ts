@@ -12,6 +12,12 @@ import { AccountClientLinks } from '@/features/clientProfiles/components/Account
 import { EnforcementNotice, FailureNotice } from '@/features/clientProfiles/components/Notices';
 import { buildAccountClientLinks } from '@/features/clientProfiles/accountLinks';
 import {
+  CollapsibleSharedRoutingBand,
+  SharedBandDisclosure,
+} from '@/features/clientProfiles/components/CollapsibleSharedRoutingBand';
+import { isSharedBandOpen, sharedBandSummaryParts } from '@/features/clientProfiles/sharedBand';
+import type { SharedRoutingBandState } from '@/features/config/routing/SharedRoutingBand';
+import {
   buildPoolPreview,
   buildProfileRows,
   credentialRefForAuthFile,
@@ -355,7 +361,7 @@ describe('profile sheet keys', () => {
   });
 });
 
-describe('notices, shared routing band and account links', () => {
+describe('notices and account links', () => {
   test('enforcement off is a calm notice that does not announce active selection', () => {
     const markup = render(createElement(EnforcementNotice));
     expect(markup).toContain(t('client_routes.enforcement.title'));
@@ -373,16 +379,6 @@ describe('notices, shared routing band and account links', () => {
     expect(markup).toContain(t('client_routes.errors.reload'));
     expect(markup).toContain('role="alert"');
     expect(markup).not.toContain(t('client_routes.editor.saved'));
-  });
-
-  test('the page embeds the shared routing band with the Automatic profile count', async () => {
-    const source = await Bun.file('src/features/clientProfiles/ClientRoutesPage.tsx').text();
-    expect(source).toContain(
-      "import { SharedRoutingBand } from '@/features/config/routing/SharedRoutingBand';"
-    );
-    expect(source).toMatch(
-      /<SharedRoutingBand\s+automaticClientCount=\{snapshot \? countAutomaticProfiles\(snapshot\) : undefined\}/
-    );
   });
 
   test('account cards show pinned clients and will-fail when the account is off', () => {
@@ -435,5 +431,77 @@ describe('client routes locales', () => {
       });
       expect({ locale, mismatched }).toEqual({ locale, mismatched: [] });
     }
+  });
+});
+
+describe('collapsible shared routing band', () => {
+  const savedState = (overrides: Partial<SharedRoutingBandState> = {}): SharedRoutingBandState => ({
+    saved: { strategy: 'round-robin', sessionAffinity: false, sessionAffinityTtl: '' },
+    dirty: false,
+    attention: false,
+    ...overrides,
+  });
+  const disclosure = (open: boolean, forced: boolean, state: SharedRoutingBandState | null) =>
+    render(
+      createElement(
+        SharedBandDisclosure,
+        {
+          open,
+          forced,
+          summary: sharedBandSummaryParts(i18n.t, state),
+          onToggle: noop,
+        },
+        createElement('p', null, 'BAND CONTENT')
+      )
+    );
+  const attr = (markup: string, name: string) => markup.match(new RegExp(`${name}="([^"]+)"`))?.[1];
+
+  test('collapsed by default: one summary row and an Edit disclosure controlling a hidden region', () => {
+    const markup = render(createElement(CollapsibleSharedRoutingBand, { automaticClientCount: 3 }));
+    expect(markup).toContain('aria-expanded="false"');
+    expect(markup).toContain(t('client_routes.shared_band.edit'));
+    expect(markup).toContain(`aria-label="${t('client_routes.shared_band.edit_aria')}"`);
+    const controls = attr(markup, 'aria-controls');
+    expect(controls).toBeTruthy();
+    expect(markup).toMatch(new RegExp(`id="${controls}"[^>]*hidden=""`));
+  });
+
+  test('the summary names the saved strategy and conversation affinity', () => {
+    const parts = sharedBandSummaryParts(i18n.t, savedState());
+    expect(parts).toEqual([
+      i18n.t('client_routes.shared_band.label'),
+      i18n.t('config_management.routing_settings.strategy.round_robin'),
+      i18n.t('client_routes.shared_band.affinity_off'),
+    ]);
+    expect(
+      sharedBandSummaryParts(
+        i18n.t,
+        savedState({
+          saved: { strategy: 'fill-first', sessionAffinity: true, sessionAffinityTtl: '1h' },
+        })
+      )[2]
+    ).toBe(i18n.t('client_routes.shared_band.affinity_on_ttl', { ttl: '1h' }));
+    expect(sharedBandSummaryParts(i18n.t, null)[1]).toBe(
+      i18n.t('client_routes.shared_band.loading')
+    );
+  });
+
+  test('expanded shows the band inline with a Hide control', () => {
+    const markup = disclosure(true, false, savedState());
+    expect(markup).toContain('aria-expanded="true"');
+    expect(markup).toContain(t('client_routes.shared_band.hide'));
+    expect(markup).toContain('BAND CONTENT');
+    expect(markup).not.toContain('hidden=""');
+  });
+
+  test('unsaved edits or a save error force it open and explain why it cannot collapse', () => {
+    expect(isSharedBandOpen(false, savedState())).toBe(false);
+    expect(isSharedBandOpen(false, savedState({ dirty: true }))).toBe(true);
+    expect(isSharedBandOpen(false, savedState({ attention: true }))).toBe(true);
+    expect(isSharedBandOpen(false, null)).toBe(false);
+    const markup = disclosure(true, true, savedState({ dirty: true }));
+    expect(markup).toContain('aria-expanded="true"');
+    expect(markup).toContain(t('client_routes.shared_band.locked'));
+    expect(markup).not.toContain('hidden=""');
   });
 });

@@ -9,7 +9,6 @@ import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useAuthStore } from '@/stores';
 import { useClientProfilesStore } from '@/stores/useClientProfilesStore';
-import { SharedRoutingBand } from '@/features/config/routing/SharedRoutingBand';
 import { gatewayDisplayHost } from '@/utils/connection';
 import type { ClientProfileProvider } from '@/types/clientProfiles';
 import {
@@ -21,6 +20,7 @@ import { buildPoolPreview, buildProfileRows, countAutomaticProfiles } from './mo
 import { CR } from './copy';
 import { useClientRoutesData } from './hooks/useClientRoutesData';
 import { ClientRoutesMatrix } from './components/ClientRoutesMatrix';
+import { CollapsibleSharedRoutingBand } from './components/CollapsibleSharedRoutingBand';
 import { EnforcementNotice, FailureNotice, Notice } from './components/Notices';
 import { PolicySheet } from './components/PolicySheet';
 import { ProfileSheet } from './components/ProfileSheet';
@@ -129,9 +129,9 @@ export function ClientRoutesPage() {
         )}
       </header>
 
-      {/* Shared load balancing for Automatic rules (CPA-008); Only rules ignore it. */}
+      {/* Shared load balancing for Automatic rules (CPA-008), collapsed so the matrix leads. */}
       {status !== 'unsupported' && (
-        <SharedRoutingBand
+        <CollapsibleSharedRoutingBand
           automaticClientCount={snapshot ? countAutomaticProfiles(snapshot) : undefined}
         />
       )}
