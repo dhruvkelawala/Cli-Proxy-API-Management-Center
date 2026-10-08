@@ -85,7 +85,44 @@
 .fields {
   display: flex;
   flex-direction: column;
+  gap: 22px;
+}
+
+/* 用途 → 路由 → 其他设置；原始元数据收进末尾的折叠区 */
+.section {
+  display: flex;
+  flex-direction: column;
   gap: 14px;
+}
+
+.section + .section {
+  padding-top: 18px;
+  border-top: 1px solid color-mix(in srgb, var(--border-color) 70%, transparent);
+}
+
+/* 与抽屉 eyebrow 同语汇：分组标签退后，字段标签保持主层级 */
+.sectionTitle {
+  margin: 0;
+  font-family: $font-mono;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.sectionHint {
+  margin: -6px 0 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.metadata {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .settingsLink {

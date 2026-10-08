@@ -129,13 +129,14 @@ export function DashboardPage() {
       value: credentials ? credentials.total.toLocaleString() : DASH,
       hint: credentials
         ? t('dashboard.stat_credentials_hint', {
-            active: credentials.active,
-            disabled: credentials.disabled + credentials.unavailable,
+            available: credentials.available,
+            attention: credentials.needsAttention,
+            disabled: credentials.disabled,
           })
         : t('dashboard.stat_credentials_empty'),
       meter:
         credentials && credentials.total > 0
-          ? (credentials.active / credentials.total) * 100
+          ? (credentials.available / credentials.total) * 100
           : null,
       tone: undefined,
     },
@@ -417,16 +418,22 @@ export function DashboardPage() {
           ) : (
             <>
               <div className={styles.healthBar}>
-                {credentials.active > 0 && (
+                {credentials.available > 0 && (
                   <span
                     className={`${styles.healthSegment} ${styles.healthActive}`}
-                    style={{ flexGrow: credentials.active }}
+                    style={{ flexGrow: credentials.available }}
                   />
                 )}
-                {credentials.unavailable > 0 && (
+                {credentials.needsAttention > 0 && (
                   <span
                     className={`${styles.healthSegment} ${styles.healthUnavailable}`}
-                    style={{ flexGrow: credentials.unavailable }}
+                    style={{ flexGrow: credentials.needsAttention }}
+                  />
+                )}
+                {credentials.unknown > 0 && (
+                  <span
+                    className={`${styles.healthSegment} ${styles.healthUnknown}`}
+                    style={{ flexGrow: credentials.unknown }}
                   />
                 )}
                 {credentials.disabled > 0 && (
@@ -439,17 +446,27 @@ export function DashboardPage() {
               <ul className={styles.healthLegend}>
                 <li>
                   <i className={`${styles.healthKey} ${styles.healthActive}`} aria-hidden="true" />
-                  {t('dashboard.health_active')}
-                  <b>{credentials.active.toLocaleString()}</b>
+                  {t('dashboard.health_available')}
+                  <b>{credentials.available.toLocaleString()}</b>
                 </li>
                 <li>
                   <i
                     className={`${styles.healthKey} ${styles.healthUnavailable}`}
                     aria-hidden="true"
                   />
-                  {t('dashboard.health_unavailable')}
-                  <b>{credentials.unavailable.toLocaleString()}</b>
+                  {t('dashboard.health_attention')}
+                  <b>{credentials.needsAttention.toLocaleString()}</b>
                 </li>
+                {credentials.unknown > 0 && (
+                  <li>
+                    <i
+                      className={`${styles.healthKey} ${styles.healthUnknown}`}
+                      aria-hidden="true"
+                    />
+                    {t('dashboard.health_unknown')}
+                    <b>{credentials.unknown.toLocaleString()}</b>
+                  </li>
+                )}
                 <li>
                   <i
                     className={`${styles.healthKey} ${styles.healthDisabled}`}

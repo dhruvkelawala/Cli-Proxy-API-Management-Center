@@ -30,12 +30,17 @@ export interface ProviderTraffic {
   buckets: RecentRequestBucket[];
 }
 
-/** 凭证健康度 */
+/** 凭证健康度（与凭证页 summarizeAccounts 同口径） */
 export interface CredentialHealth {
   total: number;
-  active: number;
+  /** 启用且可用 */
+  available: number;
+  /** 启用但冷却中或需处理（等同「问题」筛选） */
+  needsAttention: number;
+  /** 启用但后端尚未报告可用性 */
+  unknown: number;
+  /** 主动停用 */
   disabled: number;
-  unavailable: number;
   /** 按供应商类型分组的凭证数，按数量降序 */
   byType: Array<{ type: string; count: number }>;
 }

@@ -34,6 +34,8 @@ import { ProviderTabs } from '@/features/authFiles/components/ProviderTabs';
 import { VaultHeader } from '@/features/authFiles/components/VaultHeader';
 import { VaultPulse } from '@/features/authFiles/components/VaultPulse';
 import { invalidateAuthFileDerivedCaches } from '@/features/authFiles/cacheInvalidation';
+import { presentAccounts, summarizeAccounts } from '@/features/authFiles/accountPresentation';
+import { deriveAuthFileIdentity } from '@/features/authFiles/identity';
 import {
   buildWildcardSearch,
   matchesAuthFileSearch,
@@ -55,6 +57,7 @@ import {
   type AuthFilesSortMode,
 } from '@/features/authFiles/uiState';
 import { useAuthStore, useNotificationStore, useThemeStore } from '@/stores';
+import { gatewayDisplayHost } from '@/utils/connection';
 import styles from './AuthFilesPage.module.scss';
 
 const DEFAULT_REGULAR_PAGE_SIZE = 9;
@@ -81,6 +84,7 @@ export function AuthFilesPage() {
   const { t } = useTranslation();
   const showNotification = useNotificationStore((state) => state.showNotification);
   const connectionStatus = useAuthStore((state) => state.connectionStatus);
+  const apiBase = useAuthStore((state) => state.apiBase);
   const resolvedTheme: ResolvedTheme = useThemeStore((state) => state.resolvedTheme);
   const pageTransitionLayer = usePageTransitionLayer();
   const isCurrentLayer = pageTransitionLayer ? pageTransitionLayer.status === 'current' : true;
@@ -482,8 +486,14 @@ export function AuthFilesPage() {
 
   /* ---------- 头部遥测计数 ---------- */
 
-  const activeCount = useMemo(() => files.filter((file) => file.disabled !== true).length, [files]);
-  const problemCount = useMemo(() => files.filter(isProblemAuthFile).length, [files]);
+  const accountCounts = useMemo(() => summarizeAccounts(files), [files]);
+  const accountPresentations = useMemo(() => presentAccounts(files), [files]);
+  const gatewayHost = gatewayDisplayHost(apiBase);
+  const editorAccountLabel = useMemo(() => {
+    if (!prefixProxyEditor) return '';
+    const file = files.find((item) => item.name === prefixProxyEditor.fileName);
+    return file ? deriveAuthFileIdentity(file).primary : '';
+  }, [files, prefixProxyEditor]);
 
   /* ---------- 首屏卡片一次性级联入场 ----------
    * 首批数据渲染后立即翻转 cardsAnimated；已挂载的卡片在挂载时捕获过
@@ -587,9 +597,8 @@ export function AuthFilesPage() {
   return (
     <div className={styles.page}>
       <VaultHeader
-        totalCount={files.length}
-        activeCount={activeCount}
-        problemCount={problemCount}
+        counts={accountCounts}
+        gatewayHost={gatewayHost}
         loading={loading}
         refreshing={refreshing}
         uploading={uploading}
@@ -705,6 +714,7 @@ export function AuthFilesPage() {
               <AuthFileCard
                 key={getQuotaCacheKey(file)}
                 file={file}
+                presentation={accountPresentations.get(file)}
                 compact={compactMode}
                 selected={selectedFiles.has(file.name)}
                 resolvedTheme={resolvedTheme}
@@ -803,6 +813,7 @@ export function AuthFilesPage() {
       <AuthFileDetailsSheet
         disableControls={disableControls}
         editor={prefixProxyEditor}
+        accountLabel={editorAccountLabel}
         updatedText={prefixProxyUpdatedText}
         dirty={prefixProxyDirty}
         onClose={closePrefixProxyEditor}

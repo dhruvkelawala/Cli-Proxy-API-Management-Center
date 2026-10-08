@@ -50,6 +50,7 @@ import { APIKEY_FUN_DISPLAY_NAME, hasApiKeyFunConfig } from '@/features/provider
 import { triggerHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { LANGUAGE_LABEL_KEYS, LANGUAGE_ORDER } from '@/utils/constants';
 import { isSupportedLanguage } from '@/utils/language';
+import { gatewayDisplayHost } from '@/utils/connection';
 import { getSidebarShortcutLabel, isSidebarToggleShortcut } from '@/utils/sidebarShortcut';
 import type { Theme } from '@/types';
 
@@ -354,6 +355,9 @@ export function MainLayout() {
   const isLogsPage = location.pathname.startsWith('/logs');
   const isPluginResourcePage = location.pathname.startsWith('/plugin-pages');
   const showSidebarLabels = !sidebarCollapsed || sidebarOpen;
+  // 共享网关语境：只展示已配置地址的 host[:port]，管理改动作用于所有使用该网关的客户端
+  const gatewayHost = gatewayDisplayHost(apiBase);
+  const gatewayLabel = gatewayHost ? t('sidebar.gateway', { host: gatewayHost }) : '';
 
   // Keep floating header height available to sticky mobile elements and overlays.
   useLayoutEffect(() => {
@@ -1151,12 +1155,17 @@ export function MainLayout() {
           className={`sidebar ${sidebarOpen ? 'open' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}
         >
           <div className="sidebar-header">
-            <div className="sidebar-brand" title={fullBrandName}>
+            <div
+              className="sidebar-brand"
+              title={gatewayLabel ? `${fullBrandName} · ${gatewayLabel}` : fullBrandName}
+            >
               <img src={INLINE_LOGO_JPEG} alt="CPAMC logo" className="sidebar-brand-logo" />
               {showSidebarLabels && (
                 <span className="sidebar-brand-text">
                   <span className="sidebar-brand-title">{abbrBrandName}</span>
-                  <span className="sidebar-brand-subtitle">{t('sidebar.subtitle')}</span>
+                  <span className="sidebar-brand-subtitle">
+                    {gatewayLabel || t('sidebar.subtitle')}
+                  </span>
                 </span>
               )}
             </div>

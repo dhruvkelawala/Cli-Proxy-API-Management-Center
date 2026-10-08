@@ -699,6 +699,10 @@
   background: var(--text-quaternary);
 }
 
+.healthUnknown {
+  background: color-mix(in srgb, var(--text-quaternary) 45%, transparent);
+}
+
 .healthLegend {
   list-style: none;
   margin: 0;

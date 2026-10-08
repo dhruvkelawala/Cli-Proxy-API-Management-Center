@@ -30,14 +30,36 @@ import {
   type ResolvedTheme,
 } from '@/features/authFiles/constants';
 import { deriveAuthFileIdentity } from '@/features/authFiles/identity';
+import type {
+  AccountAvailability,
+  AccountPresentation,
+} from '@/features/authFiles/accountPresentation';
 import { resolveAuthFileQuotaType } from '@/features/authFiles/logic';
 import type { AuthFileStatusBarData } from '@/features/authFiles/hooks/useAuthFilesStatusBarCache';
 import { AuthFileQuotaSection } from '@/features/authFiles/components/AuthFileQuotaSection';
 import { AuthFileCooldownSection } from './AuthFileCooldownSection';
 import styles from './AuthFileCard.module.scss';
 
+const STATE_LABEL_KEYS: Record<AccountAvailability | 'off', string> = {
+  available: 'auth_files.account_state_available',
+  coolingDown: 'auth_files.account_state_cooling',
+  attention: 'auth_files.account_state_attention',
+  unknown: 'auth_files.account_state_unknown',
+  off: 'auth_files.account_state_off',
+};
+
+const STATE_TONE_CLASSES: Record<AccountAvailability | 'off', string> = {
+  available: styles.stateAvailable,
+  coolingDown: styles.stateCooling,
+  attention: styles.stateAttention,
+  unknown: styles.stateUnknown,
+  off: styles.stateOff,
+};
+
 export type AuthFileCardProps = {
   file: AuthFileItem;
+  /** Availability and pool preference from presentAccounts(all files); omitted = no state line. */
+  presentation?: AccountPresentation;
   compact: boolean;
   selected: boolean;
   resolvedTheme: ResolvedTheme;
@@ -64,6 +86,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
   const { t } = useTranslation();
   const {
     file,
+    presentation,
     compact,
     selected,
     resolvedTheme,
@@ -113,6 +136,16 @@ export function AuthFileCard(props: AuthFileCardProps) {
   const noteValue = typeof file.note === 'string' ? file.note.trim() : '';
   // 主行显示账号（email/项目 ID），文件名降为满卡宽的 mono 副行
   const identity = deriveAuthFileIdentity(file);
+  // 无障碍名称用账号身份而不是文件名，供应商前缀区分同邮箱的不同提供商
+  const accountName = identity.primary ? `${typeLabel} ${identity.primary}` : file.name;
+  const enabled = file.disabled !== true;
+  const stateKey = presentation ? (presentation.availability ?? 'off') : null;
+  const providerName = presentation ? getTypeLabel(t, presentation.provider) : typeLabel;
+  const poolLabel = presentation
+    ? presentation.poolRole === 'shared'
+      ? t('auth_files.pool_shared', { count: presentation.peers })
+      : t(`auth_files.pool_${presentation.poolRole}`, { provider: providerName })
+    : '';
 
   // 挂载时捕获一次入场延迟：父级随后传 null 也不会中断已开始的动画
   const [mountEntranceDelayMs] = useState<number | null>(entranceDelayMs ?? null);
@@ -138,8 +171,8 @@ export function AuthFileCard(props: AuthFileCardProps) {
             checked={selected}
             onChange={() => onToggleSelect(file.name)}
             className={styles.selection}
-            ariaLabel={t('auth_files.card_select', { name: file.name })}
-            title={t('auth_files.card_select', { name: file.name })}
+            ariaLabel={t('auth_files.card_select', { name: accountName })}
+            title={t('auth_files.card_select', { name: accountName })}
           />
         )}
         <h3 className={styles.identity}>
@@ -171,13 +204,27 @@ export function AuthFileCard(props: AuthFileCardProps) {
         </p>
       )}
 
-      {!compact && noteValue && (
+      {noteValue && (
         <p className={styles.note} title={noteValue}>
           {noteValue}
         </p>
       )}
 
-      {rawStatusMessage && hasStatusWarning && (
+      {stateKey && (
+        <p className={`${styles.state} ${STATE_TONE_CLASSES[stateKey]}`}>
+          <span className={styles.stateHead}>
+            <span className={styles.stateDot} aria-hidden="true" />
+            <span className={styles.stateLabel}>{t(STATE_LABEL_KEYS[stateKey])}</span>
+          </span>
+          <span className={`${styles.metaDivider} ${styles.stateDivider}`} aria-hidden="true">
+            ·
+          </span>
+          <span className={styles.statePool}>{poolLabel}</span>
+        </p>
+      )}
+
+      {/* 主动停用由状态行中性表达，不再以告警样式重复「disabled via management API」 */}
+      {rawStatusMessage && hasStatusWarning && enabled && (
         <div className={styles.warning} title={rawStatusMessage}>
           <IconInfo className={styles.warningIcon} size={14} />
           <span>{rawStatusMessage}</span>
@@ -318,10 +365,18 @@ export function AuthFileCard(props: AuthFileCardProps) {
         </div>
         {!isRuntimeOnly && (
           <div className={styles.toggleWrap}>
-            <span className={styles.toggleLabel}>{t('auth_files.status_toggle_label')}</span>
+            <span className={styles.toggleLabel} aria-hidden="true">
+              {enabled
+                ? t('auth_files.status_toggle_enabled')
+                : t('auth_files.status_toggle_disabled')}
+            </span>
             <ToggleSwitch
-              ariaLabel={t('auth_files.card_toggle', { name: file.name })}
-              checked={!file.disabled}
+              ariaLabel={
+                enabled
+                  ? t('auth_files.card_toggle_enabled', { name: accountName })
+                  : t('auth_files.card_toggle_disabled', { name: accountName })
+              }
+              checked={enabled}
               disabled={
                 disableControls ||
                 statusUpdating[getAuthFileRefreshKey(file)] === true ||

@@ -71,6 +71,16 @@
   color: var(--viz-failure);
 }
 
+/* 共享网关语境：管理改动作用于所有使用该网关的客户端 */
+.context {
+  margin: 0;
+  max-width: 64ch;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
 /* ---------- 动作区 ---------- */
 
 .actions {
@@ -179,6 +189,9 @@
 
   .actions {
     justify-content: flex-start;
+    /* 360px 下三颗按钮的固有宽度超出内容区；允许换行，避免撑宽头部而裁切网关语境行 */
+    flex-wrap: wrap;
+    min-width: 0;
   }
 }
 

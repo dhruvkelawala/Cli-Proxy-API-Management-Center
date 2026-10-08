@@ -27,14 +27,34 @@ describe('auth file card presentation contract', () => {
     const footer = source.split('<footer')[1].split('</footer>')[0];
     expect(source.match(/<ToggleSwitch/g)).toHaveLength(1);
     expect(header).not.toContain('<ToggleSwitch');
-    expect(header).toContain("ariaLabel={t('auth_files.card_select', { name: file.name })}");
+    expect(header).toContain("ariaLabel={t('auth_files.card_select', { name: accountName })}");
     expect(header).not.toContain('aria-label=');
     expect(footer).toContain('<ToggleSwitch');
-    expect(footer).toContain("t('auth_files.card_toggle', { name: file.name })");
-    expect(footer).toContain('checked={!file.disabled}');
+    expect(source).toContain('const enabled = file.disabled !== true;');
+    expect(footer).toContain('checked={enabled}');
     expect(footer).toContain('statusUpdating[getAuthFileRefreshKey(file)] === true ||');
     expect(footer).toContain('isManualRefreshing');
     expect(footer).toContain('!isRuntimeOnly &&');
+  });
+
+  test('labels the switch from the actual account state', () => {
+    const footer = source.split('<footer')[1].split('</footer>')[0];
+    expect(footer).not.toContain('status_toggle_label');
+    expect(footer).toMatch(
+      /enabled\s*\?\s*t\('auth_files\.status_toggle_enabled'\)\s*:\s*t\('auth_files\.status_toggle_disabled'\)/
+    );
+    expect(footer).toMatch(
+      /enabled\s*\?\s*t\('auth_files\.card_toggle_enabled', \{ name: accountName \}\)\s*:\s*t\('auth_files\.card_toggle_disabled', \{ name: accountName \}\)/
+    );
+  });
+
+  test('keeps the account purpose and state visible in compact mode', () => {
+    expect(source).not.toContain('!compact && noteValue');
+    expect(source).toContain('{noteValue && (');
+    const stateLine = source.split('{stateKey && (')[1].split('</p>')[0];
+    expect(stateLine).toContain('STATE_LABEL_KEYS[stateKey]');
+    expect(stateLine).toContain('{poolLabel}');
+    expect(source).not.toMatch(/compact\s*&&[^\n]*stateKey/);
   });
 
   test('dims disabled card content but keeps the re-enable controls clear', () => {
@@ -75,7 +95,7 @@ describe('auth file card presentation contract', () => {
     ]) {
       expect(source).toContain(handler);
     }
-    expect(source).toContain('rawStatusMessage && hasStatusWarning');
+    expect(source).toContain('rawStatusMessage && hasStatusWarning && enabled');
     expect(source).toContain('showManualRefreshButton');
     expect(source).toContain('file.disabled ||');
   });
