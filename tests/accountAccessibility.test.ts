@@ -6,6 +6,7 @@ import i18n from '@/i18n';
 import { AuthFileModelList } from '@/features/authFiles/components/AuthFileModelsModal';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import { isTopmostDialog } from '@/components/ui/dialogStack';
+import { createOpenerFocusTracker } from '@/components/common/trackOpenerFocus';
 import { TYPE_COLORS } from '@/utils/quota/constants';
 import { contrastRatio, loadThemeTokens } from './helpers/wcagContrast';
 
@@ -246,17 +247,17 @@ describe('operational status colours', () => {
 });
 
 describe('ToggleSwitch', () => {
-  test('renders a real switch whose name is the supplied state-aware label', () => {
+  test('renders a real switch with a fixed name (aria-checked carries the state)', () => {
     const markup = renderToStaticMarkup(
       createElement(ToggleSwitch, {
         checked: true,
         onChange: () => {},
-        ariaLabel: 'Claude A: enabled',
+        ariaLabel: 'Claude A',
       })
     );
     expect(markup).toContain('type="checkbox"');
     expect(markup).toContain('role="switch"');
-    expect(markup).toContain('aria-label="Claude A: enabled"');
+    expect(markup).toContain('aria-label="Claude A"');
     expect(markup).toContain('checked=""');
   });
 
@@ -367,8 +368,8 @@ describe('Client routes and the shared band', () => {
 
 describe('dialogs, drawer and motion', () => {
   test('only the topmost modal dialog reacts to Escape and Tab', () => {
-    const bottom = {} as HTMLElement;
-    const top = {} as HTMLElement;
+    const bottom = { hasAttribute: () => false } as unknown as HTMLElement;
+    const top = { hasAttribute: () => false } as unknown as HTMLElement;
     const original = (globalThis as { document?: unknown }).document;
     (globalThis as { document?: unknown }).document = {
       querySelectorAll: () => [bottom, top],
@@ -377,8 +378,26 @@ describe('dialogs, drawer and motion', () => {
       expect(isTopmostDialog(top)).toBe(true);
       expect(isTopmostDialog(bottom)).toBe(false);
       expect(isTopmostDialog(null)).toBe(true);
+
+      // A dialog animating out (data-closing) no longer blocks the one beneath it.
+      const closing = { hasAttribute: (name: string) => name === 'data-closing' } as HTMLElement;
+      const open = { hasAttribute: () => false } as unknown as HTMLElement;
+      const below = { hasAttribute: () => false } as unknown as HTMLElement;
+      (globalThis as { document?: unknown }).document = {
+        querySelectorAll: () => [below, open, closing],
+      };
+      expect(isTopmostDialog(open)).toBe(true);
+      expect(isTopmostDialog(below)).toBe(false);
+      expect(isTopmostDialog(closing)).toBe(false);
+      (globalThis as { document?: unknown }).document = {
+        querySelectorAll: () => [below, closing],
+      };
+      expect(isTopmostDialog(below)).toBe(true);
     } finally {
       (globalThis as { document?: unknown }).document = original;
+    }
+    for (const file of ['src/components/ui/Sheet/Sheet.tsx', 'src/components/ui/Modal.tsx']) {
+      expect(read(file)).toContain("data-closing={isClosing ? 'true' : undefined}");
     }
     expect(read('src/components/ui/Sheet/Sheet.tsx')).toContain(
       'if (!isTopmostDialog(sheetRef.current)) return;'
@@ -388,12 +407,47 @@ describe('dialogs, drawer and motion', () => {
     );
   });
 
-  test('the confirmation dialog returns focus to its opener (it unmounts, so Modal cannot)', () => {
+  test('focus tracker returns focus to the opener after open then close', () => {
+    const calls: string[] = [];
+    const opener = { isConnected: true, focus: () => calls.push('opener') };
+    const other = { isConnected: true, focus: () => calls.push('other') };
+    let active: typeof opener | null = opener;
+    const track = createOpenerFocusTracker(() => active);
+
+    track(false); // initial mount while closed: nothing to restore
+    expect(calls).toEqual([]);
+    track(true); // opens while the opener has focus
+    active = other; // focus then moves into the dialog
+    track(false); // closes
+    expect(calls).toEqual(['opener']);
+    track(false); // closing again does not refocus
+    expect(calls).toEqual(['opener']);
+  });
+
+  test('focus tracker skips an opener that left the document or was never focusable', () => {
+    let called = false;
+    const gone = {
+      isConnected: false,
+      focus: () => {
+        called = true;
+      },
+    };
+    const track = createOpenerFocusTracker(() => gone);
+    track(true);
+    track(false);
+    expect(called).toBe(false);
+
+    const none = createOpenerFocusTracker(() => null);
+    none(true);
+    expect(() => none(false)).not.toThrow();
+  });
+
+  test('the confirmation dialog drives the tracker from isOpen', () => {
     const source = read('src/components/common/ConfirmationModal.tsx');
-    expect(source).toContain('openerRef.current = ');
-    expect(source).toContain('document.activeElement instanceof HTMLElement');
-    expect(source).toContain('opener?.isConnected');
-    expect(source).toContain('opener.focus(');
+    expect(source).toContain('createOpenerFocusTracker(getActiveHtmlElement)');
+    expect(source).toMatch(
+      /useEffect\(\(\) => \{\s*trackOpener\(isOpen\);\s*\}, \[isOpen, trackOpener\]\)/
+    );
   });
 
   test('the closed mobile drawer is not focusable and motion honours reduced-motion', () => {
