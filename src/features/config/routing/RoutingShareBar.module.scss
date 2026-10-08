@@ -1,15 +1,15 @@
 .wrap {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   min-width: 0;
 }
 
 .bar {
   display: flex;
   gap: 3px;
-  height: 26px;
-  border-radius: 8px;
+  height: 14px;
+  border-radius: 999px;
   overflow: hidden;
   background: var(--bg-tertiary);
 }
@@ -19,16 +19,13 @@
   padding: 0 10px;
   font-size: 12px;
   font-weight: 600;
+  line-height: 14px;
   color: var(--text-secondary);
 }
 
 .segment {
-  display: flex;
-  align-items: center;
   flex-basis: 0;
   min-width: 6px;
-  padding: 0 8px;
-  overflow: hidden;
   transition: flex-grow 280ms var(--ease-out-strong);
 
   @media (prefers-reduced-motion: reduce) {
@@ -36,45 +33,69 @@
   }
 }
 
-.seg0 {
-  background: var(--text-primary);
-  color: var(--bg-secondary);
+// Calm, distinct tones from the neutral palette so adjacent segments can be told apart.
+.tone0 {
+  background: color-mix(in srgb, var(--text-primary) 72%, var(--bg-secondary));
 }
 
-.seg1 {
+.tone1 {
   background: var(--primary-color);
-  color: var(--bg-secondary);
 }
 
-.seg2 {
-  background: var(--border-hover);
-  color: var(--text-primary);
+.tone2 {
+  background: color-mix(in srgb, var(--primary-color) 42%, var(--bg-secondary));
+}
+
+.tone3 {
+  background: color-mix(in srgb, var(--text-primary) 28%, var(--bg-secondary));
 }
 
 .unknown {
   background-image: repeating-linear-gradient(
     -45deg,
-    transparent 0 5px,
-    color-mix(in srgb, var(--bg-secondary) 34%, transparent) 5px 9px
+    transparent 0 4px,
+    color-mix(in srgb, var(--bg-secondary) 45%, transparent) 4px 7px
   );
   box-shadow: inset 0 0 0 2px var(--amber-color);
 }
 
-.segmentLabel {
+.legend {
   display: flex;
-  min-width: 0;
-  font-size: 12px;
-  font-weight: 650;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    font-size: 12.5px;
+  }
 }
 
-.segmentName {
+.swatch {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.legendName {
   min-width: 0;
-  margin-right: 0.3em;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.legendValue {
+  font-family: $font-mono;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
 }
 
 .caption {

@@ -8,8 +8,5 @@ export const bandScopeText = (t: TFunction, automaticClientCount?: number): stri
     ? t(`${ROOT}.scope`)
     : t(`${ROOT}.scope_count`, { count: automaticClientCount });
 
-/** Scope notice beside the account save. The count is an upper bound for those accounts. */
-export const accountsScopeText = (t: TFunction, automaticClientCount?: number): string =>
-  automaticClientCount === undefined
-    ? t(`${ROOT}.sheet.scope`)
-    : t(`${ROOT}.sheet.scope_count`, { count: automaticClientCount });
+/** Scope notice beside the account save. A client count would overstate who uses these accounts. */
+export const accountsScopeText = (t: TFunction): string => t(`${ROOT}.sheet.scope`);

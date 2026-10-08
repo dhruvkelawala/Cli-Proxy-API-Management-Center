@@ -3,7 +3,8 @@ import type { RoutingAccountPresentation } from './routingPresentation';
 import { formatSharePercent } from './routingFormat';
 import styles from './RoutingShareBar.module.scss';
 
-const SEGMENT_CLASSES = [styles.seg0, styles.seg1, styles.seg2];
+const TONES = [styles.tone0, styles.tone1, styles.tone2, styles.tone3];
+const toneFor = (index: number) => TONES[index % TONES.length];
 
 export interface RoutingShareBarProps {
   /** Accounts of one provider pool, in display order. */
@@ -12,9 +13,10 @@ export interface RoutingShareBarProps {
 }
 
 /**
- * Illustrative configured shares for one provider pool. Always labelled as illustrative:
- * it is the scheduler's configured intent under an all-eligible assumption, never served-by
- * attribution, tokens or cost. Unknown availability is striped.
+ * Illustrative configured shares for one provider pool, with a legend naming every segment.
+ * Always labelled as illustrative: it is the scheduler's configured intent under an
+ * all-eligible assumption, never served-by attribution, tokens or cost. Unknown availability
+ * is striped with an amber ring.
  */
 export function RoutingShareBar({ accounts, strategyLabel }: RoutingShareBarProps) {
   const { t } = useTranslation();
@@ -33,6 +35,9 @@ export function RoutingShareBar({ accounts, strategyLabel }: RoutingShareBarProp
         .join(', ')
     : t('config_management.routing_settings.sheet.share_empty');
 
+  const segmentClass = ({ account, index }: (typeof sharing)[number]) =>
+    [toneFor(index), account.status === 'unknown' ? styles.unknown : ''].filter(Boolean).join(' ');
+
   return (
     <div className={styles.wrap}>
       <div
@@ -45,32 +50,30 @@ export function RoutingShareBar({ accounts, strategyLabel }: RoutingShareBarProp
             {t('config_management.routing_settings.sheet.share_empty')}
           </span>
         ) : (
-          sharing.map(({ account, index }) => (
+          sharing.map((entry) => (
             <span
-              key={account.id}
-              className={[
-                styles.segment,
-                SEGMENT_CLASSES[index % SEGMENT_CLASSES.length],
-                account.status === 'unknown' ? styles.unknown : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-              data-availability={account.availability}
-              data-striped={account.status === 'unknown' ? 'true' : undefined}
-              style={{ flexGrow: account.sharePercent ?? 0 }}
-            >
-              {(account.sharePercent ?? 0) >= 12 && (
-                <span className={styles.segmentLabel}>
-                  {(account.sharePercent ?? 0) >= 30 && (
-                    <span className={styles.segmentName}>{account.label} </span>
-                  )}
-                  {formatSharePercent(account.sharePercent ?? 0)}
-                </span>
-              )}
-            </span>
+              key={entry.account.id}
+              className={`${styles.segment} ${segmentClass(entry)}`}
+              data-availability={entry.account.availability}
+              data-striped={entry.account.status === 'unknown' ? 'true' : undefined}
+              style={{ flexGrow: entry.account.sharePercent ?? 0 }}
+            />
           ))
         )}
       </div>
+      {sharing.length > 0 && (
+        <ul className={styles.legend}>
+          {sharing.map((entry) => (
+            <li key={entry.account.id}>
+              <span className={`${styles.swatch} ${segmentClass(entry)}`} aria-hidden="true" />
+              <span className={styles.legendName}>{entry.account.label}</span>
+              <span className={styles.legendValue}>
+                {formatSharePercent(entry.account.sharePercent ?? 0)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
       <p className={styles.caption}>
         {t('config_management.routing_settings.sheet.share_caption', { strategy: strategyLabel })}
         {hasUnknown ? ` · ${t('config_management.routing_settings.sheet.share_unknown')}` : ''}

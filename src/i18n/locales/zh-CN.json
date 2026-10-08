@@ -1599,7 +1599,6 @@
       "scope": "全局 · 影响共享网关上的所有自动客户端（两台 Mac）",
       "scope_count_one": "全局 · 影响共享网关上的 {{count}} 个自动客户端（两台 Mac）",
       "scope_count_other": "全局 · 影响共享网关上的 {{count}} 个自动客户端（两台 Mac）",
-      "only_ignores": "设为“仅使用某个账号”的客户端会忽略这些设置。",
       "strategy_legend": "选择策略",
       "strategy_saved": "已保存：{{label}}",
       "strategy": {
@@ -1607,7 +1606,7 @@
         "weighted_round_robin": "按权重分配",
         "fill_first": "集中到一个账号"
       },
-      "recommend": "编程场景推荐：均匀轮换，并让对话保持在同一账号。已保存的策略不会被自动更改。",
+      "recommend": "编程场景推荐：均匀轮换，并让对话保持在同一账号。",
       "affinity_label": "让对话保持在同一账号",
       "affinity_ttl_prefix": "时长",
       "affinity_ttl_aria": "对话保持在同一账号的时长",
@@ -1665,9 +1664,7 @@
         "share_caption": "{{strategy}}下新分配的示意占比 · 并非实际流量、令牌或费用",
         "share_unknown": "条纹 = 可用性未知",
         "share_standby": "备用",
-        "scope": "全局 · 影响所有可使用这些账号的自动客户端（两台 Mac）",
-        "scope_count_one": "全局 · 影响可使用这些账号的自动客户端（最多 {{count}} 个，两台 Mac）",
-        "scope_count_other": "全局 · 影响可使用这些账号的自动客户端（最多 {{count}} 个，两台 Mac）",
+        "scope": "全局 · 影响所有使用这些账号的自动客户端（两台 Mac）",
         "save": "保存账号",
         "status": {
           "clean": "与已保存的账号一致",
@@ -1677,8 +1674,17 @@
           "partial": "已保存 {{total}} 个账号中的 {{saved}} 个。未保存并保留草稿：{{names}}",
           "failed": "没有账号被保存。已保留草稿：{{names}}",
           "invalid": "请先修正高亮的值再保存"
-        }
-      }
+        },
+        "config_keys_note": "同一提供商的配置 API 密钥也会参与分配，因此此列表并非完整账号池。请在 <providersLink>AI 提供商</providersLink> 中编辑。"
+      },
+      "strategy_short": {
+        "round_robin": "让新分配在最高优先级层的可用账号间依次轮换。",
+        "weighted_round_robin": "按权重在最高优先级层内分配新请求。权重为 0 或更低的账号会被跳过。",
+        "fill_first": "把新分配交给第一个可用账号。给某个账号更高的优先级即可优先使用它。"
+      },
+      "muted_on": "对话会在其账号上保持 {{ttl}}。设为“仅使用某个账号”的客户端会忽略这些设置。",
+      "muted_off": "每个请求独立分配。设为“仅使用某个账号”的客户端会忽略这些设置。",
+      "how_title": "工作原理"
     }
   },
   "quota_management": {

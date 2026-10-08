@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { I18nextProvider } from 'react-i18next';
+import { MemoryRouter } from 'react-router-dom';
 import i18n from '@/i18n';
 import {
   RoutingBandView,
@@ -11,6 +12,7 @@ import {
   RoutingTuningPanel,
   type RoutingTuningPanelProps,
 } from '@/features/config/routing/RoutingTuningPanel';
+import { accountsScopeText, bandScopeText } from '@/features/config/routing/routingScope';
 import { describeAccountSaveStatus } from '@/features/config/routing/routingStatus';
 import type { RoutingSettingsValues } from '@/features/config/routing/routingSettingsState';
 import type { AuthFileItem } from '@/types';
@@ -18,7 +20,13 @@ import type { AuthFileItem } from '@/types';
 const languages = ['en', 'zh-CN', 'zh-TW', 'ru', 'vi'] as const;
 const translations = i18n.cloneInstance({ lng: 'en' });
 const render = (element: ReturnType<typeof createElement>, i18nInstance = translations) =>
-  renderToStaticMarkup(createElement(I18nextProvider, { i18n: i18nInstance }, element));
+  renderToStaticMarkup(
+    createElement(
+      MemoryRouter,
+      null,
+      createElement(I18nextProvider, { i18n: i18nInstance }, element)
+    )
+  );
 const escapeText = (value: string) =>
   renderToStaticMarkup(createElement('span', null, value)).slice(6, -7);
 
@@ -96,13 +104,44 @@ describe('shared routing band', () => {
   });
 
   test.each([
-    ['round-robin', 'new assignments cycle through the eligible accounts'],
-    ['weighted-round-robin', 'in proportion to each account weight'],
-    ['fill-first', 'first eligible account in internal ID order'],
-  ] as const)('explains %s in one line from the shared presentation keys', (strategy, snippet) => {
+    [
+      'round-robin',
+      'Cycles new assignments through the eligible accounts in the top priority tier.',
+    ],
+    [
+      'weighted-round-robin',
+      'Splits new assignments in the top priority tier by weight. Weight 0 or below is skipped.',
+    ],
+    ['fill-first', 'Sends new assignments to the first eligible account.'],
+  ] as const)('explains %s in one short line', (strategy, snippet) => {
     const markup = band({ values: values({ strategy }) });
     expect(markup).toContain(snippet);
     expect(checkedStrategies(markup)).toEqual([strategy]);
+    // The long, shared explanation lives behind the disclosure, not in the visible body.
+    const [visible, disclosure] = markup.split('<details');
+    expect(visible).not.toContain('internal ID order');
+    expect(disclosure).toBeDefined();
+  });
+
+  test('keeps the band to a short line, one muted line and a collapsed disclosure', () => {
+    const markup = band({ values: values({ sessionAffinity: true, sessionAffinityTtl: '2h' }) });
+    const [visible, rest] = markup.split('<details');
+    expect(visible).toContain(
+      'Conversations stay on their account for 2h. Clients set to Only one account ignore these settings.'
+    );
+    expect(markup).not.toMatch(/<details[^>]* open/);
+    expect(rest).toContain('How this works');
+    expect(rest).toContain('Conversation affinity is on.');
+    expect(rest).toContain(
+      'Recommended for coding: Rotate evenly with conversations kept on one account.'
+    );
+    expect(visible).not.toContain('Recommended for coding');
+    expect(visible).not.toContain('Conversation affinity is on.');
+    expect(markup).not.toContain('never changed automatically');
+    const off = band({ values: values({ sessionAffinity: false }) });
+    expect(off).toContain(
+      'Each request is assigned on its own. Clients set to Only one account ignore'
+    );
   });
 
   test('a saved fill-first strategy loads as fill-first, not the recommended default', () => {
@@ -119,6 +158,9 @@ describe('shared routing band', () => {
     });
     expect(markup).toContain('Saved: Concentrate on one');
     expect(markup).toContain('Unsaved changes');
+    // A separate pill beside the segmented control, not glued onto the explanation.
+    expect(markup).toMatch(/<\/fieldset><span[^>]*>Saved: Concentrate on one<\/span>/);
+    expect(band({ dirty: false })).not.toContain('Saved:');
   });
 
   test('states the global scope beside the save action', () => {
@@ -139,11 +181,8 @@ describe('shared routing band', () => {
     expect(band({ automaticClientCount: 3 })).not.toContain('affects all Automatic clients');
   });
 
-  test('tells the reader that Only profiles ignore these settings and recommends without changing', () => {
-    const markup = band();
-    expect(markup).toContain('Clients set to Only one account ignore these settings.');
-    expect(markup).toContain('Recommended for coding');
-    expect(markup).toContain('never changed automatically');
+  test('tells the reader that Only profiles ignore these settings', () => {
+    expect(band()).toContain('Clients set to Only one account ignore these settings.');
   });
 
   test('keeps conversations toggle and TTL are labelled and the TTL is off with affinity', () => {
@@ -179,6 +218,12 @@ describe('shared routing band', () => {
     );
     expect(markup).toContain(
       escapeText(instance.t('config_management.routing_settings.scope_count', { count: 2 }))
+    );
+    expect(markup).toContain(
+      escapeText(instance.t('config_management.routing_settings.strategy_short.round_robin'))
+    );
+    expect(markup).toContain(
+      escapeText(instance.t('config_management.routing_settings.how_title'))
     );
   });
 });
@@ -260,6 +305,67 @@ describe('priorities and weights panel', () => {
     expect(markup).toContain('>Codex</h3>');
   });
 
+  test('names every bar segment in a legend with a distinct tone', () => {
+    const markup = panel({
+      strategy: 'weighted-round-robin',
+      files: [
+        file('a', { weight: 1, note: 'Alpha seat' }),
+        file('b', { weight: 1, note: 'Beta seat' }),
+        file('c', { weight: 2, note: 'Gamma seat' }),
+      ],
+    });
+    const legend = markup.match(/<ul[^>]*>(?:(?!<\/ul>).)*Alpha seat(?:(?!<\/ul>).)*<\/ul>/g) ?? [];
+    const swatches = legend.find((block) => block.includes('aria-hidden="true"')) ?? '';
+    for (const entry of ['Alpha seat', 'Beta seat', 'Gamma seat', '25%', '50%']) {
+      expect(swatches).toContain(entry);
+    }
+    // The bar itself carries no text labels: names live in the legend.
+    const bar = markup.match(/<div[^>]*role="img"[^>]*>(.*?)<\/div>/)?.[1] ?? '';
+    expect(bar).not.toContain('Alpha');
+    expect(bar).not.toMatch(/\d%/);
+  });
+
+  test('shows the priority and weight hint once at the top, not under each provider', () => {
+    const markup = panel({
+      files: [file('c1'), file('x1', { type: 'codex' }), file('c2', { type: 'claude' })],
+    });
+    expect(markup.match(/Higher wins new assignments/g)).toHaveLength(1);
+    expect(markup.match(/Used only by Weighted split/g)).toHaveLength(1);
+    expect(markup.indexOf('Higher wins new assignments')).toBeLessThan(
+      markup.indexOf('>Claude</h3>')
+    );
+    const weighted = panel({ strategy: 'weighted-round-robin', files: [file('c1'), file('c2')] });
+    expect(weighted.match(/Default 1 · max 1,000,000/g)).toHaveLength(1);
+  });
+
+  test('points to AI Providers for config API keys, which also take part', () => {
+    const markup = panel();
+    expect(markup).toContain('Config API keys for the same provider also take part');
+    expect(markup).toContain('this list is not the whole pool');
+    expect(markup).toMatch(/<a[^>]*href="\/ai-providers"[^>]*>AI Providers<\/a>/);
+    expect(markup.match(/ai-providers/g)).toHaveLength(1);
+  });
+
+  test('repeats the role sentence only for excluded or standby rows', () => {
+    const markup = panel({
+      files: [
+        file('top', { priority: 5 }),
+        file('low', { priority: 1 }),
+        file('off', { disabled: true, status: 'disabled' }),
+      ],
+    });
+    // Participating: the chip is enough (the sentence stays available as a tooltip).
+    expect(markup).not.toContain('>Participates in the shared pool.<');
+    expect(markup).toContain('title="Participates in the shared pool."');
+    expect(markup).toContain('>Excluded: the account is disabled.<');
+    expect(markup).toContain('>Excluded for now: a higher priority tier has eligible accounts.');
+    const standby = panel({ strategy: 'fill-first', files: [file('a'), file('b')] });
+    expect(standby).toContain(
+      '>Eligible, but only used if the accounts before it become unavailable.<'
+    );
+    expect(standby).not.toContain('>Participates in the shared pool.<');
+  });
+
   test('shows draft values and an unsaved marker, with field errors', () => {
     const markup = panel({
       files: [file('claude-a', { priority: 1 })],
@@ -303,6 +409,22 @@ describe('priorities and weights panel', () => {
     expect(markup).toContain(
       escapeText(instance.t('config_management.routing_settings.sheet.priority_hint'))
     );
+    expect(markup).toContain('href="/ai-providers"');
+    expect(markup).not.toContain('&lt;link&gt;');
+  });
+});
+
+describe('scope notices', () => {
+  const t = translations.t.bind(translations);
+
+  test('the account save names no client count, the band keeps it', () => {
+    expect(accountsScopeText(t)).toBe(
+      'Global · affects every Automatic client using these accounts, on both Macs'
+    );
+    expect(bandScopeText(t, 3)).toBe(
+      'Global · affects 3 Automatic clients on the shared gateway (both Macs)'
+    );
+    expect(bandScopeText(t)).toContain('affects all Automatic clients');
   });
 });
 
