@@ -1,6 +1,6 @@
 # CPA-008: Expose shared load-balancing strategies with priority, weights and session affinity
 
-- **Status:** TODO
+- **Status:** In review (UI steps 1-4 implemented on `cpa-008-shared-load-balancing`; step 5 fixture proof pending backend CPA-003)
 - **Issue:** https://github.com/dhruvkelawala/Cli-Proxy-API-Management-Center/issues/4
 - **Tracking issue:** https://github.com/dhruvkelawala/CLIProxyAPI/issues/5
 - **Priority:** P2; follow strict subscription selection
@@ -98,6 +98,20 @@ Match React/TypeScript feature ownership, existing Input/Select/Toggle component
 - [ ] Focused tests and `bunx bun@1.3.14 run verify` pass; screenshots cover both themes and widths.
 - [ ] Changed files remain in scope; no new backend API, T3 fork or production modification.
 - [ ] Update this issue and the pickup/tracking status with implementation evidence.
+
+## Implementation status
+
+Implemented (steps 1-4, UI only):
+
+- `src/features/config/routing/SharedRoutingBand.tsx` exports `SharedRoutingBand({ automaticClientCount? })`: strategy choice, "Keep conversations on one account" with TTL, and a "Priorities & weights" side sheet. It is not mounted anywhere yet; the Client routes page (CPA-005) mounts it. The Config page keeps its own Network editor, which now shows the same explanations.
+- Saved strategy and affinity are read from `useConfigStore` and written as touched-field patches through `applyConfigPatch` (connection-revision aware), so an untouched fill-first is never rewritten. Priority and weight use `authFilesApi.patchFields` with the credential editor's field semantics. The two saves are separate, report their own state, retain failed drafts and ignore completions after a connection switch.
+- Verification: `tests/routingSettingsState.test.ts`, `tests/routingSettingsRendering.test.ts`, `tests/routingPresentation.test.ts` and `bunx bun@1.3.14 run verify`. Browser evidence against a synthetic mock (360px/728px, light/dark) is kept outside the repo.
+
+Pending:
+
+- Step 5 (fixture proof that Only-B stays strict under all three strategies and that failures record zero traffic to A) needs the CPA-001 fixture and the CPA-003 strict policies. Not run, not faked.
+- Mounting on the Client routes page and the real Automatic client count belong to CPA-005.
+- `../CLIProxyAPI` was not available in this workspace; selector semantics were taken from this plan and were not re-read in the backend source.
 
 ## Stop conditions and later work
 
