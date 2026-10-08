@@ -2588,7 +2588,7 @@
       "title": "Not saved",
       "reload": "Reload",
       "not_found_title": "Not found",
-      "stale": "Client routes changed on the gateway since this page loaded. Your edit is kept; reload to see the latest state, then save again.",
+      "stale": "The gateway configuration changed since this page loaded (for example a shared pool save or an edit elsewhere). Your edit is kept; reload to see the latest state, then save again.",
       "reload_pending": "The gateway has config changes on disk that it hasn't loaded yet. Wait a moment, reload, then try again.",
       "profile_in_use": "This profile still has client keys. Move or revoke them first.",
       "last_client_key": "This is the gateway's last client key. Without any key the gateway would accept requests without a key, so add another key first.",

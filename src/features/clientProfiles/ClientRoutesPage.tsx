@@ -105,6 +105,8 @@ export function ClientRoutesPage() {
     setSheet({ kind: 'policy', profileRef, provider, open: true, id: (sheetSequence += 1) });
   const openProfile = (profileRef: string | null) =>
     setSheet({ kind: 'profile', profileRef, open: true, id: (sheetSequence += 1) });
+  // The band writes the config file; client profile ETags hash that file, so re-read the list.
+  const handleBandConfigWritten = useCallback(() => void load({ fresh: true }), [load]);
 
   const sheetProfile =
     sheet && sheet.profileRef && snapshot
@@ -133,6 +135,7 @@ export function ClientRoutesPage() {
       {status !== 'unsupported' && (
         <CollapsibleSharedRoutingBand
           automaticClientCount={snapshot ? countAutomaticProfiles(snapshot) : undefined}
+          onConfigWritten={handleBandConfigWritten}
         />
       )}
 

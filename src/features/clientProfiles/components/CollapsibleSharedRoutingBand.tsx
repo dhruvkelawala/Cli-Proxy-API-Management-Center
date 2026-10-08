@@ -1,4 +1,4 @@
-import { useId, useState, type ReactNode } from 'react';
+import { useCallback, useId, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import {
@@ -6,7 +6,12 @@ import {
   type SharedRoutingBandState,
 } from '@/features/config/routing/SharedRoutingBand';
 import { CR } from '../copy';
-import { isSharedBandForcedOpen, isSharedBandOpen, sharedBandSummaryParts } from '../sharedBand';
+import {
+  isSharedBandForcedOpen,
+  isSharedBandOpen,
+  sharedBandSummaryParts,
+  sharedBandWroteConfig,
+} from '../sharedBand';
 import styles from './CollapsibleSharedRoutingBand.module.scss';
 
 /** Presentational shell: a summary row with an Edit/Hide disclosure and the inline region. */
@@ -71,12 +76,24 @@ export function SharedBandDisclosure({
  */
 export function CollapsibleSharedRoutingBand({
   automaticClientCount,
+  onConfigWritten,
 }: {
   automaticClientCount?: number;
+  /** A band save wrote the gateway config file (which changes the client profiles ETag). */
+  onConfigWritten?: () => void;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [bandState, setBandState] = useState<SharedRoutingBandState | null>(null);
+  const previousState = useRef<SharedRoutingBandState | null>(null);
+  const handleStateChange = useCallback(
+    (next: SharedRoutingBandState) => {
+      if (sharedBandWroteConfig(previousState.current, next)) onConfigWritten?.();
+      previousState.current = next;
+      setBandState(next);
+    },
+    [onConfigWritten]
+  );
   const forced = isSharedBandForcedOpen(bandState);
   const open = isSharedBandOpen(expanded, bandState);
 
@@ -87,7 +104,10 @@ export function CollapsibleSharedRoutingBand({
       summary={sharedBandSummaryParts(t, bandState)}
       onToggle={() => setExpanded(!open)}
     >
-      <SharedRoutingBand automaticClientCount={automaticClientCount} onStateChange={setBandState} />
+      <SharedRoutingBand
+        automaticClientCount={automaticClientCount}
+        onStateChange={handleStateChange}
+      />
     </SharedBandDisclosure>
   );
 }

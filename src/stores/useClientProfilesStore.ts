@@ -48,7 +48,11 @@ interface ClientProfilesState {
   /** True while any write is in flight, so other write controls can wait. */
   mutating: boolean;
 
-  load: (options?: { force?: boolean }) => Promise<void>;
+  /**
+   * force: re-probe capabilities too. fresh: never reuse a list read already in flight, e.g.
+   * after another config write changed the list ETag (it is the hash of the whole config file).
+   */
+  load: (options?: { force?: boolean; fresh?: boolean }) => Promise<void>;
   /** Run one profile/key write with the current ETag, then re-read the list. */
   mutate: <T>(
     write: (revision: string) => Promise<ClientProfileMutation<T>>
@@ -164,7 +168,8 @@ export const useClientProfilesStore = create<ClientProfilesState>((set, get) => 
 
     load: (options) => {
       const force = options?.force === true;
-      if (inFlightLoad && inFlightLoad.generation === generation && !force) {
+      const fresh = options?.fresh === true;
+      if (inFlightLoad && inFlightLoad.generation === generation && !force && !fresh) {
         return inFlightLoad.promise;
       }
       return startLoad(force);

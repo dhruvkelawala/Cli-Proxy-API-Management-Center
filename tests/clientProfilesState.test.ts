@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, spyOn, test } from 'bun:test';
 import { apiClient } from '@/services/api/client';
 import { classifyClientProfileError, clientProfilesApi } from '@/services/api/clientProfiles';
 import { useClientProfilesStore } from '@/stores/useClientProfilesStore';
+import { sharedBandWroteConfig } from '@/features/clientProfiles/sharedBand';
+import type { SharedRoutingBandState } from '@/features/config/routing/SharedRoutingBand';
 import {
   buildPoolPreview,
   buildProfileRows,
@@ -494,6 +496,26 @@ describe('client routes presentation model', () => {
       'sk-a',
       ' sk-b ',
     ]);
+  });
+
+  test('a shared band save that wrote the config is reported once', () => {
+    const base: SharedRoutingBandState = {
+      saved: null,
+      dirty: false,
+      attention: false,
+      save: { phase: 'idle' },
+    };
+    const saving = { ...base, save: { phase: 'saving' as const } };
+    const saved = { ...base, save: { phase: 'saved' as const } };
+    expect(sharedBandWroteConfig(null, base)).toBe(false);
+    expect(sharedBandWroteConfig(base, saving)).toBe(false);
+    expect(sharedBandWroteConfig(saving, saved)).toBe(true);
+    // Same save object re-reported (e.g. a dirty flag change): not another write.
+    expect(sharedBandWroteConfig(saved, { ...saved, dirty: true })).toBe(false);
+    const reloadFailed = { ...base, save: { phase: 'reload_failed' as const } };
+    expect(sharedBandWroteConfig(saving, reloadFailed)).toBe(true);
+    const failed = { ...base, save: { phase: 'failed' as const, message: 'x' } };
+    expect(sharedBandWroteConfig(saving, failed)).toBe(false);
   });
 
   test('key fingerprints follow the contract (SHA-256 of the trimmed value)', () => {

@@ -9,6 +9,17 @@ import type { SharedRoutingBandState } from '@/features/config/routing/SharedRou
 import { STRATEGY_LABEL_KEYS } from '@/features/config/routing/routingFormat';
 import { CR } from './copy';
 
+/**
+ * True once per strategy/affinity save that reached the gateway config file (including a save
+ * whose re-read failed). Client profile ETags hash that whole file, so the list must be re-read.
+ */
+export const sharedBandWroteConfig = (
+  previous: SharedRoutingBandState | null,
+  next: SharedRoutingBandState
+): boolean =>
+  next.save !== previous?.save &&
+  (next.save.phase === 'saved' || next.save.phase === 'reload_failed');
+
 export const isSharedBandForcedOpen = (state: SharedRoutingBandState | null): boolean =>
   Boolean(state && (state.dirty || state.attention));
 

@@ -35,6 +35,11 @@ export interface SharedRoutingBandState {
   dirty: boolean;
   /** A save failed, its re-read failed, or an edit is invalid. */
   attention: boolean;
+  /**
+   * Latest strategy/affinity save status. A new `saved` or `reload_failed` object means the
+   * gateway config file was written, so hosts keyed on its revision must re-read.
+   */
+  save: SaveStatus;
 }
 
 export interface SharedRoutingBandProps {
@@ -233,8 +238,8 @@ export function SharedRoutingBand({ automaticClientCount, onStateChange }: Share
     routing.globalSave.phase === 'reload_failed' ||
     routing.ttlError !== null;
   useEffect(() => {
-    onStateChange?.({ saved, dirty: routing.dirty, attention });
-  }, [attention, onStateChange, routing.dirty, saved]);
+    onStateChange?.({ saved, dirty: routing.dirty, attention, save: routing.globalSave });
+  }, [attention, onStateChange, routing.dirty, routing.globalSave, saved]);
 
   if (!routing.values || !routing.saved) {
     return (

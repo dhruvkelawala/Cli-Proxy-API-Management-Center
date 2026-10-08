@@ -2594,7 +2594,7 @@
       "title": "Chưa lưu",
       "reload": "Tải lại",
       "not_found_title": "Không tìm thấy",
-      "stale": "Định tuyến máy khách trên cổng đã thay đổi kể từ khi trang được tải. Thay đổi của bạn được giữ; hãy tải lại để xem trạng thái mới nhất rồi lưu lần nữa.",
+      "stale": "Cấu hình cổng đã thay đổi kể từ khi trang được tải (ví dụ đã lưu thiết lập nhóm dùng chung hoặc có chỉnh sửa ở nơi khác). Thay đổi của bạn được giữ; hãy tải lại để xem trạng thái mới nhất rồi lưu lần nữa.",
       "reload_pending": "Cổng có thay đổi cấu hình trên đĩa chưa được nạp. Hãy đợi một lát, tải lại rồi thử lại.",
       "profile_in_use": "Hồ sơ này vẫn còn khóa máy khách. Hãy chuyển hoặc thu hồi chúng trước.",
       "last_client_key": "Đây là khóa máy khách cuối cùng của cổng. Nếu không còn khóa nào, cổng sẽ nhận yêu cầu không có khóa, nên hãy thêm khóa khác trước.",
