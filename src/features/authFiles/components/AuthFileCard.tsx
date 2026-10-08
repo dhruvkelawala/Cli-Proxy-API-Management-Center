@@ -29,7 +29,7 @@ import {
   type AuthFileQuotaFilter,
   type ResolvedTheme,
 } from '@/features/authFiles/constants';
-import { deriveAuthFileIdentity } from '@/features/authFiles/identity';
+import { deriveAccountTitle } from '@/features/authFiles/identity';
 import type {
   AccountAvailability,
   AccountPresentation,
@@ -38,6 +38,7 @@ import { resolveAuthFileQuotaType } from '@/features/authFiles/logic';
 import type { AuthFileStatusBarData } from '@/features/authFiles/hooks/useAuthFilesStatusBarCache';
 import { AuthFileQuotaSection } from '@/features/authFiles/components/AuthFileQuotaSection';
 import { AuthFileCooldownSection } from './AuthFileCooldownSection';
+import { AuthFileAccountHeading, AuthFileAccountSubtitle } from './AuthFileAccountTitle';
 import styles from './AuthFileCard.module.scss';
 
 const STATE_LABEL_KEYS: Record<AccountAvailability | 'off', string> = {
@@ -133,11 +134,10 @@ export function AuthFileCard(props: AuthFileCardProps) {
 
   const priorityValue = Number.isSafeInteger(file.priority) ? file.priority : undefined;
   const weightValue = Number.isSafeInteger(file.weight) ? file.weight : undefined;
-  const noteValue = typeof file.note === 'string' ? file.note.trim() : '';
-  // 主行显示账号（email/项目 ID），文件名降为满卡宽的 mono 副行
-  const identity = deriveAuthFileIdentity(file);
-  // 无障碍名称用账号身份而不是文件名，供应商前缀区分同邮箱的不同提供商
-  const accountName = identity.primary ? `${typeLabel} ${identity.primary}` : file.name;
+  // 标题：有备注时用备注，账号（email/项目 ID）降为副行；否则账号领衔，文件名为 mono 副行
+  const accountTitle = deriveAccountTitle(file);
+  // 无障碍名称用卡片显示的标题，供应商前缀区分同名的不同提供商账号
+  const accountName = accountTitle.title ? `${typeLabel} ${accountTitle.title}` : file.name;
   const enabled = file.disabled !== true;
   const stateKey = presentation ? (presentation.availability ?? 'off') : null;
   const providerName = presentation ? getTypeLabel(t, presentation.provider) : typeLabel;
@@ -175,40 +175,21 @@ export function AuthFileCard(props: AuthFileCardProps) {
             title={t('auth_files.card_select', { name: accountName })}
           />
         )}
-        <h3 className={styles.identity}>
-          <span
-            className={styles.providerBadge}
-            style={{
-              backgroundColor: typeColor.bg,
-              color: typeColor.text,
-              ...(typeColor.border ? { border: typeColor.border } : {}),
-            }}
-          >
-            {typeLabel}
-          </span>
-          <span
-            className={`${styles.account} ${identity.kind === 'fileName' ? styles.accountMono : ''}`}
-            title={identity.primary}
-          >
-            {identity.primary}
-          </span>
-        </h3>
+        <AuthFileAccountHeading
+          title={accountTitle}
+          typeLabel={typeLabel}
+          typeStyle={{
+            backgroundColor: typeColor.bg,
+            color: typeColor.text,
+            ...(typeColor.border ? { border: typeColor.border } : {}),
+          }}
+        />
         {isRuntimeOnly && (
           <span className={styles.runtimeLabel}>{t('auth_files.type_virtual')}</span>
         )}
       </header>
 
-      {identity.secondary && (
-        <p className={styles.fileName} title={identity.fullName}>
-          {identity.secondary}
-        </p>
-      )}
-
-      {noteValue && (
-        <p className={styles.note} title={noteValue}>
-          {noteValue}
-        </p>
-      )}
+      <AuthFileAccountSubtitle title={accountTitle} />
 
       {stateKey && (
         <p className={`${styles.state} ${STATE_TONE_CLASSES[stateKey]}`}>

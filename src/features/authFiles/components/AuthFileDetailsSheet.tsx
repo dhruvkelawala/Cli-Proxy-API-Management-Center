@@ -39,8 +39,10 @@ const DERIVED_INFO_KEYS = [
 export type AuthFileDetailsSheetProps = {
   disableControls: boolean;
   editor: PrefixProxyEditorState | null;
-  /** Account identity (email/project) for the title; falls back to the file name. */
+  /** Displayed account title (note, else email/project); falls back to the file name. */
   accountLabel?: string;
+  /** Email/project shown under a note title. */
+  accountDetail?: string;
   updatedText: string;
   dirty: boolean;
   onClose: () => void;
@@ -60,6 +62,7 @@ export function AuthFileDetailsSheet(props: AuthFileDetailsSheetProps) {
     disableControls,
     editor,
     accountLabel,
+    accountDetail,
     updatedText,
     dirty,
     onClose,
@@ -142,7 +145,11 @@ export function AuthFileDetailsSheet(props: AuthFileDetailsSheetProps) {
       closeDisabled={editor?.saving === true}
       eyebrow={t('auth_files.prefix_proxy_button')}
       title={accountLabel || editor?.fileName || ''}
-      description={accountLabel && editor?.fileName ? editor.fileName : undefined}
+      description={
+        accountLabel && editor?.fileName
+          ? [accountDetail, editor.fileName].filter(Boolean).join(' · ')
+          : undefined
+      }
       footer={
         <>
           <Button

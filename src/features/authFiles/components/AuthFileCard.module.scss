@@ -125,12 +125,17 @@
   @include text-ellipsis-multiline(2);
 }
 
-.note {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.5;
+/* 备注作标题时，账号（email/项目 ID）退为副行；与文件名行紧贴标题 */
+.accountLine {
+  margin: -4px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
   color: var(--text-secondary);
-  @include text-ellipsis;
+  overflow-wrap: anywhere;
+}
+
+.accountLine + .fileName {
+  margin-top: -8px;
 }
 
 /* ---------- 账号状态行：可用性 · 池内偏好 ----------

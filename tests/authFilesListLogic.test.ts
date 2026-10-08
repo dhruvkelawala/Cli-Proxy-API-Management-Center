@@ -72,6 +72,13 @@ describe('matchesAuthFileSearch', () => {
     ).toBe(true);
   });
 
+  test('matches both the note shown as the title and the email under it', () => {
+    const file = authFile({ email: 'claude-a@example.test', note: 'Work subscription' });
+    expect(search(file, 'work sub')).toBe(true);
+    expect(search(file, 'claude-a@')).toBe(true);
+    expect(search(file, 'work*example')).toBe(false);
+  });
+
   test('matches the project id', () => {
     expect(search(authFile({ name: 'vertex-x.json', projectId: 'my-proj' }), 'my-proj')).toBe(true);
   });
@@ -147,6 +154,14 @@ describe('sortAuthFiles', () => {
       authFile({ name: 'aaa.json', email: 'zzz@example.com' }),
     ];
     expect(sortAuthFiles(files, 'az').map((file) => file.name)).toEqual(['zzz.json', 'aaa.json']);
+  });
+
+  test("'az' orders by the displayed title, which is the note when set", () => {
+    const files = [
+      authFile({ name: 'a.json', email: 'mmm@example.com' }),
+      authFile({ name: 'b.json', email: 'zzz@example.com', note: 'Alpha team' }),
+    ];
+    expect(sortAuthFiles(files, 'az').map((file) => file.name)).toEqual(['b.json', 'a.json']);
   });
 
   test("'az' falls back to the file name when primaries are equal", () => {

@@ -35,7 +35,7 @@ import { VaultHeader } from '@/features/authFiles/components/VaultHeader';
 import { VaultPulse } from '@/features/authFiles/components/VaultPulse';
 import { invalidateAuthFileDerivedCaches } from '@/features/authFiles/cacheInvalidation';
 import { presentAccounts, summarizeAccounts } from '@/features/authFiles/accountPresentation';
-import { deriveAuthFileIdentity } from '@/features/authFiles/identity';
+import { deriveAccountTitle } from '@/features/authFiles/identity';
 import {
   buildWildcardSearch,
   matchesAuthFileSearch,
@@ -489,10 +489,10 @@ export function AuthFilesPage() {
   const accountCounts = useMemo(() => summarizeAccounts(files), [files]);
   const accountPresentations = useMemo(() => presentAccounts(files), [files]);
   const gatewayHost = gatewayDisplayHost(apiBase);
-  const editorAccountLabel = useMemo(() => {
-    if (!prefixProxyEditor) return '';
+  const editorAccountTitle = useMemo(() => {
+    if (!prefixProxyEditor) return null;
     const file = files.find((item) => item.name === prefixProxyEditor.fileName);
-    return file ? deriveAuthFileIdentity(file).primary : '';
+    return file ? deriveAccountTitle(file) : null;
   }, [files, prefixProxyEditor]);
 
   /* ---------- 首屏卡片一次性级联入场 ----------
@@ -813,7 +813,8 @@ export function AuthFilesPage() {
       <AuthFileDetailsSheet
         disableControls={disableControls}
         editor={prefixProxyEditor}
-        accountLabel={editorAccountLabel}
+        accountLabel={editorAccountTitle?.title}
+        accountDetail={editorAccountTitle?.account ?? undefined}
         updatedText={prefixProxyUpdatedText}
         dirty={prefixProxyDirty}
         onClose={closePrefixProxyEditor}

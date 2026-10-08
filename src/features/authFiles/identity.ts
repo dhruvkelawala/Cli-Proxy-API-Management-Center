@@ -60,3 +60,44 @@ export const deriveAuthFileIdentity = (file: AuthFileItem): AuthFileIdentity => 
 
   return { primary, kind, secondary, fullName };
 };
+
+export type AccountTitle = {
+  /** Card / sheet title: the trimmed note when set, otherwise the identity primary. */
+  title: string;
+  titleIsNote: boolean;
+  /** Title rendered in mono (file-name fallback without a note). */
+  titleMono: boolean;
+  /** Email / project ID under a note title; null when it is already the title or absent. */
+  account: string | null;
+  /** Mono file-name line; null when the title or account line already shows it. */
+  fileLine: string | null;
+  fullName: string;
+};
+
+/**
+ * Displayed account title (product decision for CPA-004): the operator's note names the
+ * account when set; the email (or project ID / file name) then moves underneath.
+ */
+export const deriveAccountTitle = (file: AuthFileItem): AccountTitle => {
+  const identity = deriveAuthFileIdentity(file);
+  const note = readIdentityText(file.note);
+  if (!note) {
+    return {
+      title: identity.primary,
+      titleIsNote: false,
+      titleMono: identity.kind === 'fileName',
+      account: null,
+      fileLine: identity.secondary,
+      fullName: identity.fullName,
+    };
+  }
+  const hasAccount = identity.kind !== 'fileName' && identity.primary.length > 0;
+  return {
+    title: note,
+    titleIsNote: true,
+    titleMono: false,
+    account: hasAccount ? identity.primary : null,
+    fileLine: hasAccount ? identity.secondary : identity.primary || null,
+    fullName: identity.fullName,
+  };
+};

@@ -300,6 +300,7 @@ describe('account presentation locales', () => {
       for (const key of [
         'auth_files.pool_shared',
         'auth_files.meta_attention',
+        'auth_files.meta_total',
         'auth_files.card_select',
       ]) {
         expect({ key, value: typeof pluralBase(key) }).toEqual({ key, value: 'string' });
@@ -310,4 +311,17 @@ describe('account presentation locales', () => {
       expect(lookup(messages, 'dashboard.health_active')).toBeUndefined();
     });
   }
+
+  test('names the page "Accounts" while file actions keep file wording', () => {
+    const en = JSON.parse(readFileSync('src/i18n/locales/en.json', 'utf8')) as Record<
+      string,
+      Record<string, string>
+    >;
+    expect(en.nav.auth_files).toBe('Accounts');
+    expect(en.auth_files.title).toBe('Accounts');
+    expect(en.auth_files.meta_total_other).toBe('{{count}} accounts');
+    expect(en.auth_files.prefix_proxy_button).toBe('Account details');
+    expect(en.dashboard.stat_credentials).toBe('Accounts');
+    expect(en.auth_files.upload_button).toBe('Upload File');
+  });
 });
