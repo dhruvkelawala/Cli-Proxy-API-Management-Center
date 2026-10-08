@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
@@ -17,6 +18,72 @@ export type AuthFileModelsModalProps = {
   onClose: () => void;
   onCopyText: (text: string) => void;
 };
+
+export type AuthFileModelListProps = Pick<
+  AuthFileModelsModalProps,
+  'models' | 'fileType' | 'excluded' | 'onCopyText'
+>;
+
+/** Model rows with a real Copy button each; the model text itself stays selectable. */
+export function AuthFileModelList({
+  models,
+  fileType,
+  excluded,
+  onCopyText,
+}: AuthFileModelListProps) {
+  const { t } = useTranslation();
+  const baseId = useId();
+  const excludedHint = t('auth_files.models_excluded_hint', {
+    defaultValue: '此 OAuth 模型已被禁用',
+  });
+  return (
+    <ul className={styles.list}>
+      {models.map((model, index) => {
+        const excludedModel = isModelExcluded(model.id, fileType, excluded);
+        const hintId = `${baseId}-excluded-${index}`;
+        return (
+          <li
+            key={model.id}
+            className={`${styles.item} ${excludedModel ? styles.itemExcluded : ''}`}
+          >
+            <div className={styles.itemText}>
+              <span className={styles.modelId}>{model.id}</span>
+              {model.display_name && model.display_name !== model.id && (
+                <span className={styles.modelDisplayName}>{model.display_name}</span>
+              )}
+              {model.type && <span className={styles.modelType}>{model.type}</span>}
+              {excludedModel && (
+                <span className={styles.excludedBadge} title={excludedHint}>
+                  {t('auth_files.models_excluded_badge', { defaultValue: '已禁用' })}
+                </span>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={styles.copyButton}
+              aria-describedby={excludedModel ? hintId : undefined}
+              aria-label={t('auth_files.models_copy_aria', {
+                id: model.id,
+                defaultValue: 'Copy model ID {{id}}',
+              })}
+              onClick={() => {
+                onCopyText(model.id);
+              }}
+            >
+              {t('common.copy')}
+            </Button>
+            {excludedModel && (
+              <span id={hintId} className={styles.visuallyHidden}>
+                {excludedHint}
+              </span>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 export function AuthFileModelsModal(props: AuthFileModelsModalProps) {
   const { t } = useTranslation();
@@ -52,38 +119,12 @@ export function AuthFileModelsModal(props: AuthFileModelsModalProps) {
           })}
         />
       ) : (
-        <div className={styles.list}>
-          {models.map((model) => {
-            const excludedModel = isModelExcluded(model.id, fileType, excluded);
-            return (
-              <div
-                key={model.id}
-                className={`${styles.item} ${excludedModel ? styles.itemExcluded : ''}`}
-                onClick={() => {
-                  onCopyText(model.id);
-                }}
-                title={
-                  excludedModel
-                    ? t('auth_files.models_excluded_hint', {
-                        defaultValue: '此 OAuth 模型已被禁用',
-                      })
-                    : t('common.copy', { defaultValue: '点击复制' })
-                }
-              >
-                <span className={styles.modelId}>{model.id}</span>
-                {model.display_name && model.display_name !== model.id && (
-                  <span className={styles.modelDisplayName}>{model.display_name}</span>
-                )}
-                {model.type && <span className={styles.modelType}>{model.type}</span>}
-                {excludedModel && (
-                  <span className={styles.excludedBadge}>
-                    {t('auth_files.models_excluded_badge', { defaultValue: '已禁用' })}
-                  </span>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <AuthFileModelList
+          models={models}
+          fileType={fileType}
+          excluded={excluded}
+          onCopyText={onCopyText}
+        />
       )}
     </Modal>
   );

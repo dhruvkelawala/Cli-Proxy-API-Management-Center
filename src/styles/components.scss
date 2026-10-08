@@ -16,13 +16,13 @@
   color: var(--text-primary);
 
   &.btn-primary {
-    background-color: var(--primary-color);
-    color: var(--primary-contrast, #fff);
-    border-color: var(--primary-color);
+    background-color: var(--btn-primary-bg, var(--primary-color));
+    color: var(--btn-primary-fg, var(--primary-contrast, #fff));
+    border-color: var(--btn-primary-bg, var(--primary-color));
 
     &:hover {
-      background-color: var(--primary-hover);
-      border-color: var(--primary-hover);
+      background-color: var(--btn-primary-bg-hover, var(--primary-hover));
+      border-color: var(--btn-primary-bg-hover, var(--primary-hover));
     }
   }
 
@@ -49,12 +49,13 @@
   }
 
   &.btn-danger {
-    background-color: $error-color;
-    border-color: $error-color;
-    color: #fff;
+    background-color: var(--btn-danger-bg, #{$error-color});
+    border-color: var(--btn-danger-bg, #{$error-color});
+    color: var(--btn-danger-fg, #fff);
 
     &:hover {
-      background-color: color.adjust($error-color, $lightness: -5%);
+      background-color: var(--btn-danger-bg-hover, #{color.adjust($error-color, $lightness: -5%)});
+      border-color: var(--btn-danger-bg-hover, #{color.adjust($error-color, $lightness: -5%)});
     }
   }
 
@@ -74,7 +75,8 @@
 }
 
 [data-theme='dark'] {
-  .btn {
+  // Primary and danger buttons carry their own themed text colour (--btn-*-fg).
+  .btn:not(.btn-primary):not(.btn-danger) {
     color: #fff;
   }
 
