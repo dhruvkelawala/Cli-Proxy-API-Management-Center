@@ -1,0 +1,85 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.bar {
+  display: flex;
+  gap: 3px;
+  height: 26px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-tertiary);
+}
+
+.empty {
+  margin: auto;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.segment {
+  display: flex;
+  align-items: center;
+  flex-basis: 0;
+  min-width: 6px;
+  padding: 0 8px;
+  overflow: hidden;
+  transition: flex-grow 280ms var(--ease-out-strong);
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.seg0 {
+  background: var(--text-primary);
+  color: var(--bg-secondary);
+}
+
+.seg1 {
+  background: var(--primary-color);
+  color: var(--bg-secondary);
+}
+
+.seg2 {
+  background: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.unknown {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 5px,
+    color-mix(in srgb, var(--bg-secondary) 34%, transparent) 5px 9px
+  );
+  box-shadow: inset 0 0 0 2px var(--amber-color);
+}
+
+.segmentLabel {
+  display: flex;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.segmentName {
+  min-width: 0;
+  margin-right: 0.3em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+.caption {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
