@@ -13,6 +13,8 @@ import { ConfigPage } from '@/features/config/ConfigPage';
 import { LogsPage } from '@/features/logs/LogsPage';
 import { SystemPage } from '@/pages/SystemPage';
 import { useAuthStore } from '@/stores';
+// PROTOTYPE (throwaway branch only): dev-only client routes UX variants.
+import { ClientRoutesPrototypePage } from '@/features/clientRoutesPrototype/ClientRoutesPrototypePage';
 
 const createMainRoutes = (supportsPlugin: boolean) => [
   { path: '/', element: <DashboardPage /> },
@@ -43,6 +45,9 @@ const createMainRoutes = (supportsPlugin: boolean) => [
   { path: '/config', element: <ConfigPage /> },
   { path: '/logs', element: <LogsPage /> },
   { path: '/system', element: <SystemPage /> },
+  ...(import.meta.env.DEV
+    ? [{ path: '/prototype/client-routes', element: <ClientRoutesPrototypePage /> }]
+    : []),
   { path: '*', element: <Navigate to="/" replace /> },
 ];
 

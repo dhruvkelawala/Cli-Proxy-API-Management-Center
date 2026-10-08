@@ -1,0 +1,573 @@
+/* PROTOTYPE (throwaway) — Variant B: Matrix. */
+
+@mixin hidden-radio {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  pointer-events: none;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  padding-bottom: 96px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(26px, 3.2vw, 30px);
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.lede {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ---------- strategy band ---------- */
+
+.band {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px dashed var(--border-primary);
+  background: var(--bg-quinary);
+}
+
+.bandHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+}
+
+.bandTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.bandSub {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.globalChip {
+  font-size: 12px;
+  font-weight: 650;
+  padding: 3px 10px;
+  border-radius: 999px;
+  color: var(--amber-text);
+  background: var(--amber-10);
+  border: 1px solid var(--amber-30);
+}
+
+.bandControls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+}
+
+.bandStrategy {
+  display: inline-flex;
+  flex-wrap: wrap;
+  padding: 3px;
+  gap: 3px;
+  border-radius: 10px;
+  background: var(--bg-tertiary);
+
+  @media (max-width: 520px) {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+}
+
+.bandOption {
+  position: relative;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-align: center;
+
+  input {
+    @include hidden-radio;
+  }
+
+  &:focus-within {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 1px;
+  }
+}
+
+.bandOptionOn {
+  background: var(--floating-surface);
+  color: var(--text-primary);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+}
+
+.bandAffinity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+
+.ttl {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+
+  input {
+    width: 70px;
+    padding: 6px 8px;
+    font-family: $font-mono;
+  }
+}
+
+.bandBlurb {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text-primary);
+}
+
+.recommend {
+  color: var(--text-secondary);
+}
+
+/* ---------- matrix ---------- */
+
+.matrixWrap {
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-primary) 82%, transparent);
+  overflow: hidden;
+}
+
+.matrix {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+
+  thead th {
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-secondary);
+    padding: 12px 16px;
+    background: var(--bg-tertiary);
+  }
+
+  thead th:first-child {
+    width: 34%;
+  }
+
+  tbody tr + tr > * {
+    border-top: 1px solid var(--border-color);
+  }
+}
+
+.caption {
+  margin: 0;
+  padding: 10px 16px 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border-color);
+}
+
+.rowHead {
+  text-align: left;
+  vertical-align: top;
+  padding: 14px 16px;
+  font-weight: 400;
+
+  > span {
+    display: flex;
+  }
+}
+
+.profileName {
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-weight: 650;
+  font-size: 14.5px;
+  margin-bottom: 4px;
+}
+
+.unsaved {
+  font-size: 11px;
+  font-weight: 650;
+  padding: 1px 7px;
+  border-radius: 999px;
+  color: var(--amber-text);
+  background: var(--amber-10);
+}
+
+.cellTd {
+  padding: 8px;
+  vertical-align: top;
+}
+
+.cell {
+  appearance: none;
+  width: 100%;
+  height: 100%;
+  min-height: 84px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--dur-hover) var(--ease-out-strong),
+    border-color var(--dur-hover) var(--ease-out-strong);
+
+  &:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 1px;
+  }
+}
+
+.pill {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.cellAuto .pill {
+  border: 1px solid var(--border-primary);
+  background: var(--bg-quinary);
+}
+
+.cellOnly .pill {
+  background: var(--text-primary);
+  color: var(--bg-secondary);
+}
+
+.pin {
+  font-size: 8px;
+}
+
+.cellStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.cellFail {
+  background: var(--bg-error-light);
+  border-color: var(--failure-badge-border);
+
+  .pill {
+    background: var(--error-color);
+    color: #fff;
+    border-color: transparent;
+  }
+
+  .cellStatus {
+    color: var(--error-color);
+    font-weight: 650;
+  }
+}
+
+/* Mobile: each row becomes a card; cells stack with their provider label. */
+@media (max-width: 640px) {
+  .matrix,
+  .matrix tbody,
+  .matrix tr,
+  .matrix th,
+  .matrix td {
+    display: block;
+    width: auto !important;
+  }
+
+  .matrix thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .matrix tbody tr + tr > * {
+    border-top: 0;
+  }
+
+  .matrix tbody tr + tr {
+    border-top: 1px solid var(--border-color);
+  }
+
+  .rowHead {
+    padding: 14px 14px 4px;
+  }
+
+  .cellTd {
+    padding: 4px 8px;
+
+    &::before {
+      content: attr(data-label);
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-secondary);
+      padding: 4px 4px 2px;
+    }
+
+    &:last-child {
+      padding-bottom: 10px;
+    }
+  }
+
+  .cell {
+    min-height: 0;
+    border-color: var(--border-color);
+  }
+}
+
+/* ---------- accounts strip ---------- */
+
+.accounts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.accountList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+  gap: 10px;
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-primary) 82%, transparent);
+}
+
+.accountOff {
+  background: color-mix(in srgb, var(--bg-primary) 55%, var(--bg-tertiary));
+}
+
+.accountText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 13.5px;
+
+  > span {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+}
+
+/* ---------- sheets ---------- */
+
+.choiceList {
+  border: 0;
+  margin: 0 0 18px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.choiceLegend {
+  padding: 0;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.choice {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-quinary);
+  cursor: pointer;
+
+  input {
+    margin-top: 3px;
+    accent-color: var(--text-primary);
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  &:focus-within {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 2px;
+  }
+}
+
+.choiceOn {
+  border-color: var(--text-primary);
+  box-shadow: inset 0 0 0 1px var(--text-primary);
+}
+
+.choiceBody {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.choiceTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 650;
+}
+
+.choiceText {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.choiceWarn {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--error-color);
+}
+
+.what {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--bg-tertiary);
+
+  p {
+    margin: 0;
+    font-size: 13px;
+  }
+}
+
+.whatFail {
+  background: var(--bg-error-light);
+  border: 1px solid var(--failure-badge-border);
+}
+
+.whatTitle {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.fine {
+  margin: 10px 0 0;
+  font-size: 12px !important;
+  color: var(--text-secondary);
+}
+
+.tuneGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 0 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tuneRow {
+  display: grid;
+  grid-template-columns: minmax(110px, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr 1fr;
+
+    > :first-child {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+.tuneName {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 24px;
+
+  @media (max-width: 480px) {
+    padding-top: 0;
+  }
+}
+
+[data-theme='dark'] .bandOptionOn {
+  background: var(--border-primary);
+  box-shadow: none;
+}

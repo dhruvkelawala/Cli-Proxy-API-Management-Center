@@ -1,0 +1,156 @@
+/* PROTOTYPE chrome. */
+
+.panel {
+  width: min(560px, calc(100vw - 16px));
+  max-height: min(62vh, 560px);
+  overflow: auto;
+  background: #111;
+  color: #f2f2f2;
+  border: 2px solid #ffd400;
+  border-radius: 14px;
+  padding: 10px 12px 12px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  box-shadow: 0 16px 40px rgb(0 0 0 / 0.45);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  position: sticky;
+  top: -10px;
+  background: #111;
+  padding: 2px 0 6px;
+  font-size: 12.5px;
+}
+
+.sub {
+  color: #bdbdbd;
+  flex: 1;
+}
+
+.close {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.block {
+  border-top: 1px solid #333;
+  padding: 7px 0;
+}
+
+.blockTitle {
+  color: #ffd400;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.simRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 0;
+  flex-wrap: wrap;
+}
+
+.simName {
+  min-width: 8ch;
+}
+
+.segment {
+  display: inline-flex;
+  border: 1px solid #555;
+  border-radius: 6px;
+  overflow: hidden;
+
+  button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: #ddd;
+    font: inherit;
+    padding: 2px 8px;
+    cursor: pointer;
+
+    &[aria-pressed='true'] {
+      background: #ffd400;
+      color: #111;
+      font-weight: 700;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #ffd400;
+      outline-offset: -2px;
+    }
+  }
+}
+
+.check {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.reset {
+  appearance: none;
+  border: 1px solid #555;
+  background: transparent;
+  color: #fff;
+  border-radius: 6px;
+  font: inherit;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+.kv {
+  color: #d6d6d6;
+
+  b {
+    color: #fff;
+  }
+
+  em {
+    color: #ffd400;
+    font-style: normal;
+  }
+}
+
+.err {
+  color: #ff8a7a;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    text-align: left;
+    font-weight: 600;
+    padding-right: 8px;
+    white-space: nowrap;
+    vertical-align: top;
+  }
+
+  td {
+    padding-right: 8px;
+    vertical-align: top;
+  }
+
+  em {
+    color: #ffd400;
+    font-style: normal;
+  }
+}
+
+.log {
+  margin: 0;
+  padding-left: 18px;
+  color: #cfcfcf;
+}

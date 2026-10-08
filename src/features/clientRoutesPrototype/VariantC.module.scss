@@ -1,0 +1,511 @@
+/* PROTOTYPE (throwaway) — Variant C: account-centric + request journey. */
+
+@mixin hidden-radio {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  pointer-events: none;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+  padding-bottom: 96px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(26px, 3.2vw, 30px);
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.meta {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-family: $font-mono;
+  font-size: 13px;
+  color: var(--text-secondary);
+
+  &::before {
+    content: '▍';
+    color: var(--viz-success);
+  }
+}
+
+.metaActive {
+  color: var(--viz-success);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+  gap: 24px;
+  align-items: start;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.accounts {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.groupTitle {
+  margin: 0 0 10px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+}
+
+/* ---------- account card (AuthFileCard vocabulary) ---------- */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-primary) 82%, transparent);
+  min-width: 0;
+}
+
+.cardOff {
+  background: color-mix(in srgb, var(--bg-primary) 55%, var(--bg-tertiary));
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.providerBadge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.cardTitle {
+  flex: 1;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+  min-width: 0;
+}
+
+.cardMeta {
+  margin: -4px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.plan {
+  margin-left: auto;
+  font-family: $font-mono;
+  font-size: 11.5px;
+}
+
+.usage {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+}
+
+.usageLabel {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.usageEmpty,
+.usageNote {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.failNote {
+  color: var(--error-color);
+}
+
+.chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: var(--text-primary);
+  color: var(--bg-secondary);
+  overflow: hidden;
+}
+
+.chipFail {
+  background: var(--error-color);
+  color: #fff;
+}
+
+.chipName {
+  appearance: none;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 650;
+  padding: 4px 4px 4px 11px;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--bg-secondary);
+    outline-offset: -3px;
+    border-radius: 999px;
+  }
+}
+
+.chipMode {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px 4px 4px;
+  opacity: 0.8;
+}
+
+.cardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pinPanel {
+  margin: 0;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-primary);
+  background: var(--bg-quinary);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pinLegend {
+  padding: 0 4px;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.pinRow {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bg-tertiary);
+  }
+
+  input {
+    margin-top: 3px;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--text-primary);
+    flex-shrink: 0;
+  }
+}
+
+.pinText {
+  display: flex;
+  flex-direction: column;
+}
+
+.pinName {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.pinCurrent {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.pinWarn {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-primary);
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--amber-10);
+  border: 1px solid var(--amber-30);
+}
+
+.tunePanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px dashed var(--border-primary);
+}
+
+.tuneInputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ---------- journey ---------- */
+
+.journey {
+  position: sticky;
+  top: calc(var(--header-height, 64px) + 12px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: var(--floating-surface);
+  box-shadow: var(--shadow);
+
+  @media (max-width: 1100px) {
+    position: static;
+  }
+
+  @media (max-width: 480px) {
+    padding: 16px 14px;
+  }
+}
+
+.journeyTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.journeyLede {
+  margin: -8px 0 0;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.journeyPickers {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+
+  @media (max-width: 480px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pickerLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 0;
+  margin-bottom: 4px;
+}
+
+.providerSwitch {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.providerSeg,
+.strategySeg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--bg-tertiary);
+
+  label {
+    position: relative;
+    padding: 6px 11px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+
+    &:focus-within {
+      outline: 2px solid var(--text-primary);
+      outline-offset: 1px;
+    }
+  }
+
+  input {
+    @include hidden-radio;
+  }
+}
+
+.strategySeg {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  @media (max-width: 480px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  label {
+    text-align: center;
+    padding: 7px 6px;
+  }
+}
+
+.segOn {
+  background: var(--bg-secondary);
+  color: var(--text-primary) !important;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 0 18px 26px;
+  border-left: 2px solid var(--border-primary);
+  margin-left: 6px;
+  min-width: 0;
+  font-size: 14px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--floating-surface);
+    border: 2px solid var(--text-primary);
+  }
+}
+
+.stepStrict::before {
+  background: var(--text-primary);
+}
+
+.stepSkipped {
+  border-left-style: dashed;
+  color: var(--text-secondary);
+
+  &::before {
+    border-color: var(--border-primary);
+    border-style: dashed;
+  }
+}
+
+.stepEnd {
+  border-left-color: transparent;
+  padding-bottom: 0;
+}
+
+.stepFail::before {
+  background: var(--error-color);
+  border-color: var(--error-color);
+}
+
+.stepKicker {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.stepFine {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.failText {
+  color: var(--error-color);
+}
+
+.targetTag {
+  margin-left: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--border-primary);
+  color: var(--text-secondary);
+}
+
+.journeySave {
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+[data-theme='dark'] .segOn {
+  background: var(--border-primary);
+  box-shadow: none;
+}
