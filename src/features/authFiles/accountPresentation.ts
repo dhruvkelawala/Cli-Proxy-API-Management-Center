@@ -7,8 +7,9 @@
  * 2. Availability — only meaningful while enabled: available, cooling down, needs attention
  *    or unknown. Derived from the same signals as isProblemAuthFile so counts and the
  *    Problem filter always agree.
- * 3. Pool preference — where new automatic sessions start inside a provider pool. Mirrors the
- *    backend selector: the highest priority tier among usable accounts wins (default 0).
+ * 3. Pool preference — where new automatic sessions start among the listed accounts of a
+ *    provider. Mirrors the backend selector: the highest priority tier among accounts not
+ *    marked unavailable wins (default 0).
  *    Established session-affinity bindings outrank priority, so this never describes
  *    which account an existing session is using.
  */
@@ -19,15 +20,15 @@ import { isProblemAuthFile, normalizeProviderKey } from './constants';
 export type AccountAvailability = 'available' | 'coolingDown' | 'attention' | 'unknown';
 
 export type AccountPoolRole =
-  /** Alone in the highest priority tier with other usable accounts below it. */
+  /** Alone in the highest listed priority tier with other listed pool members below it. */
   | 'preferred'
-  /** Shares the highest priority tier; the routing strategy spreads new sessions. */
+  /** Shares the highest listed priority tier; the routing strategy spreads new sessions. */
   | 'shared'
-  /** The only usable account in its provider pool. */
+  /** The only listed pool member for its provider. */
   | 'sole'
-  /** Usable, but a higher-priority account is usable too. */
+  /** In the pool, but another listed member has a higher priority. */
   | 'backup'
-  /** Enabled but currently unusable (cooling down or needs attention). */
+  /** Enabled but marked unavailable by the backend (cooldown, quota, auth failure). */
   | 'skipped'
   /** Disabled by the operator; excluded from the pool. */
   | 'excluded';
@@ -107,19 +108,25 @@ export const accountProviderKey = (file: AuthFileItem): string =>
 const priorityOf = (file: AuthFileItem): number =>
   typeof file.priority === 'number' && Number.isSafeInteger(file.priority) ? file.priority : 0;
 
-/** Usable for new sessions: enabled and not known to be failing. Unknown counts as usable. */
-const isUsable = (availability: AccountAvailability | null): boolean =>
-  availability === 'available' || availability === 'unknown';
+/**
+ * Listed pool member: enabled and not marked unavailable. Mirrors the backend selector,
+ * which only skips unavailable credentials; an error status or stale warning alone does not
+ * take an account out of the pool. Only the auth-file list is known here — config API keys,
+ * per-model cooldowns, excluded models and prefix pools are not modelled, so roles describe
+ * this list rather than the whole pool.
+ */
+const isPoolMember = (file: AuthFileItem, availability: AccountAvailability | null): boolean =>
+  availability !== null && file.unavailable !== true;
 
 export const presentAccounts = (files: AuthFileItem[]): Map<AuthFileItem, AccountPresentation> => {
   const availabilityByFile = new Map(files.map((file) => [file, resolveAccountAvailability(file)]));
-  const usableByProvider = new Map<string, AuthFileItem[]>();
+  const poolByProvider = new Map<string, AuthFileItem[]>();
   files.forEach((file) => {
-    if (!isUsable(availabilityByFile.get(file) ?? null)) return;
+    if (!isPoolMember(file, availabilityByFile.get(file) ?? null)) return;
     const provider = accountProviderKey(file);
-    const pool = usableByProvider.get(provider);
-    if (pool) pool.push(file);
-    else usableByProvider.set(provider, [file]);
+    const members = poolByProvider.get(provider);
+    if (members) members.push(file);
+    else poolByProvider.set(provider, [file]);
   });
 
   const result = new Map<AuthFileItem, AccountPresentation>();
@@ -131,21 +138,21 @@ export const presentAccounts = (files: AuthFileItem[]): Map<AuthFileItem, Accoun
       result.set(file, { ...base, poolRole: 'excluded' });
       return;
     }
-    if (!isUsable(availability)) {
+    if (!isPoolMember(file, availability)) {
       result.set(file, { ...base, poolRole: 'skipped' });
       return;
     }
-    const usable = usableByProvider.get(provider) ?? [file];
-    if (usable.length === 1) {
+    const pool = poolByProvider.get(provider) ?? [file];
+    if (pool.length === 1) {
       result.set(file, { ...base, poolRole: 'sole' });
       return;
     }
-    const topPriority = Math.max(...usable.map(priorityOf));
+    const topPriority = Math.max(...pool.map(priorityOf));
     if (priorityOf(file) < topPriority) {
       result.set(file, { ...base, poolRole: 'backup' });
       return;
     }
-    const topTier = usable.filter((candidate) => priorityOf(candidate) === topPriority).length;
+    const topTier = pool.filter((candidate) => priorityOf(candidate) === topPriority).length;
     result.set(
       file,
       topTier === 1

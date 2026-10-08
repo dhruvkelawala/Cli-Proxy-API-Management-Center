@@ -813,7 +813,8 @@ export function AuthFilesPage() {
       <AuthFileDetailsSheet
         disableControls={disableControls}
         editor={prefixProxyEditor}
-        accountLabel={editorAccountTitle?.title}
+        // 标题仅在为备注或账号（email/项目 ID）时替换文件名，避免「foo / foo.json」重复
+        accountLabel={editorAccountTitle?.titleMono ? undefined : editorAccountTitle?.title}
         accountDetail={editorAccountTitle?.account ?? undefined}
         updatedText={prefixProxyUpdatedText}
         dirty={prefixProxyDirty}

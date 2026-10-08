@@ -173,6 +173,48 @@ describe('pool preference', () => {
     expect(roles.get(codex)).toMatchObject({ poolRole: 'sole', provider: 'codex' });
   });
 
+  test('a stale warning without unavailable keeps the account in the pool, like the backend', () => {
+    const healthy = authFile({ name: 'healthy.json', priority: 0 });
+    const warned = authFile({
+      name: 'warned.json',
+      priority: 0,
+      statusMessage: 'request failed earlier',
+      unavailable: false,
+    });
+    const roles = presentAccounts([healthy, warned]);
+    expect(roles.get(healthy)).toMatchObject({ poolRole: 'shared', peers: 1 });
+    expect(roles.get(warned)).toMatchObject({
+      poolRole: 'shared',
+      peers: 1,
+      availability: 'attention',
+    });
+    // Counts still treat the warning as needing attention (== Problem filter).
+    expect(summarizeAccounts([healthy, warned]).needsAttention).toBe(1);
+  });
+
+  test('an error status alone does not skip the account; unavailable does', () => {
+    const errored = authFile({ name: 'errored.json', status: 'error', priority: 9 });
+    const other = authFile({ name: 'other.json', priority: 1 });
+    expect(presentAccounts([errored, other]).get(errored)).toMatchObject({
+      poolRole: 'preferred',
+      availability: 'attention',
+    });
+    const blocked = { ...errored, unavailable: true };
+    expect(presentAccounts([blocked, other]).get(blocked)).toMatchObject({ poolRole: 'skipped' });
+    expect(presentAccounts([blocked, other]).get(other)).toMatchObject({ poolRole: 'sole' });
+  });
+
+  test('role copy only claims what the listed accounts show', () => {
+    const en = JSON.parse(readFileSync('src/i18n/locales/en.json', 'utf8')) as {
+      auth_files: Record<string, string>;
+    };
+    const roleCopy = Object.entries(en.auth_files)
+      .filter(([key]) => key.startsWith('pool_'))
+      .map(([, value]) => value);
+    for (const copy of roleCopy) expect(copy).not.toMatch(/usable|preferred for/i);
+    expect(en.auth_files.pool_attention).toBe('May still be selected');
+  });
+
   test('equal top priorities share new sessions', () => {
     const one = authFile({ name: 'one.json', priority: 3 });
     const two = authFile({ name: 'two.json', priority: 3 });
@@ -257,9 +299,10 @@ describe('account presentation locales', () => {
     'auth_files.pool_backup',
     'auth_files.pool_skipped',
     'auth_files.pool_excluded',
-    'auth_files.meta_available',
     'auth_files.meta_unknown',
-    'auth_files.meta_disabled',
+    'auth_files.pool_attention',
+    'auth_files.details_routing_scope',
+    'dashboard.stat_credentials_hint_unknown',
     'auth_files.gateway_context',
     'auth_files.gateway_context_unknown',
     'auth_files.status_toggle_enabled',
@@ -301,6 +344,8 @@ describe('account presentation locales', () => {
         'auth_files.pool_shared',
         'auth_files.meta_attention',
         'auth_files.meta_total',
+        'auth_files.meta_available',
+        'auth_files.meta_disabled',
         'auth_files.card_select',
       ]) {
         expect({ key, value: typeof pluralBase(key) }).toEqual({ key, value: 'string' });

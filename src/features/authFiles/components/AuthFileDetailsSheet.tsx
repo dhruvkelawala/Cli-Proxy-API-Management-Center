@@ -217,6 +217,7 @@ export function AuthFileDetailsSheet(props: AuthFileDetailsSheetProps) {
                       {t('auth_files.details_routing_title')}
                     </h3>
                     <p className={styles.sectionHint}>{t('auth_files.details_routing_hint')}</p>
+                    <p className={styles.sectionHint}>{t('auth_files.details_routing_scope')}</p>
                     <Input
                       label={t('auth_files.priority_label')}
                       value={editor.priority}

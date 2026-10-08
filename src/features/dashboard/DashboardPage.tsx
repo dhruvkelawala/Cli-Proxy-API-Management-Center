@@ -128,11 +128,17 @@ export function DashboardPage() {
       label: t('dashboard.stat_credentials'),
       value: credentials ? credentials.total.toLocaleString() : DASH,
       hint: credentials
-        ? t('dashboard.stat_credentials_hint', {
-            available: credentials.available,
-            attention: credentials.needsAttention,
-            disabled: credentials.disabled,
-          })
+        ? t(
+            credentials.unknown > 0
+              ? 'dashboard.stat_credentials_hint_unknown'
+              : 'dashboard.stat_credentials_hint',
+            {
+              available: credentials.available,
+              attention: credentials.needsAttention,
+              unknown: credentials.unknown,
+              disabled: credentials.disabled,
+            }
+          )
         : t('dashboard.stat_credentials_empty'),
       meter:
         credentials && credentials.total > 0

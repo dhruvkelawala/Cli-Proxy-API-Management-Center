@@ -35,7 +35,7 @@ describe('auth file card presentation contract', () => {
     expect(header).toContain("ariaLabel={t('auth_files.card_select', { name: accountName })}");
     expect(header).not.toContain('aria-label=');
     expect(footer).toContain('<ToggleSwitch');
-    expect(source).toContain('const enabled = file.disabled !== true;');
+    expect(source).toContain('const enabled = !isAccountDisabled(file);');
     expect(footer).toContain('checked={enabled}');
     expect(footer).toContain('statusUpdating[getAuthFileRefreshKey(file)] === true ||');
     expect(footer).toContain('isManualRefreshing');
@@ -60,6 +60,9 @@ describe('auth file card presentation contract', () => {
     const stateLine = source.split('{stateKey && (')[1].split('</p>')[0];
     expect(stateLine).toContain('STATE_LABEL_KEYS[stateKey]');
     expect(stateLine).toContain('{poolLabel}');
+    expect(source).toMatch(
+      /presentation\.availability === 'attention' && presentation\.poolRole !== 'skipped'\s*\?\s*t\('auth_files\.pool_attention'\)/
+    );
     expect(source).not.toMatch(/compact\s*&&[^\n]*stateKey/);
   });
 
@@ -101,7 +104,7 @@ describe('auth file card presentation contract', () => {
     ]) {
       expect(source).toContain(handler);
     }
-    expect(source).toContain('rawStatusMessage && hasStatusWarning && enabled');
+    expect(source).toContain('rawStatusMessage && hasStatusWarning && isProblemAuthFile(file)');
     expect(source).toContain('showManualRefreshButton');
     expect(source).toContain('file.disabled ||');
   });

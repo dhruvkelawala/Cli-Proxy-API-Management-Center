@@ -23,6 +23,7 @@ import {
   hasAuthFileStatusWarning,
   getTypeColor,
   getTypeLabel,
+  isProblemAuthFile,
   isRuntimeOnlyAuthFile,
   normalizeProviderKey,
   supportsAuthFileManualRefresh,
@@ -30,9 +31,10 @@ import {
   type ResolvedTheme,
 } from '@/features/authFiles/constants';
 import { deriveAccountTitle } from '@/features/authFiles/identity';
-import type {
-  AccountAvailability,
-  AccountPresentation,
+import {
+  isAccountDisabled,
+  type AccountAvailability,
+  type AccountPresentation,
 } from '@/features/authFiles/accountPresentation';
 import { resolveAuthFileQuotaType } from '@/features/authFiles/logic';
 import type { AuthFileStatusBarData } from '@/features/authFiles/hooks/useAuthFilesStatusBarCache';
@@ -138,14 +140,17 @@ export function AuthFileCard(props: AuthFileCardProps) {
   const accountTitle = deriveAccountTitle(file);
   // 无障碍名称用卡片显示的标题，供应商前缀区分同名的不同提供商账号
   const accountName = accountTitle.title ? `${typeLabel} ${accountTitle.title}` : file.name;
-  const enabled = file.disabled !== true;
+  const enabled = !isAccountDisabled(file);
   const stateKey = presentation ? (presentation.availability ?? 'off') : null;
   const providerName = presentation ? getTypeLabel(t, presentation.provider) : typeLabel;
-  const poolLabel = presentation
-    ? presentation.poolRole === 'shared'
-      ? t('auth_files.pool_shared', { count: presentation.peers })
-      : t(`auth_files.pool_${presentation.poolRole}`, { provider: providerName })
-    : '';
+  // 仍在池内但需处理（错误状态/告警但后端未标记 unavailable）的账号可能仍被选中，不声称其池内角色
+  const poolLabel = !presentation
+    ? ''
+    : presentation.availability === 'attention' && presentation.poolRole !== 'skipped'
+      ? t('auth_files.pool_attention')
+      : presentation.poolRole === 'shared'
+        ? t('auth_files.pool_shared', { count: presentation.peers })
+        : t(`auth_files.pool_${presentation.poolRole}`, { provider: providerName });
 
   // 挂载时捕获一次入场延迟：父级随后传 null 也不会中断已开始的动画
   const [mountEntranceDelayMs] = useState<number | null>(entranceDelayMs ?? null);
@@ -204,8 +209,8 @@ export function AuthFileCard(props: AuthFileCardProps) {
         </p>
       )}
 
-      {/* 主动停用由状态行中性表达，不再以告警样式重复「disabled via management API」 */}
-      {rawStatusMessage && hasStatusWarning && enabled && (
+      {/* 只为问题账号显示告警；主动停用（含乐观重新启用前的旧消息）由状态行中性表达 */}
+      {rawStatusMessage && hasStatusWarning && isProblemAuthFile(file) && (
         <div className={styles.warning} title={rawStatusMessage}>
           <IconInfo className={styles.warningIcon} size={14} />
           <span>{rawStatusMessage}</span>
