@@ -15,6 +15,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { PageTransition } from '@/components/common/PageTransition';
+import { DarkRegisterPrototype } from '@/components/layout/prototype/DarkRegisterPrototype';
 import { MainRoutes } from '@/router/MainRoutes';
 import { authFilesApi, pluginsApi } from '@/services/api';
 import {
@@ -1220,6 +1221,7 @@ export function MainLayout() {
           </main>
         </div>
       </div>
+      {import.meta.env.DEV ? <DarkRegisterPrototype /> : null}
     </div>
   );
 }
