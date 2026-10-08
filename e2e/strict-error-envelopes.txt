@@ -1,0 +1,14 @@
+set Only A:
+{"result":{"profile_ref":"f967336a-0e19-49e9-bf46-1a05c3cf44a6","label":"MacBook · T3 Claude","revision":4,"policies":{"claude":{"mode":"only","account_ref":"309dbbf2-def8-4527-b135-8e58129855b7"},"c
+disable A:
+{"disabled":true,"status":"ok"}
+--- POST /v1/messages (Claude)
+{"type":"error","error":{"type":"api_error","message":"target_unavailable"}} [HTTP 503]
+--- POST /v1/chat/completions (OpenAI)
+{"error":{"code":"target_unavailable","field":"claude"}} [HTTP 503]
+--- POST /v1/responses (OpenAI Responses)
+{"error":{"code":"target_unavailable","field":"claude"}} [HTTP 503]
+--- POST /v1/messages/count_tokens
+{"type":"error","error":{"type":"api_error","message":"target_unavailable"}} [HTTP 503]
+re-enable A:
+{"disabled":false,"status":"ok"}
