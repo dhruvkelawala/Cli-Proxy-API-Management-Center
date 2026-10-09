@@ -12,13 +12,19 @@ import {
   type ProviderRecentUsageMap,
 } from '@/components/providers/utils';
 import type { OpenAIProviderConfig } from '@/types';
-import { ProviderHeaderCard } from './components/ProviderHeaderCard';
+import { ActionMenu, MoreDisclosure, PageHeader } from '@/components/flow';
+import flow from '@/components/flow/flowPage.module.scss';
+import { IconPlus } from '@/components/ui/icons';
+import type { Copy } from '@/features/clientProfiles/routing/routingOrder';
+import { buildNameJoiner } from '@/features/clientProfiles/routing/useRoutingOrder';
+import { ProviderKeyList } from './components/ProviderKeyList';
+import { ProviderLogo } from './components/ProviderLogo';
+import { describeProviders, describeQuickStart, splitProviderGroups } from './providersHeadline';
 import { ProviderCategoryList } from './components/ProviderCategoryList';
 import { ProviderResourcePanel } from './components/ProviderResourcePanel';
 import type { ProviderPanelControls } from './components/ProviderResourcePanel';
 import { SponsorQuickStartPanel } from './components/SponsorQuickStartPanel';
 import { ProviderSheet, type ProviderSheetHandle } from './sheets/ProviderSheet';
-import { APIKEY_FUN_DISPLAY_NAME } from './sponsor';
 import { isMultiProtocolSponsorBrand } from './sponsorDefinitions';
 import { isSponsorPartialMutationError } from './sponsorMutationRecovery';
 import { useProviderWorkbench } from './useProviderWorkbench';
@@ -33,6 +39,14 @@ import type { ProviderBrand, ProviderResource, ProviderSortBy, SortDir } from '.
 import styles from './ProvidersWorkbenchPage.module.scss';
 
 type SheetMode = 'detail' | 'create' | 'edit';
+
+/** Offered as one-click starts while no provider has a key yet. */
+const STARTER_BRANDS: ReadonlyArray<ProviderBrand> = [
+  'claude',
+  'gemini',
+  'codex',
+  'openaiCompatibility',
+];
 
 interface SheetState {
   open: boolean;
@@ -256,20 +270,6 @@ export function ProvidersWorkbenchPage({ fixedBrand }: ProvidersWorkbenchPagePro
     updateActiveFilterState,
   ]);
 
-  const totalResources = useMemo(
-    () => groups.reduce((sum, g) => sum + g.resources.length, 0),
-    [groups]
-  );
-
-  const totalActive = useMemo(
-    () => groups.reduce((sum, g) => sum + g.resources.filter((r) => !r.disabled).length, 0),
-    [groups]
-  );
-
-  const providerFamilies = useMemo(
-    () => groups.filter((g) => g.resources.length > 0).length,
-    [groups]
-  );
   const quickStartResource = useMemo(
     () => (fixedBrand === 'apikeyFun' && activeGroup ? (activeGroup.resources[0] ?? null) : null),
     [activeGroup, fixedBrand]
@@ -278,20 +278,42 @@ export function ProvidersWorkbenchPage({ fixedBrand }: ProvidersWorkbenchPagePro
   const updatedAtLabel = workbench.snapshot
     ? formatDateTime(workbench.snapshot.fetchedAt, i18n.language)
     : t('providersPage.modelCatalog.notLoaded');
-  const headerTitle =
+  const locale = i18n.language || 'en';
+  const join = useMemo(() => buildNameJoiner(locale), [locale]);
+  const text = (copy: Copy | null) => (copy ? t(copy.key, copy.values) : undefined);
+  const { configured: configuredGroups, empty: emptyGroups } = useMemo(
+    () => splitProviderGroups(groups),
+    [groups]
+  );
+  const quickStartName = t('providersPage.providerNames.apikeyFun');
+  const headline =
     fixedBrand === 'apikeyFun'
-      ? quickStartResource
-        ? APIKEY_FUN_DISPLAY_NAME
-        : t('nav.quick_start')
-      : undefined;
+      ? describeQuickStart({
+          name: quickStartName,
+          resource: quickStartResource,
+          loading: workbench.isPending,
+          failed: workbench.isError,
+        })
+      : describeProviders({
+          groups: workbench.snapshot ? groups : null,
+          loading: workbench.isPending,
+          failed: workbench.isError,
+          nameOf: (brand) => t(`providersPage.providerNames.${brand}`),
+          join,
+        });
   const errorBanner = workbench.errorMessage ? (
-    <div className="error-box">{workbench.errorMessage}</div>
+    <p className={flow.note} data-tone="bad" role="alert">
+      {workbench.errorMessage}
+    </p>
   ) : null;
 
-  const openCreate = useCallback(() => {
-    const brand = activeBrand;
-    setSheetState({ open: true, brand, mode: 'create', resource: null });
-  }, [activeBrand]);
+  const openCreate = useCallback(
+    (brand: ProviderBrand = activeBrand) => {
+      if (brand !== activeBrand) setActiveBrand(brand);
+      setSheetState({ open: true, brand, mode: 'create', resource: null });
+    },
+    [activeBrand, setActiveBrand]
+  );
 
   const openView = useCallback((resource: ProviderResource) => {
     setSheetState({
@@ -371,14 +393,70 @@ export function ProvidersWorkbenchPage({ fixedBrand }: ProvidersWorkbenchPagePro
     closeSheet();
   }, [closeSheet, showNotification, t]);
 
+  const selectBrand = (brand: ProviderBrand) => {
+    const isSwitching = sheetState.open && sheetState.brand !== brand;
+    const proceed =
+      isSwitching && sheetRef.current
+        ? sheetRef.current.confirmDiscardIfDirty()
+        : Promise.resolve(true);
+    void proceed.then((ok) => {
+      if (!ok) return;
+      setActiveBrand(brand);
+      if (isSwitching) {
+        closeSheet();
+      }
+    });
+  };
+
+  const header = (
+    <PageHeader
+      eyebrow={fixedBrand === 'apikeyFun' ? t('nav.quick_start') : t('providersPage.flow.eyebrow')}
+      title={text(headline.title)}
+      subtitle={text(headline.subtitle)}
+      live
+      actions={
+        fixedBrand ? undefined : (
+          <ActionMenu
+            variant="primary"
+            disabled={disableMutations || groups.length === 0}
+            items={groups.map((group) => ({
+              id: group.id,
+              label: t(`providersPage.providerNames.${group.id}`),
+              icon: <ProviderLogo brand={group.id} size={16} />,
+              onSelect: () => openCreate(group.id),
+            }))}
+          >
+            <IconPlus size={15} aria-hidden="true" />
+            {t('providersPage.flow.add_key')}
+          </ActionMenu>
+        )
+      }
+    />
+  );
+
+  const refreshLine = (
+    <p className={flow.actions}>
+      <span>{t('providersPage.flow.updated', { time: updatedAtLabel })}</span>
+      <button
+        type="button"
+        className={flow.textButton}
+        onClick={() => void handleRefresh()}
+        disabled={workbench.isFetching}
+      >
+        {workbench.isFetching
+          ? t('providersPage.actions.syncing')
+          : t('providersPage.actions.refresh')}
+      </button>
+    </p>
+  );
+
   // 加载状态
   if (!workbench.snapshot && workbench.isPending) {
     return (
-      <div className={styles.page}>
-        <Skeleton height={120} />
-        <div className={styles.layout}>
-          <Skeleton height={420} />
-          <Skeleton height={420} />
+      <div className={flow.page}>
+        {header}
+        <div className={flow.lead}>
+          <Skeleton height={160} />
         </div>
       </div>
     );
@@ -386,106 +464,140 @@ export function ProvidersWorkbenchPage({ fixedBrand }: ProvidersWorkbenchPagePro
 
   if (!activeGroup) {
     return (
-      <div className={styles.page}>
-        <ProviderHeaderCard
-          title={headerTitle}
-          totalActive={0}
-          totalResources={0}
-          providerFamilies={0}
-          updatedAtLabel={updatedAtLabel}
-          isFetching={workbench.isFetching}
-          onRefresh={() => void handleRefresh()}
-          onNew={() => {}}
-          isNewDisabled
-          showNewAction={!fixedBrand}
-          showSummary={fixedBrand !== 'apikeyFun'}
-        />
+      <div className={flow.page}>
+        {header}
         {errorBanner}
+        <div className={flow.moreWrap}>{refreshLine}</div>
       </div>
     );
   }
 
-  return (
-    <div className={styles.page}>
-      <ProviderHeaderCard
-        title={headerTitle}
-        totalActive={totalActive}
-        totalResources={totalResources}
-        providerFamilies={providerFamilies}
-        updatedAtLabel={updatedAtLabel}
-        isFetching={workbench.isFetching}
-        isNewDisabled={disableMutations}
-        showNewAction={!fixedBrand}
-        showSummary={fixedBrand !== 'apikeyFun'}
-        newLabel={t('providersPage.actions.new')}
-        variant={fixedBrand === 'apikeyFun' ? 'quickStart' : undefined}
-        onRefresh={() => void handleRefresh()}
-        onNew={openCreate}
-      />
-
-      {errorBanner}
-
-      <div className={`${styles.layout} ${fixedBrand ? styles.layoutSingle : ''}`.trim()}>
-        {!fixedBrand ? (
-          <ProviderCategoryList
-            groups={groups}
-            activeBrand={activeGroup.id}
-            onSelect={(brand) => {
-              const isSwitching = sheetState.open && sheetState.brand !== brand;
-              const proceed =
-                isSwitching && sheetRef.current
-                  ? sheetRef.current.confirmDiscardIfDirty()
-                  : Promise.resolve(true);
-              void proceed.then((ok) => {
-                if (!ok) return;
-                setActiveBrand(brand);
-                if (isSwitching) {
-                  closeSheet();
-                }
-              });
-            }}
-          />
-        ) : null}
-        {fixedBrand === 'apikeyFun' ? (
+  if (fixedBrand === 'apikeyFun') {
+    return (
+      <div className={flow.page}>
+        {header}
+        {errorBanner}
+        <div className={flow.lead}>
           <SponsorQuickStartPanel
             resource={quickStartResource}
             workbench={workbench}
             mutationDisabled={disableMutations}
           />
-        ) : (
-          <ProviderResourcePanel
-            group={activeGroup}
-            filter={filter}
-            onFilterChange={(value) => updateActiveFilterState({ filter: value })}
-            filteredResources={visibleResources}
+        </div>
+        <div className={flow.moreWrap}>
+          <MoreDisclosure
+            label={t('providersPage.flow.more')}
+            summary={t('providersPage.flow.updated', { time: updatedAtLabel })}
+          >
+            <div className={flow.moreBody}>
+              <section className={flow.moreSection}>
+                <h3 className={flow.sectionLabel}>{t('providersPage.flow.sync_title')}</h3>
+                <p className={flow.quiet}>{t('providersPage.flow.sync_hint')}</p>
+                {refreshLine}
+              </section>
+            </div>
+          </MoreDisclosure>
+        </div>
+      </div>
+    );
+  }
+
+  const startBrands = emptyGroups.filter((group) => STARTER_BRANDS.includes(group.id)).slice(0, 4);
+
+  return (
+    <div className={flow.page}>
+      {header}
+
+      {errorBanner}
+
+      <div className={flow.lead}>
+        {configuredGroups.length > 0 ? (
+          <ProviderKeyList
+            groups={configuredGroups}
             selectedId={sheetState.open ? (sheetState.resource?.id ?? null) : null}
             disableMutations={disableMutations}
-            usageByProvider={usageByProvider}
-            toolbarControls={toolbarControls}
             onView={openView}
             onEdit={openEdit}
             onDelete={handleDelete}
             onToggleDisabled={handleToggleDisabled}
-            onCreate={openCreate}
+            onAdd={(brand) => openCreate(brand)}
           />
+        ) : (
+          <p className={flow.actions}>
+            <span>{t('providersPage.flow.start_with')}</span>
+            {startBrands.map((group) => (
+              <button
+                key={group.id}
+                type="button"
+                className={flow.textButton}
+                disabled={disableMutations}
+                onClick={() => openCreate(group.id)}
+              >
+                {t(`providersPage.providerNames.${group.id}`)}
+              </button>
+            ))}
+          </p>
         )}
       </div>
 
-      {!fixedBrand ? (
-        <ProviderSheet
-          ref={sheetRef}
-          state={sheetState}
-          onClose={closeSheet}
-          onSwitchToEdit={() => {
-            setSheetState((s) => (s.resource ? { ...s, mode: 'edit' } : s));
-          }}
-          workbench={workbench}
-          onCreated={handleCreated}
-          onUpdated={handleUpdated}
-          mutationDisabled={disableMutations}
-          usageByProvider={usageByProvider}
-        />
-      ) : null}
+      <div className={flow.moreWrap}>
+        <MoreDisclosure
+          label={t('providersPage.flow.more_all')}
+          summary={t(
+            configuredGroups.length === 0
+              ? 'providersPage.flow.more_summary_none'
+              : 'providersPage.flow.more_summary',
+            { count: groups.length, empty: emptyGroups.length }
+          )}
+        >
+          <div className={flow.moreBody}>
+            <section className={flow.moreSection}>
+              <p className={flow.quiet}>{t('providersPage.flow.browse_hint')}</p>
+              <div className={styles.browse}>
+                <ProviderCategoryList
+                  groups={groups}
+                  activeBrand={activeGroup.id}
+                  onSelect={selectBrand}
+                />
+                <ProviderResourcePanel
+                  group={activeGroup}
+                  filter={filter}
+                  onFilterChange={(value) => updateActiveFilterState({ filter: value })}
+                  filteredResources={visibleResources}
+                  selectedId={sheetState.open ? (sheetState.resource?.id ?? null) : null}
+                  disableMutations={disableMutations}
+                  usageByProvider={usageByProvider}
+                  toolbarControls={toolbarControls}
+                  onView={openView}
+                  onEdit={openEdit}
+                  onDelete={handleDelete}
+                  onToggleDisabled={handleToggleDisabled}
+                  onCreate={() => openCreate()}
+                />
+              </div>
+            </section>
+            <section className={flow.moreSection}>
+              <h3 className={flow.sectionLabel}>{t('providersPage.flow.sync_title')}</h3>
+              <p className={flow.quiet}>{t('providersPage.flow.sync_hint')}</p>
+              {refreshLine}
+            </section>
+          </div>
+        </MoreDisclosure>
+      </div>
+
+      <ProviderSheet
+        ref={sheetRef}
+        state={sheetState}
+        onClose={closeSheet}
+        onSwitchToEdit={() => {
+          setSheetState((s) => (s.resource ? { ...s, mode: 'edit' } : s));
+        }}
+        workbench={workbench}
+        onCreated={handleCreated}
+        onUpdated={handleUpdated}
+        mutationDisabled={disableMutations}
+        usageByProvider={usageByProvider}
+      />
     </div>
   );
 }

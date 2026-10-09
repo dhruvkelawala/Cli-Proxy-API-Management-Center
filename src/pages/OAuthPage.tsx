@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Card } from '@/components/ui/Card';
+import { MoreDisclosure, PageHeader, StepFlow, type StepFlowState } from '@/components/flow';
+import flow from '@/components/flow/flowPage.module.scss';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { IconPlug } from '@/components/ui/icons';
@@ -19,6 +20,7 @@ import {
 import type { PluginListEntry } from '@/types';
 import { createOAuthAttempts, type OAuthAttempt } from './oauthAttempts';
 import { validateDevinCallback } from './devinOAuth';
+import { attemptPending, describeOAuth, splitOAuthProviders, type OAuthStep } from './oauthFlow';
 import styles from './OAuthPage.module.scss';
 import iconMeta from '@/assets/icons/meta.svg';
 import iconCodex from '@/assets/icons/codex.svg';
@@ -33,6 +35,8 @@ import iconDevin from '@/assets/icons/devin.svg';
 import iconDevinDark from '@/assets/icons/devin-dark.svg';
 
 interface ProviderState {
+  /** Increasing per attempt, so the headline follows the latest sign-in. */
+  startedAt?: number;
   url?: string;
   userCode?: string;
   state?: string;
@@ -288,6 +292,7 @@ export function OAuthPage() {
     })
   );
   const vertexFileInputRef = useRef<HTMLInputElement | null>(null);
+  const attemptSeq = useRef(0);
 
   const clearTimers = useCallback(() => {
     attempts.current.invalidateAll();
@@ -344,6 +349,17 @@ export function OAuthPage() {
     provider.kind === 'plugin'
       ? t('auth_login.plugin_oauth_title', { name: provider.title })
       : t(provider.titleKey);
+
+  const getProviderShortName = (provider: OAuthProviderCard) =>
+    provider.kind === 'plugin'
+      ? provider.title
+      : t(`auth_login.flow.names.${getProviderI18nPrefix(provider.id)}`);
+
+  /** One short line per provider; the long description stays as the line's tooltip. */
+  const getProviderLine = (provider: OAuthProviderCard) =>
+    provider.kind === 'plugin'
+      ? t('auth_login.flow.lines.plugin', { name: provider.title })
+      : t(`auth_login.flow.lines.${getProviderI18nPrefix(provider.id)}`);
 
   const getProviderText = (provider: OAuthProviderCard, suffix: string) =>
     provider.kind === 'plugin'
@@ -475,7 +491,9 @@ export function OAuthPage() {
     // explicit cancellation before replacing that Devin session.
     if (provider === 'devin' && states[provider]?.state) return;
     const attempt = attempts.current.begin(provider);
+    attemptSeq.current += 1;
     updateProviderState(provider, {
+      startedAt: attemptSeq.current,
       url: undefined,
       userCode: undefined,
       state: undefined,
@@ -661,16 +679,19 @@ export function OAuthPage() {
     }
   };
 
-  const renderOAuthProviderCard = (provider: OAuthProviderCard, featured = false) => {
+  const renderOAuthProviderRow = (provider: OAuthProviderCard) => {
     const state = states[provider.id] || {};
-    const showKimiSignUp =
-      featured && provider.kind === 'builtin' && ['kimi', 'kimi-ai'].includes(provider.id);
+    const showKimiSignUp = provider.kind === 'builtin' && ['kimi', 'kimi-ai'].includes(provider.id);
     const canSubmitCallback =
       (provider.kind === 'plugin' || CALLBACK_SUPPORTED.has(provider.id)) && Boolean(state.url);
+    const shortName = getProviderShortName(provider);
     const loginButtonLabel =
       state.status === 'success'
         ? t('auth_login.login_another_account')
-        : getProviderText(provider, 'oauth_button');
+        : t('auth_login.flow.sign_in');
+    // Errors can be dismissed; a Devin session still open on the server is cancelled instead.
+    const canDismiss =
+      state.status === 'error' && !state.polling && !(provider.id === 'devin' && state.state);
     const statusBadgeClassName = [
       'status-badge',
       state.status === 'success' ? 'success' : '',
@@ -679,20 +700,26 @@ export function OAuthPage() {
       .filter(Boolean)
       .join(' ');
 
+    const attemptOpen = Boolean(
+      state.url || canSubmitCallback || (state.status && state.status !== 'idle')
+    );
+
     return (
-      <Card
-        key={provider.id}
-        className={featured ? styles.featuredCard : undefined}
-        title={
-          <span className={styles.cardTitle}>
-            <OAuthProviderIcon provider={provider} theme={resolvedTheme} />
-            <span>{getProviderTitleText(provider)}</span>
-          </span>
-        }
-        extra={
-          showKimiSignUp ? (
-            <div className={styles.featuredActions}>
+      <li key={provider.id} className={styles.provider} data-open={attemptOpen || undefined}>
+        <div className={styles.providerRow}>
+          <OAuthProviderIcon provider={provider} theme={resolvedTheme} />
+          <div className={styles.providerMain}>
+            <h3 className={styles.providerName} title={getProviderTitleText(provider)}>
+              {getProviderShortName(provider)}
+            </h3>
+            <p className={styles.providerHint} title={getProviderText(provider, 'oauth_hint')}>
+              {getProviderLine(provider)}
+            </p>
+          </div>
+          <div className={styles.providerActions}>
+            {showKimiSignUp ? (
               <Button
+                variant="secondary"
                 onClick={() =>
                   window.open(
                     provider.id === 'kimi-ai'
@@ -705,25 +732,22 @@ export function OAuthPage() {
               >
                 {t('auth_login.kimi_sign_up_button')}
               </Button>
-              <Button onClick={() => startAuth(provider.id)} loading={state.polling}>
-                {loginButtonLabel}
-              </Button>
-            </div>
-          ) : (
+            ) : null}
             <Button
               onClick={() => startAuth(provider.id)}
               loading={state.polling}
               disabled={provider.id === 'devin' && Boolean(state.state)}
+              aria-label={
+                state.status === 'success'
+                  ? undefined
+                  : t('auth_login.flow.sign_in_with', { name: shortName })
+              }
             >
               {loginButtonLabel}
             </Button>
-          )
-        }
-      >
-        <div className={styles.cardContent}>
-          <div className={featured ? styles.featuredHint : styles.cardHint}>
-            {getProviderText(provider, 'oauth_hint')}
           </div>
+        </div>
+        <div className={styles.attempt} hidden={!attemptOpen}>
           {state.url && (
             <div className={styles.authUrlBox}>
               <div className={styles.authUrlLabel}>
@@ -841,6 +865,18 @@ export function OAuthPage() {
                   : getProviderText(provider, 'oauth_status_waiting')}
             </div>
           )}
+          {canDismiss && (
+            <div className={styles.successActions}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => resetProviderAttempt(provider.id)}
+                aria-label={t('auth_login.flow.dismiss_named', { name: shortName })}
+              >
+                {t('auth_login.flow.dismiss')}
+              </Button>
+            </div>
+          )}
           {state.status === 'success' && (
             <div className={styles.successActions}>
               <Button variant="secondary" size="sm" onClick={() => navigate('/auth-files')}>
@@ -849,128 +885,194 @@ export function OAuthPage() {
             </div>
           )}
         </div>
-      </Card>
+      </li>
     );
   };
 
-  const featuredProviders = providerCards.filter((provider) =>
-    ['kimi', 'kimi-ai'].includes(provider.id)
-  );
-  const otherOAuthProviders = providerCards.filter(
-    (provider) => !['kimi', 'kimi-ai'].includes(provider.id)
-  );
+  const { primary: primaryProviders, other: otherProviders } = splitOAuthProviders(providerCards);
+  const nameOf = (id: string) => {
+    const card = providerCards.find((item) => item.id === id);
+    return card ? getProviderShortName(card) : id;
+  };
+  const headline = describeOAuth(states, nameOf);
+  // More is held open only by something under way: a sign-in there, or an import in progress.
+  const otherPending = otherProviders.some((provider) => attemptPending(states[provider.id]));
+  const vertexPending = vertexState.loading;
+  const stepIndex: Record<OAuthStep, number> = {
+    idle: -1,
+    browser: 0,
+    signin: 1,
+    failed: 1,
+    added: 2,
+  };
+  const stepState: StepFlowState =
+    headline.step === 'idle'
+      ? 'idle'
+      : headline.step === 'added'
+        ? 'done'
+        : headline.step === 'failed'
+          ? 'failed'
+          : 'active';
 
   return (
-    <div className={styles.container}>
-      <h1 className={styles.pageTitle}>{t('nav.oauth', { defaultValue: 'OAuth' })}</h1>
+    <div className={`${flow.page} ${styles.page}`}>
+      <PageHeader
+        eyebrow={t('auth_login.flow.eyebrow')}
+        title={t(headline.title.key, headline.title.values)}
+        subtitle={t(headline.subtitle.key, headline.subtitle.values)}
+        live
+      />
 
-      <div className={styles.content}>
-        <section className={styles.providerSection}>
-          <div className={styles.providerList}>
-            {featuredProviders.map((provider) => renderOAuthProviderCard(provider, true))}
-          </div>
-        </section>
+      <div className={styles.steps}>
+        <StepFlow
+          label={t('auth_login.flow.steps_label')}
+          failedNote={t('auth_login.flow.step_failed')}
+          doneNote={t('auth_login.flow.step_done')}
+          current={stepIndex[headline.step]}
+          state={stepState}
+          steps={[
+            { id: 'browser', label: t('auth_login.flow.step_browser') },
+            { id: 'signin', label: t('auth_login.flow.step_signin') },
+            { id: 'added', label: t('auth_login.flow.step_added') },
+          ]}
+        />
+      </div>
 
-        <section className={styles.providerSection}>
-          <div className={styles.providerList}>
-            {otherOAuthProviders.map((provider) => renderOAuthProviderCard(provider))}
-          </div>
-        </section>
+      {headline.step === 'added' && (
+        <p className={flow.actions}>
+          <button type="button" className={flow.textButton} onClick={() => navigate('/auth-files')}>
+            {t('auth_login.view_auth_files')}
+          </button>
+        </p>
+      )}
 
-        {/* Vertex JSON 登录 */}
-        <section className={styles.providerSection}>
-          <h2 className={styles.sectionTitle}>{t('auth_login.other_login_methods')}</h2>
-          <Card
-            title={
-              <span className={styles.cardTitle}>
+      <section className={flow.section} aria-labelledby="oauth-providers">
+        <h2 id="oauth-providers" className={flow.sectionLabel}>
+          {t('auth_login.flow.providers')}
+        </h2>
+        <ul className={`${styles.providers} ${flow.quietButtons}`}>
+          {primaryProviders.map((provider) => renderOAuthProviderRow(provider))}
+        </ul>
+      </section>
+
+      <div className={flow.moreWrap}>
+        <MoreDisclosure
+          label={t('auth_login.flow.more')}
+          summary={[
+            ...otherProviders.map((provider) => getProviderShortName(provider)),
+            t('auth_login.flow.vertex_short'),
+          ].join(', ')}
+          forcedOpen={otherPending || vertexPending}
+          forcedNote={t('auth_login.flow.more_forced')}
+        >
+          <div className={flow.moreBody}>
+            <section className={flow.moreSection}>
+              <h3 className={flow.sectionLabel}>{t('auth_login.flow.other_providers')}</h3>
+              <ul className={`${styles.providers} ${flow.quietButtons}`}>
+                {otherProviders.map((provider) => renderOAuthProviderRow(provider))}
+              </ul>
+            </section>
+
+            <section className={`${flow.moreSection} ${flow.quietButtons}`}>
+              <h3 className={flow.sectionLabel}>{t('auth_login.other_login_methods')}</h3>
+              <div className={styles.providerRow}>
                 <img src={iconVertex} alt="" className={styles.cardTitleIcon} />
-                {t('vertex_import.title')}
-              </span>
-            }
-            extra={
-              <Button onClick={handleVertexImport} loading={vertexState.loading}>
-                {t('vertex_import.import_button')}
-              </Button>
-            }
-          >
-            <div className={styles.cardContent}>
-              <div className={styles.cardHint}>{t('vertex_import.description')}</div>
-              <Input
-                label={t('vertex_import.location_label')}
-                hint={t('vertex_import.location_hint')}
-                value={vertexState.location}
-                onChange={(e) =>
-                  setVertexState((prev) => ({
-                    ...prev,
-                    location: e.target.value,
-                  }))
-                }
-                placeholder={t('vertex_import.location_placeholder')}
-              />
-              <div className={styles.formItem}>
-                <label className={styles.formItemLabel}>{t('vertex_import.file_label')}</label>
-                <div className={styles.filePicker}>
-                  <Button variant="secondary" size="sm" onClick={handleVertexFilePick}>
-                    {t('vertex_import.choose_file')}
+                <div className={styles.providerMain}>
+                  <h4 className={styles.providerName}>{t('vertex_import.title')}</h4>
+                  <p className={styles.providerHint}>{t('vertex_import.description')}</p>
+                </div>
+                <div className={styles.providerActions}>
+                  <Button onClick={handleVertexImport} loading={vertexState.loading}>
+                    {t('vertex_import.import_button')}
                   </Button>
-                  <div
-                    className={`${styles.fileName} ${
-                      vertexState.fileName ? '' : styles.fileNamePlaceholder
-                    }`.trim()}
-                  >
-                    {vertexState.fileName || t('vertex_import.file_placeholder')}
-                  </div>
                 </div>
-                <div className={styles.cardHintSecondary}>{t('vertex_import.file_hint')}</div>
-                <input
-                  ref={vertexFileInputRef}
-                  type="file"
-                  accept=".json,application/json"
-                  style={{ display: 'none' }}
-                  onChange={handleVertexFileChange}
-                />
               </div>
-              {vertexState.error && <div className="status-badge error">{vertexState.error}</div>}
-              {vertexState.result && (
-                <div className={styles.connectionBox}>
-                  <div className={styles.connectionLabel}>{t('vertex_import.result_title')}</div>
-                  <div className={styles.keyValueList}>
-                    {vertexState.result.projectId && (
-                      <div className={styles.keyValueItem}>
-                        <span className={styles.keyValueKey}>
-                          {t('vertex_import.result_project')}
-                        </span>
-                        <span className={styles.keyValueValue}>{vertexState.result.projectId}</span>
-                      </div>
-                    )}
-                    {vertexState.result.email && (
-                      <div className={styles.keyValueItem}>
-                        <span className={styles.keyValueKey}>
-                          {t('vertex_import.result_email')}
-                        </span>
-                        <span className={styles.keyValueValue}>{vertexState.result.email}</span>
-                      </div>
-                    )}
-                    {vertexState.result.location && (
-                      <div className={styles.keyValueItem}>
-                        <span className={styles.keyValueKey}>
-                          {t('vertex_import.result_location')}
-                        </span>
-                        <span className={styles.keyValueValue}>{vertexState.result.location}</span>
-                      </div>
-                    )}
-                    {vertexState.result.authFile && (
-                      <div className={styles.keyValueItem}>
-                        <span className={styles.keyValueKey}>{t('vertex_import.result_file')}</span>
-                        <span className={styles.keyValueValue}>{vertexState.result.authFile}</span>
-                      </div>
-                    )}
+              <div className={styles.vertexForm}>
+                <Input
+                  label={t('vertex_import.location_label')}
+                  hint={t('vertex_import.location_hint')}
+                  value={vertexState.location}
+                  onChange={(e) =>
+                    setVertexState((prev) => ({
+                      ...prev,
+                      location: e.target.value,
+                    }))
+                  }
+                  placeholder={t('vertex_import.location_placeholder')}
+                />
+                <div className={styles.formItem}>
+                  <label className={styles.formItemLabel}>{t('vertex_import.file_label')}</label>
+                  <div className={styles.filePicker}>
+                    <Button variant="secondary" size="sm" onClick={handleVertexFilePick}>
+                      {t('vertex_import.choose_file')}
+                    </Button>
+                    <div
+                      className={`${styles.fileName} ${
+                        vertexState.fileName ? '' : styles.fileNamePlaceholder
+                      }`.trim()}
+                    >
+                      {vertexState.fileName || t('vertex_import.file_placeholder')}
+                    </div>
                   </div>
+                  <div className={styles.cardHintSecondary}>{t('vertex_import.file_hint')}</div>
+                  <input
+                    ref={vertexFileInputRef}
+                    type="file"
+                    accept=".json,application/json"
+                    style={{ display: 'none' }}
+                    onChange={handleVertexFileChange}
+                  />
                 </div>
-              )}
-            </div>
-          </Card>
-        </section>
+                {vertexState.error && <div className="status-badge error">{vertexState.error}</div>}
+                {vertexState.result && (
+                  <div className={styles.connectionBox}>
+                    <div className={styles.connectionLabel}>{t('vertex_import.result_title')}</div>
+                    <div className={styles.keyValueList}>
+                      {vertexState.result.projectId && (
+                        <div className={styles.keyValueItem}>
+                          <span className={styles.keyValueKey}>
+                            {t('vertex_import.result_project')}
+                          </span>
+                          <span className={styles.keyValueValue}>
+                            {vertexState.result.projectId}
+                          </span>
+                        </div>
+                      )}
+                      {vertexState.result.email && (
+                        <div className={styles.keyValueItem}>
+                          <span className={styles.keyValueKey}>
+                            {t('vertex_import.result_email')}
+                          </span>
+                          <span className={styles.keyValueValue}>{vertexState.result.email}</span>
+                        </div>
+                      )}
+                      {vertexState.result.location && (
+                        <div className={styles.keyValueItem}>
+                          <span className={styles.keyValueKey}>
+                            {t('vertex_import.result_location')}
+                          </span>
+                          <span className={styles.keyValueValue}>
+                            {vertexState.result.location}
+                          </span>
+                        </div>
+                      )}
+                      {vertexState.result.authFile && (
+                        <div className={styles.keyValueItem}>
+                          <span className={styles.keyValueKey}>
+                            {t('vertex_import.result_file')}
+                          </span>
+                          <span className={styles.keyValueValue}>
+                            {vertexState.result.authFile}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </section>
+          </div>
+        </MoreDisclosure>
       </div>
     </div>
   );

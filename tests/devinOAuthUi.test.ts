@@ -10,6 +10,7 @@ import en from '@/i18n/locales/en.json';
 import zhCN from '@/i18n/locales/zh-CN.json';
 import zhTW from '@/i18n/locales/zh-TW.json';
 import ru from '@/i18n/locales/ru.json';
+import vi from '@/i18n/locales/vi.json';
 
 const i18n = createInstance();
 await i18n.init({ lng: 'en', resources: { en: { translation: en } } });
@@ -23,17 +24,18 @@ describe('Devin OAuth login UI', () => {
         createElement(MemoryRouter, null, createElement(OAuthPage))
       )
     );
-    expect(markup).toContain('Devin OAuth');
-    expect(markup).toContain('Start Devin Login');
-    expect(markup).toContain('v7.3.1');
-    expect(markup).toContain('five minutes');
+    // The visible row: the short name, one line of guidance and a named Sign in button.
+    expect(markup).toMatch(/<h3[^>]*>Devin<\/h3>/);
+    expect(markup).toMatch(/aria-label="Sign in with Devin"[^>]*>(?:<[^>]+>)*Sign in</);
+    expect(markup).toContain('Needs CLI Proxy API v7.3.1 or later; finish within five minutes.');
     expect(markup).not.toContain('auth_login.devin_');
   });
 
-  test('supplies every Devin label and hint in all four languages', () => {
+  test('supplies every Devin label and hint in all five languages', () => {
     const keys = Object.keys(en.auth_login).filter((key) => key.startsWith('devin_'));
     expect(keys.length).toBeGreaterThanOrEqual(14);
-    for (const locale of [en, zhCN, zhTW, ru]) {
+    for (const locale of [en, zhCN, zhTW, ru, vi]) {
+      expect(locale.auth_login.flow.lines.devin).toContain('v7.3.1');
       for (const key of keys) {
         expect((locale.auth_login as Record<string, string>)[key]?.trim()).toBeTruthy();
       }

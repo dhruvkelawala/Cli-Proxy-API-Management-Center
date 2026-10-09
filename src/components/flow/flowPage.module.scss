@@ -1,0 +1,358 @@
+// Shared Flow page vocabulary (src/styles/DESIGN.md): the centred reading column, quiet
+// sections, hairline lists, text buttons and the More slot. Pages compose these classes with
+// their own module rather than re-declaring them.
+
+.page {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(8px, 4vw, 40px) 0 96px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+// A workspace that needs width to read (log lines, YAML). Still centred, still one column.
+.wide {
+  max-width: 960px;
+}
+
+// First block after the header.
+.lead {
+  margin-top: 36px;
+}
+
+.section {
+  margin-top: 44px;
+  min-width: 0;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.sectionLabel {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-operational-muted, var(--text-tertiary));
+}
+
+.quiet {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+
+.caption {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-operational-muted, var(--text-tertiary));
+}
+
+// A quiet line of actions or footnotes: text buttons separated by air.
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 20px;
+  margin: 20px 0 0;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+
+// Hairline list: rows separated by rules, no boxes.
+.list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--hairline);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.rowIcon {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.rowMain {
+  display: grid;
+  gap: 3px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.rowTitle {
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowMeta {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-operational-muted, var(--text-tertiary));
+  overflow-wrap: anywhere;
+}
+
+.rowActions {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 6px 16px;
+}
+
+// Definition rows: a quiet label column and a value column.
+.facts {
+  display: grid;
+  margin: 0;
+  border-top: 1px solid var(--hairline);
+
+  &.lead {
+    margin-top: 36px;
+  }
+}
+
+.fact {
+  display: grid;
+  grid-template-columns: minmax(120px, 200px) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 6px 24px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--hairline);
+
+  > dt {
+    font-size: 13px;
+    color: var(--text-operational-muted, var(--text-tertiary));
+  }
+
+  > dd {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 16px;
+    margin: 0;
+    min-width: 0;
+    font-size: 14.5px;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 520px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.textButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--hairline);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  white-space: nowrap;
+  transition:
+    color 200ms var(--ease-out-strong),
+    text-decoration-color 200ms var(--ease-out-strong);
+
+  &:hover:not(:disabled) {
+    color: var(--text-primary);
+    text-decoration-color: currentColor;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-indigo);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+
+  &:disabled {
+    cursor: default;
+    text-decoration: none;
+    color: var(--text-operational-muted, var(--text-tertiary));
+  }
+
+  &[aria-pressed='true'] {
+    color: var(--accent-indigo);
+    text-decoration-color: currentColor;
+  }
+}
+
+// The one emphasised text action in a row (still a text button, not a filled one).
+.textButtonStrong {
+  color: var(--text-primary);
+  font-weight: 550;
+}
+
+.textDanger {
+  color: var(--text-operational-danger, var(--danger-color));
+
+  &:hover:not(:disabled) {
+    color: var(--danger-color);
+  }
+}
+
+.textLink {
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  text-decoration: underline;
+  text-decoration-color: var(--hairline);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition:
+    color 200ms var(--ease-out-strong),
+    text-decoration-color 200ms var(--ease-out-strong);
+
+  &:hover {
+    color: var(--text-primary);
+    text-decoration-color: currentColor;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-indigo);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+}
+
+// A one-line state note with a coloured dot (amber by default, red for errors).
+.note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  margin: 20px 0 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+
+  &::before {
+    content: '';
+    flex: none;
+    align-self: flex-start;
+    width: 7px;
+    height: 7px;
+    margin-top: 0.5em;
+    border-radius: 50%;
+    background: var(--amber-color);
+  }
+
+  // Long text wraps beside the dot; a trailing text button keeps its own width.
+  > span:first-of-type {
+    flex: 1 1 16rem;
+    min-width: 0;
+  }
+
+  &[data-tone='bad']::before {
+    background: var(--danger-color);
+  }
+
+  &[data-tone='ok']::before {
+    background: var(--success-color);
+  }
+}
+
+.moreWrap {
+  margin-top: 48px;
+}
+
+// Sections inside a More: label, a quiet line, then content.
+.moreBody {
+  display: grid;
+  gap: 40px;
+  padding-top: 4px;
+  min-width: 0;
+}
+
+.moreSection {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+// Legacy <Button>s inside a Flow page (forms, old row actions) read as text buttons. Apply to a
+// container; a `.btn-primary` keeps a little weight, `.btn-danger` turns red text. The doubled
+// class and attribute outrank the themed global button rules.
+.quietButtons :global(.btn.btn)[class] {
+  min-height: 0;
+  padding: 2px 0;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  box-shadow: none;
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  font-weight: 450;
+  text-decoration: underline;
+  text-decoration-color: var(--hairline);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition: color 200ms var(--ease-out-strong);
+
+  &:hover:not(:disabled) {
+    background: none;
+    color: var(--text-primary);
+    text-decoration-color: currentColor;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-indigo);
+    outline-offset: 3px;
+  }
+
+  &:disabled {
+    opacity: 1;
+    text-decoration: none;
+    color: var(--text-operational-muted, var(--text-tertiary));
+  }
+
+  &:global(.btn-primary) {
+    color: var(--text-primary);
+    font-weight: 550;
+  }
+
+  &:global(.btn-danger) {
+    color: var(--text-operational-danger, var(--danger-color));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .textButton,
+  .textLink,
+  .quietButtons :global(.btn.btn)[class] {
+    transition: none;
+  }
+}

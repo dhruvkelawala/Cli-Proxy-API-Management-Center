@@ -1,0 +1,65 @@
+.groups {
+  display: grid;
+  gap: 40px;
+}
+
+.group {
+  min-width: 0;
+
+  li[data-selected] {
+    box-shadow: inset 2px 0 0 var(--accent-indigo);
+  }
+}
+
+.groupTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.open {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover span:first-child > span:first-child {
+    text-decoration: underline;
+    text-decoration-color: var(--hairline);
+    text-underline-offset: 4px;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-indigo);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+}
+
+.mono {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 14px;
+  font-weight: 550;
+}
+
+// Narrow columns: the key takes the first line; state, switch and menu sit under it.
+@media (max-width: 560px) {
+  .keyRow {
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+
+  .open {
+    flex-basis: 100%;
+  }
+}

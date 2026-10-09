@@ -2,59 +2,31 @@
 
 .container {
   --log-control-height: 40px;
-  display: flex;
   flex: 1;
-  flex-direction: column;
   gap: 24px;
-  min-width: 0;
   min-height: 0;
+  // The logs route is a full-height workspace (layout.scss .content-logs): the viewer takes the
+  // remaining height, so the column keeps only a little space at the bottom.
+  padding-top: clamp(8px, 2vw, 24px);
+  padding-bottom: 8px;
 }
 
 .pageHeader {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px 24px;
   flex: none;
 }
 
-.pageTitle {
-  margin: 0;
-  color: var(--text-primary);
-  font-size: 28px;
-  line-height: 1.3;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-}
-
-.tabBar {
-  display: inline-flex;
-  gap: 4px;
-  padding: 3px;
-  border-radius: 10px;
-  background: var(--bg-tertiary);
-}
-
-.tabItem {
-  @include button-reset;
-  padding: 8px 14px;
-  border-radius: 7px;
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.tabActive {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  box-shadow: 0 1px 3px var(--border-color);
+// More sits under the viewer; when open it scrolls on its own instead of squeezing the viewer away.
+.moreSlot {
+  flex: none;
+  max-height: 46dvh;
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .container button:focus-visible,
 .structuredFilters button:focus-visible,
 .logPanel:focus-visible {
-  outline: 2px solid var(--primary-color);
+  outline: 2px solid var(--accent-indigo);
   outline-offset: -2px;
 }
 
@@ -77,10 +49,32 @@
   min-height: 0;
   overflow: hidden;
   padding: 0;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--hairline);
   border-radius: 12px;
   background: var(--bg-primary);
   box-shadow: none;
+}
+
+// Under More the error archive is a quiet section, not a second card.
+.errorCard[class] {
+  padding: 0;
+  flex: none;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: none;
+
+  > :global(.card-header) {
+    margin-bottom: 8px;
+
+    :global(.title) {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-operational-muted, var(--text-tertiary));
+    }
+  }
 }
 
 .logCard {
@@ -102,7 +96,7 @@
   flex-wrap: wrap;
   gap: 12px;
   padding: 16px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--hairline);
 
   :global(.form-group) {
     margin: 0;
@@ -524,12 +518,36 @@
 }
 .errorBody {
   gap: 12px;
+  > :global(.hint) {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+  }
 }
 .errorPanel {
   flex: 1;
   min-height: 0;
   overflow: auto;
   overscroll-behavior: contain;
+  :global(.item-list) {
+    gap: 0;
+    border-top: 1px solid var(--hairline);
+  }
+  :global(.item-title) {
+    font-size: 13.5px;
+  }
+  :global(.item-subtitle) {
+    font-family: inherit;
+    font-size: 12.5px;
+    color: var(--text-operational-muted, var(--text-tertiary));
+  }
+  :global(.item-row) {
+    padding: 12px 0;
+    border: 0;
+    border-bottom: 1px solid var(--hairline);
+    border-radius: 0;
+    background: none;
+  }
   :global(.item-meta) {
     flex: 1 1 240px;
     min-width: 0;
@@ -682,4 +700,8 @@
   .filters {
     padding-block: 4px;
   }
+}
+
+.content[hidden] {
+  display: none;
 }

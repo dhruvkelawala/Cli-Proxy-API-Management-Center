@@ -1,230 +1,102 @@
 @use '../styles/variables.scss' as *;
 
-// 主容器 - 左右分栏布局
+// Login (Flow design language, src/styles/DESIGN.md): one narrow centred column on the page
+// background, a sentence, the key, and the connection details behind More. Theme tokens only,
+// so dark and light follow the app.
+
 .container {
+  display: flex;
+  justify-content: center;
   min-height: 100vh;
-  display: flex;
-  background: var(--bg-secondary);
-}
-
-// 左侧品牌展示区
-.brandPanel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background: #000000;
-  padding: $spacing-2xl;
-  position: relative;
-  overflow: hidden;
-
-  // 移动端隐藏
-  @media (max-width: $breakpoint-mobile) {
-    display: none;
-  }
-}
-
-// 品牌文字容器
-.brandContent {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  width: 100%;
-  padding: 0;
-  gap: 0;
-}
-
-// 品牌大字淡入动画
-@keyframes brandFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: var(--target-opacity, 0.9);
-    transform: translateY(0);
-  }
-}
-
-// 品牌大字
-.brandWord {
-  font-size: 14vw;
-  font-weight: 900;
-  color: rgba(255, 255, 255, 0.9);
-  letter-spacing: -0.02em;
-  line-height: 0.85;
-  text-transform: uppercase;
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  text-align: right;
-  padding-right: 0;
-  opacity: 0;
-  animation: brandFadeIn 0.8s ease-out forwards;
-
-  // 不同字有不同的透明度和延迟，从上到下依次显现
-  &:nth-child(1) {
-    --target-opacity: 0.95;
-    animation-delay: 0.1s;
-  }
-
-  &:nth-child(2) {
-    --target-opacity: 0.7;
-    animation-delay: 0.35s;
-  }
-
-  &:nth-child(3) {
-    --target-opacity: 0.45;
-    animation-delay: 0.6s;
-  }
-}
-
-// 右侧功能交互区
-.formPanel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: $spacing-2xl;
-  background: var(--bg-secondary);
-  position: relative;
-
-  @media (max-width: $breakpoint-mobile) {
-    padding: $spacing-lg;
-    min-height: 100vh;
-  }
-}
-
-// 右侧内容容器
-.formContent {
-  width: 100%;
-  max-width: 420px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: $spacing-xl;
-}
-
-// Logo
-.logo {
-  width: 80px;
-  height: 80px;
-  border-radius: $radius-lg;
-  object-fit: cover;
-  box-shadow: var(--shadow-lg);
-  border: 3px solid var(--border-color);
-}
-
-// 登录表单卡片
-.loginCard {
-  width: 100%;
+  min-height: 100dvh;
+  padding: 0 24px;
   background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: $radius-lg;
-  box-shadow: var(--shadow-lg);
-  padding: $spacing-xl;
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-lg;
-
-  @media (max-width: $breakpoint-mobile) {
-    padding: $spacing-lg;
-    box-shadow: none;
-    border: none;
-    background: transparent;
-  }
-}
-
-// 登录头部
-.loginHeader {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-sm;
-  text-align: center;
-}
-
-// 标题行
-.titleRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: $spacing-sm;
-  flex-wrap: wrap;
-}
-
-// 标题
-.title {
-  font-size: 22px;
-  font-weight: 800;
   color: var(--text-primary);
 }
 
-// 副标题
-.subtitle {
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-
-// 语言下拉选择
-.languageSelect {
-  min-width: 108px;
-  flex: 0 0 auto;
-}
-
-// 连接信息框
-.connectionBox {
-  background: var(--bg-secondary);
-  border: 1px dashed var(--border-color);
-  border-radius: $radius-md;
-  padding: $spacing-md;
+.column {
   display: flex;
   flex-direction: column;
-  gap: $spacing-xs;
+  width: 100%;
+  max-width: 420px;
+  padding: clamp(28px, 12vh, 120px) 0 64px;
+}
 
-  .label {
-    color: var(--text-secondary);
-    font-size: 14px;
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: clamp(40px, 9vh, 72px);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--text-secondary);
+}
+
+.logo {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.languageSelect {
+  flex: none;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 32px;
+
+  :global(.form-group) {
+    margin: 0;
   }
 
-  .value {
-    font-weight: 700;
-    color: var(--text-primary);
-    word-break: break-all;
+  :global(.form-group > label) {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
   }
 
-  .hint {
-    color: var(--text-secondary);
-    font-size: 12px;
+  :global(.input:focus) {
+    border-color: var(--accent-indigo);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-indigo) 18%, transparent);
   }
 }
 
-// 复选框行
 .toggleAdvanced {
   display: flex;
-  justify-content: flex-start;
-  width: 100%;
+  align-items: center;
 }
 
 .toggleLabel {
+  font-size: 13.5px;
   color: var(--text-secondary);
-  font-size: 14px;
-  font-weight: 500;
 }
 
-// 错误提示框
-.errorBox {
-  background: rgba($error-color, 0.1);
-  border: 1px solid rgba($error-color, 0.4);
-  border-radius: $radius-md;
-  padding: $spacing-sm $spacing-md;
-  color: $error-color;
-  font-size: 14px;
+.more {
+  margin-top: 40px;
 }
 
-// ========== 启动动画（右侧） ==========
+.connection {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  :global(.form-group) {
+    margin: 0;
+  }
+}
 
 // 启动动画进入效果
 @keyframes splashEnter {
@@ -321,4 +193,16 @@
   background: var(--primary-color);
   border-radius: $radius-full;
   animation: splashLoading 1.2s ease-in-out infinite;
+}
+
+.splashContent {
+  align-self: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splashContent,
+  .splashLogo,
+  .splashLoaderBar {
+    animation: none;
+  }
 }

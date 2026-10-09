@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { MoreDisclosure, PageHeader, StatusDot } from '@/components/flow';
+import flow from '@/components/flow/flowPage.module.scss';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Input } from '@/components/ui/Input';
@@ -13,7 +15,6 @@ import {
   IconRefreshCw,
   IconSearch,
   IconSettings,
-  IconSidebarStore,
   IconTrash2,
 } from '@/components/ui/icons';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
@@ -39,6 +40,7 @@ import {
 } from './pluginResources';
 import { waitForPluginState } from './pluginPolling';
 import { getPluginLogo } from './pluginLogo';
+import { describePlugins } from './pluginsHeadline';
 import styles from './PluginsPage.module.scss';
 
 type PluginRuntimeWaitStatus = 'ready' | 'globalDisabled' | 'timeout';
@@ -484,93 +486,57 @@ export function PluginsPage() {
 
   const savingConfig = Boolean(editingPlugin && mutatingID === editingPlugin.id);
 
-  return (
-    <div className={styles.page}>
-      {/* ── Page Header ── */}
-      <div className={styles.pageHeader}>
-        <h1 className={styles.title}>{t('plugin_management.title')}</h1>
-        <p className={styles.description}>{t('plugin_management.description')}</p>
-      </div>
+  const headline = describePlugins({
+    loaded: Boolean(data),
+    failed: Boolean(error),
+    pluginsEnabled: data?.pluginsEnabled ?? false,
+    total: pluginStats.discovered,
+    running: pluginStats.effective,
+  });
+  const toolbar = (
+    <div className={styles.toolbar}>
+      <Input
+        type="search"
+        value={filter}
+        onChange={(event) => setFilter(event.target.value)}
+        placeholder={t('plugin_management.search_placeholder')}
+        aria-label={t('plugin_management.search_label')}
+        rightElement={<IconSearch size={16} />}
+      />
+    </div>
+  );
 
-      {/* ── Alerts ── */}
-      {error ? <div className={styles.errorBox}>{error}</div> : null}
+  return (
+    <div className={`${flow.page} ${styles.page}`}>
+      <PageHeader
+        eyebrow={t('plugin_management.title')}
+        title={t(headline.title.key, headline.title.values)}
+        subtitle={
+          headline.subtitle ? t(headline.subtitle.key, headline.subtitle.values) : undefined
+        }
+        live
+        actions={
+          <button
+            type="button"
+            className={flow.textButton}
+            onClick={() => navigate('/plugin-store')}
+          >
+            {t('plugin_management.flow.open_store')}
+          </button>
+        }
+      />
+
+      {error ? (
+        <p className={flow.note} data-tone="bad" role="alert">
+          {error}
+        </p>
+      ) : null}
 
       {data && !data.pluginsEnabled ? (
-        <div className={styles.warningBox}>{t('plugin_management.global_disabled_hint')}</div>
+        <p className={flow.note}>{t('plugin_management.global_disabled_hint')}</p>
       ) : null}
 
-      {/* ── Status Bar ── */}
-      {data ? (
-        <div className={styles.statusBar}>
-          <div className={styles.statusPill}>
-            <span
-              className={`${styles.statusDot} ${
-                data.pluginsEnabled ? styles.statusDotOn : styles.statusDotOff
-              }`}
-            />
-            <span className={styles.statusLabel}>{t('plugin_management.global_status')}</span>
-            <span className={styles.statusValue}>
-              {data.pluginsEnabled
-                ? t('plugin_management.global_enabled')
-                : t('plugin_management.global_disabled')}
-            </span>
-          </div>
-
-          <span className={styles.statusDivider} />
-
-          <div className={styles.statusPill}>
-            <span className={styles.statusLabel}>{t('plugin_management.plugins_dir')}</span>
-            <span
-              className={`${styles.statusValue} ${styles.statusPathValue}`}
-              title={data.pluginsDir || 'plugins'}
-            >
-              {data.pluginsDir || 'plugins'}
-            </span>
-          </div>
-
-          <span className={styles.statusDivider} />
-
-          <div className={styles.statusPill}>
-            <span className={styles.statusLabel}>{t('plugin_management.discovered')}</span>
-            <span className={styles.statusValue}>{pluginStats.discovered}</span>
-          </div>
-
-          <span className={styles.statusDivider} />
-
-          <div className={styles.statusPill}>
-            <span className={styles.statusLabel}>{t('plugin_management.effective')}</span>
-            <span className={styles.statusValue}>
-              {pluginStats.effective}/{pluginStats.registered}
-            </span>
-          </div>
-        </div>
-      ) : null}
-
-      {/* ── Toolbar ── */}
-      <div className={styles.toolbar}>
-        <Input
-          type="search"
-          value={filter}
-          onChange={(event) => setFilter(event.target.value)}
-          placeholder={t('plugin_management.search_placeholder')}
-          aria-label={t('plugin_management.search_label')}
-          rightElement={<IconSearch size={16} />}
-        />
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={loadPlugins}
-          disabled={!connected || loading || Boolean(mutatingID || deletingID)}
-          loading={loading}
-        >
-          <IconRefreshCw size={16} />
-          {t('plugin_management.refresh')}
-        </Button>
-        <Button variant="secondary" size="sm" onClick={() => navigate('/plugin-store')}>
-          <IconSidebarStore size={16} />
-          {t('plugin_store.title')}
-        </Button>
-      </div>
+      <div className={`${flow.lead} ${styles.searchSlot}`}>{toolbar}</div>
 
       {/* ── Plugin List ── */}
       {loading ? (
@@ -597,7 +563,7 @@ export function PluginsPage() {
           }
         />
       ) : (
-        <div className={styles.pluginList}>
+        <div className={`${styles.pluginList} ${flow.quietButtons}`}>
           {visiblePlugins.map((plugin) => {
             const logo = resolvePluginAsset(getPluginLogo(plugin, logoEntries));
             const github = plugin.metadata?.githubRepository.trim();
@@ -720,6 +686,62 @@ export function PluginsPage() {
           })}
         </div>
       )}
+
+      <div className={flow.moreWrap}>
+        <MoreDisclosure
+          label={t('plugin_management.flow.more')}
+          summary={t('plugin_management.flow.more_summary', {
+            dir: data?.pluginsDir || 'plugins',
+          })}
+        >
+          <div className={flow.moreBody}>
+            {data ? (
+              <section className={flow.moreSection}>
+                <h3 className={flow.sectionLabel}>{t('plugin_management.flow.runtime_title')}</h3>
+                <dl className={flow.facts}>
+                  <div className={flow.fact}>
+                    <dt>{t('plugin_management.global_status')}</dt>
+                    <dd>
+                      <StatusDot
+                        tone={data.pluginsEnabled ? 'ok' : 'off'}
+                        label={
+                          data.pluginsEnabled
+                            ? t('plugin_management.global_enabled')
+                            : t('plugin_management.global_disabled')
+                        }
+                      />
+                    </dd>
+                  </div>
+                  <div className={flow.fact}>
+                    <dt>{t('plugin_management.plugins_dir')}</dt>
+                    <dd className={styles.statusPathValue}>{data.pluginsDir || 'plugins'}</dd>
+                  </div>
+                  <div className={flow.fact}>
+                    <dt>{t('plugin_management.discovered')}</dt>
+                    <dd>{pluginStats.discovered}</dd>
+                  </div>
+                  <div className={flow.fact}>
+                    <dt>{t('plugin_management.effective')}</dt>
+                    <dd>
+                      {pluginStats.effective}/{pluginStats.registered}
+                    </dd>
+                  </div>
+                </dl>
+                <p className={flow.actions}>
+                  <button
+                    type="button"
+                    className={flow.textButton}
+                    onClick={loadPlugins}
+                    disabled={!connected || loading || Boolean(mutatingID || deletingID)}
+                  >
+                    {t('plugin_management.refresh')}
+                  </button>
+                </p>
+              </section>
+            ) : null}
+          </div>
+        </MoreDisclosure>
+      </div>
 
       {/* ── Config Sheet ── */}
       <Sheet

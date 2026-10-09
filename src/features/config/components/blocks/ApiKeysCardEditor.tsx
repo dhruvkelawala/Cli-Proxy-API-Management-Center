@@ -200,8 +200,6 @@ function ScopedApiKeysCardEditor({
         </div>
       )}
 
-      <div className="hint">{t('config_management.visual.api_keys.hint')}</div>
-
       <Modal
         open={modalOpen}
         onClose={closeModal}

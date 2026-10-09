@@ -13,9 +13,8 @@
 
   :global(.form-group > label) {
     color: var(--text-secondary);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
+    font-size: 12.5px;
+    font-weight: 500;
   }
 
   :global(.input) {
@@ -32,8 +31,8 @@
 
   :global(.input:focus) {
     background: var(--bg-primary);
-    border-color: var(--text-primary);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--text-primary) 12%, transparent);
+    border-color: var(--accent-indigo);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-indigo) 18%, transparent);
   }
 
   :global(textarea.input) {
@@ -55,11 +54,17 @@
     margin-top: 8px;
   }
 
+  :global(.item-list) {
+    gap: 0;
+    border-top: 1px solid var(--hairline);
+  }
+
   :global(.item-row) {
-    border-radius: 10px;
-    padding: 12px;
+    border: 0;
+    border-bottom: 1px solid var(--hairline);
+    border-radius: 0;
+    padding: 12px 0;
     background: transparent;
-    border-color: var(--border-color);
   }
 
   :global(.item-row .item-meta) {
@@ -85,10 +90,10 @@
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 14px;
   align-items: center;
-  min-height: 74px;
-  padding: 14px;
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
+  padding: 14px 0;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
   background: transparent;
   transition:
     border-color var(--dur-hover, 200ms) var(--ease-out-strong, ease-out),
@@ -101,8 +106,7 @@
 
 @media (hover: hover) and (pointer: fine) {
   .toggleRow:hover {
-    border-color: var(--border-hover);
-    background: color-mix(in srgb, var(--bg-tertiary) 40%, transparent);
+    border-color: var(--border-color);
   }
 }
 
@@ -115,9 +119,9 @@
 
 .toggleTitle {
   color: var(--text-primary);
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.25;
+  font-size: 14.5px;
+  font-weight: 550;
+  line-height: 1.3;
 }
 
 .toggleDescription {
@@ -131,7 +135,7 @@
 .fieldGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 14px;
+  gap: 14px 24px;
 
   @include mobile {
     grid-template-columns: minmax(0, 1fr);
@@ -237,9 +241,8 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 16px;
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
+  padding: 18px 0 0;
+  border-top: 1px solid var(--hairline);
   background: transparent;
 }
 
@@ -252,9 +255,9 @@
 .groupTitle {
   margin: 0;
   color: var(--text-primary);
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.25;
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 .groupDescription {
@@ -275,9 +278,8 @@
 
 .fieldLabel {
   color: var(--text-secondary);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  font-size: 12.5px;
+  font-weight: 500;
 }
 
 .fieldControl {

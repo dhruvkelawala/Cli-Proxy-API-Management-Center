@@ -10,6 +10,7 @@ import en from '../src/i18n/locales/en.json';
 import zhCN from '../src/i18n/locales/zh-CN.json';
 import zhTW from '../src/i18n/locales/zh-TW.json';
 import ru from '../src/i18n/locales/ru.json';
+import vi from '../src/i18n/locales/vi.json';
 
 const i18n = createInstance();
 await i18n.init({ lng: 'en', resources: { en: { translation: en } } });
@@ -100,11 +101,12 @@ describe('OAuth editor UI', () => {
     expect(disabledRow.match(/disabled=""/g)).toHaveLength(4);
   });
 
-  test('all four locales include editor guidance and accessible row labels', () => {
-    for (const locale of [en, zhCN, zhTW, ru]) {
-      expect(locale.oauth_excluded.editor_description.length).toBeGreaterThan(0);
+  test('all five locales include editor guidance and accessible row labels', () => {
+    for (const locale of [en, zhCN, zhTW, ru, vi]) {
+      // The editors' guidance is their Flow sentence (the old intro descriptions are gone).
+      expect(locale.oauth_excluded.flow.subtitle_pick.length).toBeGreaterThan(0);
       expect(locale.oauth_excluded.models_hint.length).toBeGreaterThan(0);
-      expect(locale.oauth_model_alias.editor_description.length).toBeGreaterThan(0);
+      expect(locale.oauth_model_alias.flow.subtitle_pick.length).toBeGreaterThan(0);
       expect(locale.oauth_model_alias.mapping_hint.length).toBeGreaterThan(0);
       expect(locale.oauth_model_alias.edit_title).toContain('{{provider}}');
       expect(locale.oauth_model_alias.mapping_row).toContain('{{number}}');

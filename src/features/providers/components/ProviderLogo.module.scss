@@ -1,0 +1,40 @@
+.wrap {
+  display: inline-flex;
+  flex: none;
+  line-height: 0;
+}
+
+.logo {
+  object-fit: contain;
+}
+
+.themeSurface {
+  box-sizing: border-box;
+  padding: 3px;
+  border-radius: 5px;
+  background: #000;
+
+  [data-theme='dark'] & {
+    background: #fff;
+  }
+}
+
+.invertOnDark {
+  [data-theme='dark'] & {
+    filter: invert(1) hue-rotate(180deg);
+  }
+}
+
+.dark {
+  display: none;
+
+  [data-theme='dark'] & {
+    display: block;
+  }
+}
+
+.light {
+  [data-theme='dark'] & {
+    display: none;
+  }
+}
