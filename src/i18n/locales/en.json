@@ -1782,7 +1782,18 @@
     "weekday_wed": "Wed",
     "weekday_thu": "Thu",
     "weekday_fri": "Fri",
-    "weekday_sat": "Sat"
+    "weekday_sat": "Sat",
+    "flow": {
+      "eyebrow": "Quota",
+      "title_one": "Quota for {{count}} account.",
+      "title_other": "Quota for {{count}} accounts.",
+      "title_empty": "No accounts with quota yet.",
+      "empty_follow": "Accounts that report quota show up here once they are added.",
+      "checked": "{{count}} of {{total}} checked.",
+      "unreadable_one": "{{count}} couldn’t be read.",
+      "unreadable_other": "{{count}} couldn’t be read.",
+      "more": "More"
+    }
   },
   "plugin_management": {
     "title": "Plugin Management",

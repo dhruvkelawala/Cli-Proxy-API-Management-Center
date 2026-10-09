@@ -1801,7 +1801,16 @@
     "weekday_wed": "三",
     "weekday_thu": "四",
     "weekday_fri": "五",
-    "weekday_sat": "六"
+    "weekday_sat": "六",
+    "flow": {
+      "eyebrow": "額度",
+      "title": "{{count}} 個帳號的額度。",
+      "title_empty": "還沒有可查詢額度的帳號。",
+      "empty_follow": "新增能回報額度的帳號後，它們會顯示在這裡。",
+      "checked": "已查詢 {{count}}/{{total}}。",
+      "unreadable": "{{count}} 個無法讀取。",
+      "more": "更多"
+    }
   },
   "plugin_management": {
     "title": "插件管理",

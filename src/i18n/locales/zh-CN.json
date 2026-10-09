@@ -1775,7 +1775,16 @@
     "weekday_wed": "三",
     "weekday_thu": "四",
     "weekday_fri": "五",
-    "weekday_sat": "六"
+    "weekday_sat": "六",
+    "flow": {
+      "eyebrow": "额度",
+      "title": "{{count}} 个账号的额度。",
+      "title_empty": "还没有可查询额度的账号。",
+      "empty_follow": "添加能报告额度的账号后，它们会显示在这里。",
+      "checked": "已查询 {{count}}/{{total}}。",
+      "unreadable": "{{count}} 个无法读取。",
+      "more": "更多"
+    }
   },
   "plugin_management": {
     "title": "插件管理",

@@ -1806,7 +1806,22 @@
     "weekday_wed": "Ср",
     "weekday_thu": "Чт",
     "weekday_fri": "Пт",
-    "weekday_sat": "Сб"
+    "weekday_sat": "Сб",
+    "flow": {
+      "eyebrow": "Лимиты",
+      "title_one": "Лимиты {{count}} аккаунта.",
+      "title_few": "Лимиты {{count}} аккаунтов.",
+      "title_many": "Лимиты {{count}} аккаунтов.",
+      "title_other": "Лимиты {{count}} аккаунтов.",
+      "title_empty": "Аккаунтов с лимитами пока нет.",
+      "empty_follow": "Аккаунты, которые сообщают лимиты, появятся здесь после добавления.",
+      "checked": "Проверено {{count}} из {{total}}.",
+      "unreadable_one": "{{count}} не удалось прочитать.",
+      "unreadable_few": "{{count}} не удалось прочитать.",
+      "unreadable_many": "{{count}} не удалось прочитать.",
+      "unreadable_other": "{{count}} не удалось прочитать.",
+      "more": "Ещё"
+    }
   },
   "plugin_management": {
     "title": "Управление плагинами",

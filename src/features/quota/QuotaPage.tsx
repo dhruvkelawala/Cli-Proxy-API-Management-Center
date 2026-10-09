@@ -11,6 +11,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { authFilesApi } from '@/services/api';
+import { MoreDisclosure } from '@/components/flow';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { IconSearch, IconX } from '@/components/ui/icons';
@@ -42,6 +43,7 @@ import {
   filterEntriesBySearch,
   paginate,
   sortQuotaEntries,
+  visibleQuotaTabs,
   type QuotaFileEntry,
 } from './logic';
 import { nextRecoveryMs } from './resetSchedule';
@@ -163,6 +165,7 @@ export function QuotaPage() {
 
   const entries = useMemo(() => classifyQuotaFiles(files), [files]);
   const tabCounts = useMemo(() => buildTabCounts(entries), [entries]);
+  const tabIds = useMemo(() => visibleQuotaTabs(TAB_IDS, tabCounts, tab), [tabCounts, tab]);
   const filteredEntries = useMemo(
     () => filterEntriesBySearch(filterEntriesByTab(entries, tab), search),
     [entries, tab, search]
@@ -327,7 +330,7 @@ export function QuotaPage() {
         {/* 提供商导航与搜索工具栏分层，避免不同控件争夺视觉焦点。 */}
         <div className={styles.tabsRow} data-reveal>
           <ProviderTabs
-            types={TAB_IDS}
+            types={tabIds}
             counts={tabCounts}
             active={tab}
             resolvedTheme={resolvedTheme}
@@ -361,15 +364,6 @@ export function QuotaPage() {
                 <IconX size={14} aria-hidden="true" />
               </button>
             )}
-          </div>
-          <div className={styles.sort}>
-            <Select
-              value={sortMode}
-              options={sortOptions}
-              onChange={handleSortModeChange}
-              ariaLabel={t('quota_management.sort_label')}
-              size="sm"
-            />
           </div>
         </div>
 
@@ -467,6 +461,30 @@ export function QuotaPage() {
           resolvedTheme={resolvedTheme}
         />
       </section>
+
+      <div className={styles.moreWrap}>
+        <MoreDisclosure
+          label={t('quota_management.flow.more')}
+          summary={`${t('quota_management.sort_label')}: ${
+            sortOptions.find((option) => option.value === sortMode)?.label ?? sortMode
+          }`}
+        >
+          <div className={styles.moreRow}>
+            <span className={styles.moreLabel}>{t('quota_management.sort_label')}</span>
+            <div className={styles.sort}>
+              <Select
+                value={sortMode}
+                options={sortOptions}
+                onChange={handleSortModeChange}
+                ariaLabel={`${t('quota_management.sort_label')}: ${
+                  sortOptions.find((option) => option.value === sortMode)?.label ?? sortMode
+                }`}
+                size="sm"
+              />
+            </div>
+          </div>
+        </MoreDisclosure>
+      </div>
     </div>
   );
 }
