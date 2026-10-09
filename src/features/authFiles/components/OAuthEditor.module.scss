@@ -1,10 +1,13 @@
 @use '../../../styles/mixins' as *;
 
 .pageContent {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
   width: 100%;
-  max-width: 1080px;
+  max-width: 760px;
   margin: 0 auto;
-  padding: $spacing-xs $spacing-lg $spacing-2xl;
+  padding: clamp(8px, 3vw, 28px) 0 96px;
 
   @include mobile {
     padding: 0 $spacing-md $spacing-xl;
@@ -12,6 +15,9 @@
 }
 
 .topBar {
+  background: transparent;
+  border-bottom-color: var(--hairline);
+
   @include mobile {
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: $spacing-sm;
@@ -59,20 +65,21 @@
   overflow-wrap: anywhere;
 }
 
-.settingsCard {
+// Flow: sections separated by a hairline, not boxed.
+.settingsCard[class] {
   min-width: 0;
   padding: 0;
   overflow: visible;
+  border: 0;
+  border-top: 1px solid var(--hairline);
+  border-radius: 0;
+  background: none;
   box-shadow: none;
 }
 
 .providerSection,
 .editorBody {
-  padding: $spacing-lg;
-
-  @include mobile {
-    padding: $spacing-md;
-  }
+  padding: 20px 0 0;
 }
 
 .providerSection {
@@ -102,7 +109,7 @@
 }
 
 .stepNumber {
-  display: inline-flex;
+  display: none;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
@@ -122,11 +129,13 @@
 
 .sectionTitle {
   display: block;
-  margin: 2px 0 4px;
-  font-size: 15px;
-  font-weight: 650;
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   line-height: 1.5;
-  color: var(--text-primary);
+  color: var(--text-operational-muted, var(--text-tertiary));
 }
 
 .providerControl {
@@ -149,12 +158,12 @@
   display: inline-flex;
   align-items: center;
   gap: $spacing-sm;
-  min-height: 38px;
+  min-height: 34px;
   max-width: 100%;
-  padding: 7px 10px;
-  border: 1px solid var(--border-color);
-  border-radius: $radius-md;
-  background: var(--bg-secondary);
+  padding: 6px 12px;
+  border: 1px solid var(--hairline);
+  border-radius: $radius-full;
+  background: transparent;
   color: var(--text-secondary);
   font-size: 13px;
   font-weight: 500;
@@ -181,7 +190,7 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--primary-color);
+    outline: 2px solid var(--accent-indigo);
     outline-offset: 3px;
   }
 
@@ -192,8 +201,7 @@
 
   @media (hover: hover) and (pointer: fine) {
     &:hover:not(:disabled) {
-      border-color: var(--primary-color);
-      background: var(--bg-tertiary);
+      border-color: var(--border-hover, var(--border-color));
       color: var(--text-primary);
     }
   }
@@ -204,8 +212,8 @@
 }
 
 .providerOptionActive {
-  border-color: var(--primary-color);
-  background: var(--primary-10);
+  border-color: var(--accent-indigo);
+  background: color-mix(in srgb, var(--accent-indigo) 10%, transparent);
   color: var(--text-primary);
 
   .providerCheck {
@@ -219,19 +227,13 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: $spacing-md;
-  padding: $spacing-lg;
-  border-bottom: 1px solid var(--border-color);
-
-  @include mobile {
-    padding: $spacing-md;
-  }
+  padding: 20px 0 12px;
 }
 
 .countBadge {
   flex-shrink: 0;
-  padding: 4px 9px;
-  border-radius: $radius-full;
-  background: var(--bg-tertiary);
+  padding: 0;
+  background: none;
   color: var(--text-secondary);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
@@ -244,9 +246,8 @@
   flex-direction: column;
   gap: $spacing-sm;
   margin: 0;
-  padding: $spacing-2xl $spacing-md;
-  border: 1px dashed var(--border-color);
-  border-radius: $radius-md;
+  padding: 28px 0;
+  border: 0;
   color: var(--text-operational-muted);
   text-align: center;
   font-size: 13px;
@@ -256,9 +257,8 @@
   display: flex;
   align-items: flex-start;
   gap: $spacing-sm;
-  padding: $spacing-md $spacing-lg;
-  border-bottom: 1px solid var(--border-color);
-  background: var(--bg-secondary);
+  padding: 0 0 12px;
+  background: none;
 
   svg {
     margin-top: 3px;
@@ -274,8 +274,9 @@
 .mappingsBody {
   display: flex;
   flex-direction: column;
-  gap: $spacing-sm;
-  padding: $spacing-md;
+  gap: 0;
+  padding: 0;
+  border-top: 1px solid var(--hairline);
 }
 
 .mappingRow {
@@ -283,10 +284,11 @@
   grid-template-columns: 24px minmax(0, 1fr) auto;
   align-items: center;
   gap: $spacing-md;
-  padding: $spacing-md;
-  border: 1px solid var(--border-color);
-  border-radius: $radius-md;
-  background: var(--bg-secondary);
+  padding: 14px 0;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+  background: none;
 
   @include mobile {
     grid-template-columns: 20px minmax(0, 1fr);

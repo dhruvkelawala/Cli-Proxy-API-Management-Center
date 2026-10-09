@@ -5,14 +5,13 @@
  * （16px 圆角 / 1px 边框 / 82% 透感纸面），列表行走 mono 遥测。
  * ============================================================ */
 
+// Flow (src/styles/DESIGN.md): no box. A small heading with text-button actions, then hairline
+// rows; the buttons inside read as text buttons (flowPage .quietButtons).
 .panel {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: clamp(16px, 2vw, 20px);
-  border-radius: 16px;
-  border: 1px solid var(--border-color);
-  background: color-mix(in srgb, var(--bg-primary) 82%, transparent);
+  gap: 8px;
+  min-width: 0;
 }
 
 .panelHead {
@@ -25,8 +24,8 @@
 
 .panelTitle {
   margin: 0;
-  font-size: 15px;
-  font-weight: 650;
+  font-size: 14.5px;
+  font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--text-primary);
 }
@@ -34,7 +33,7 @@
 .panelExtra {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px 18px;
   flex-wrap: wrap;
 }
 
@@ -50,11 +49,12 @@
 .viewModeSwitch {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  padding: 2px;
-  border-radius: $radius-md;
-  border: 1px solid var(--border-color);
-  background: var(--bg-secondary);
+  gap: 14px;
+
+  :global(.btn[aria-pressed='true']) {
+    color: var(--accent-indigo);
+    text-decoration-color: currentColor;
+  }
 }
 
 /* ---------- provider 行 ---------- */
@@ -62,7 +62,7 @@
 .list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  border-top: 1px solid var(--hairline);
 }
 
 .item {
@@ -70,20 +70,16 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 9px 12px;
-  border-radius: 10px;
-  border: 1px solid color-mix(in srgb, var(--border-color) 70%, transparent);
-  background: color-mix(in srgb, var(--bg-secondary) 45%, transparent);
-  transition:
-    background-color $transition-fast,
-    border-color $transition-fast;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--hairline);
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .item:hover {
-    border-color: var(--border-hover);
-    background: color-mix(in srgb, var(--bg-secondary) 80%, transparent);
-  }
+.empty {
+  margin: 0;
+  padding: 12px 0;
+  border-top: 1px solid var(--hairline);
+  font-size: 13.5px;
+  color: var(--text-secondary);
 }
 
 .itemInfo {
@@ -108,8 +104,8 @@
 
 .itemActions {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  align-items: baseline;
+  gap: 6px 18px;
   flex-shrink: 0;
 }
 
@@ -141,28 +137,4 @@
 
 .aliasChart {
   min-width: 0;
-}
-
-/* ---------- 按压反馈 ---------- */
-
-.panel :global(.btn) {
-  transition:
-    transform var(--dur-press, 160ms) var(--ease-out-strong, ease-out),
-    background-color $transition-fast,
-    border-color $transition-fast,
-    color $transition-fast;
-}
-
-.panel :global(.btn:active:not(:disabled)) {
-  transform: scale(0.96);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .panel :global(.btn) {
-    transition: none;
-  }
-
-  .panel :global(.btn:active:not(:disabled)) {
-    transform: none;
-  }
 }

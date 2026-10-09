@@ -6,6 +6,7 @@ import { ModelMappingDiagram, type ModelMappingDiagramRef } from '@/components/m
 import { IconChevronUp } from '@/components/ui/icons';
 import type { OAuthModelAliasEntry } from '@/types';
 import type { AuthFileModelItem, OAuthConfigLoadError } from '@/features/authFiles/constants';
+import flow from '@/components/flow/flowPage.module.scss';
 import styles from './OAuthConfigPanels.module.scss';
 
 type ViewMode = 'diagram' | 'list';
@@ -55,7 +56,7 @@ export function OAuthModelAliasCard(props: OAuthModelAliasCardProps) {
   } = props;
 
   return (
-    <section className={styles.panel}>
+    <section className={`${styles.panel} ${flow.quietButtons}`}>
       <header className={styles.panelHead}>
         <h3 className={styles.panelTitle}>{t('oauth_model_alias.title')}</h3>
         <div className={styles.panelExtra}>
@@ -100,10 +101,10 @@ export function OAuthModelAliasCard(props: OAuthModelAliasCardProps) {
             }
           />
         ) : modelAliasError === 'loading' ? (
-          <EmptyState title={t('common.loading')} />
+          <p className={styles.empty}>{t('common.loading')}</p>
         ) : viewMode === 'diagram' ? (
           Object.keys(modelAlias).length === 0 ? (
-            <EmptyState title={t('oauth_model_alias.list_empty_all')} />
+            <p className={styles.empty}>{t('oauth_model_alias.list_empty_all')}</p>
           ) : (
             <div className={styles.aliasChartSection}>
               <div className={styles.aliasChartHeader}>
@@ -135,7 +136,7 @@ export function OAuthModelAliasCard(props: OAuthModelAliasCardProps) {
             </div>
           )
         ) : Object.keys(modelAlias).length === 0 ? (
-          <EmptyState title={t('oauth_model_alias.list_empty_all')} />
+          <p className={styles.empty}>{t('oauth_model_alias.list_empty_all')}</p>
         ) : (
           <div className={styles.list}>
             {Object.entries(modelAlias).map(([provider, mappings]) => (

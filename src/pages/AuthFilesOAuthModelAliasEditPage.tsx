@@ -4,15 +4,24 @@ import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { IconInfo, IconNetwork, IconPlus } from '@/components/ui/icons';
+import { IconInfo, IconPlus } from '@/components/ui/icons';
 import { OAuthEditorProviderCard } from '@/features/authFiles/components/OAuthEditorProviderCard';
 import { OAuthAliasMappingRow } from '@/features/authFiles/components/OAuthAliasMappingRow';
 import { SecondaryScreenShell } from '@/components/common/SecondaryScreenShell';
+import { PageHeader } from '@/components/flow';
+import {
+  countCompleteAliases,
+  describeModelRuleEditor,
+} from '@/features/authFiles/modelRulesHeadline';
 import { useEdgeSwipeBack } from '@/hooks/useEdgeSwipeBack';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useAuthStore, useNotificationStore } from '@/stores';
 import { authFilesApi } from '@/services/api';
-import { buildOAuthProviderOptions, normalizeProviderKey } from '@/features/authFiles/constants';
+import {
+  buildOAuthProviderOptions,
+  getTypeLabel,
+  normalizeProviderKey,
+} from '@/features/authFiles/constants';
 import {
   getModelAliasDraftSignature,
   isOAuthEditorDirty,
@@ -391,6 +400,13 @@ export function AuthFilesOAuthModelAliasEditPage() {
     !modelAliasUnsupported &&
     initialLoadError === null;
 
+  const headline = describeModelRuleEditor({
+    kind: 'alias',
+    provider: resolvedProviderKey ? getTypeLabel(t, provider.trim() || resolvedProviderKey) : '',
+    count: countCompleteAliases(mappings),
+    dirty: isDirty,
+  });
+
   return (
     <SecondaryScreenShell
       ref={swipeRef}
@@ -429,15 +445,12 @@ export function AuthFilesOAuthModelAliasEditPage() {
         </Card>
       ) : (
         <>
-          <div className={styles.intro}>
-            <span className={styles.introIcon}>
-              <IconNetwork size={22} aria-hidden="true" />
-            </span>
-            <div>
-              <h1 className={styles.introTitle}>{t('oauth_model_alias.title')}</h1>
-              <p className={styles.description}>{t('oauth_model_alias.editor_description')}</p>
-            </div>
-          </div>
+          <PageHeader
+            eyebrow={t('oauth_model_alias.title')}
+            title={t(headline.title.key, headline.title.values)}
+            subtitle={t(headline.subtitle.key, headline.subtitle.values)}
+            live
+          />
 
           <OAuthEditorProviderCard
             provider={provider}

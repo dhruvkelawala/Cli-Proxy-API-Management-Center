@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { IconEyeOff, IconNetwork } from '@/components/ui/icons';
+import { IconNetwork } from '@/components/ui/icons';
 import { OAuthEditorProviderCard } from '@/features/authFiles/components/OAuthEditorProviderCard';
 import {
   ExcludedModelsPicker,
@@ -12,11 +12,17 @@ import {
   type ExcludedModelsCatalogState,
 } from '@/components/excludedModels';
 import { SecondaryScreenShell } from '@/components/common/SecondaryScreenShell';
+import { PageHeader } from '@/components/flow';
+import { describeModelRuleEditor } from '@/features/authFiles/modelRulesHeadline';
 import { useEdgeSwipeBack } from '@/hooks/useEdgeSwipeBack';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useAuthStore, useNotificationStore } from '@/stores';
 import { authFilesApi } from '@/services/api';
-import { buildOAuthProviderOptions, normalizeProviderKey } from '@/features/authFiles/constants';
+import {
+  buildOAuthProviderOptions,
+  getTypeLabel,
+  normalizeProviderKey,
+} from '@/features/authFiles/constants';
 import { getStringSetSignature, isOAuthEditorDirty } from '@/features/authFiles/oauthEditorState';
 import type { AuthFileItem, OAuthModelAliasEntry } from '@/types';
 import { getErrorMessage } from '@/utils/helpers';
@@ -331,6 +337,13 @@ export function AuthFilesOAuthExcludedEditPage() {
     !excludedUnsupported &&
     initialLoadError === null;
 
+  const headline = describeModelRuleEditor({
+    kind: 'excluded',
+    provider: resolvedProviderKey ? getTypeLabel(t, provider.trim() || resolvedProviderKey) : '',
+    count: effectiveRules.length,
+    dirty: isDirty,
+  });
+
   return (
     <SecondaryScreenShell
       ref={swipeRef}
@@ -369,15 +382,12 @@ export function AuthFilesOAuthExcludedEditPage() {
         </Card>
       ) : (
         <>
-          <div className={styles.intro}>
-            <span className={styles.introIcon}>
-              <IconEyeOff size={22} aria-hidden="true" />
-            </span>
-            <div>
-              <h1 className={styles.introTitle}>{t('oauth_excluded.title')}</h1>
-              <p className={styles.description}>{t('oauth_excluded.editor_description')}</p>
-            </div>
-          </div>
+          <PageHeader
+            eyebrow={t('oauth_excluded.title')}
+            title={t(headline.title.key, headline.title.values)}
+            subtitle={t(headline.subtitle.key, headline.subtitle.values)}
+            live
+          />
 
           <OAuthEditorProviderCard
             provider={provider}

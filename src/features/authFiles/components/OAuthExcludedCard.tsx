@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { OAuthConfigLoadError } from '@/features/authFiles/constants';
+import flow from '@/components/flow/flowPage.module.scss';
 import styles from './OAuthConfigPanels.module.scss';
 
 export type OAuthExcludedCardProps = {
@@ -19,7 +20,7 @@ export function OAuthExcludedCard(props: OAuthExcludedCardProps) {
   const { disableControls, excludedError, excluded, onRetry, onAdd, onEdit, onDelete } = props;
 
   return (
-    <section className={styles.panel}>
+    <section className={`${styles.panel} ${flow.quietButtons}`}>
       <header className={styles.panelHead}>
         <h3 className={styles.panelTitle}>{t('oauth_excluded.title')}</h3>
         <div className={styles.panelExtra}>
@@ -44,9 +45,9 @@ export function OAuthExcludedCard(props: OAuthExcludedCardProps) {
             }
           />
         ) : excludedError === 'loading' ? (
-          <EmptyState title={t('common.loading')} />
+          <p className={styles.empty}>{t('common.loading')}</p>
         ) : Object.keys(excluded).length === 0 ? (
-          <EmptyState title={t('oauth_excluded.list_empty_all')} />
+          <p className={styles.empty}>{t('oauth_excluded.list_empty_all')}</p>
         ) : (
           <div className={styles.list}>
             {Object.entries(excluded).map(([provider, models]) => (
