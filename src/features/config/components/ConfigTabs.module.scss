@@ -10,6 +10,8 @@
   scrollbar-width: none;
   min-width: 0;
   flex: 1;
+  // The row scrolls sideways on narrow columns; fade the cut-off edge instead of clipping it.
+  mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
 
   &::-webkit-scrollbar {
     display: none;
@@ -25,11 +27,11 @@
   border: 0;
   background: none;
   cursor: pointer;
-  padding: 8px 12px 11px;
-  border-radius: 8px 8px 0 0;
+  padding: 6px 10px 10px;
+  border-radius: 6px 6px 0 0;
   font-size: 13px;
-  font-weight: 550;
-  color: var(--text-secondary);
+  font-weight: 450;
+  color: var(--text-operational-muted, var(--text-tertiary));
   white-space: nowrap;
   transition:
     color var(--dur-hover, 200ms) var(--ease-out-strong, ease-out),
@@ -57,24 +59,32 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--primary-color);
+    outline: 2px solid var(--accent-indigo);
     outline-offset: -2px;
+  }
+
+  &:first-child {
+    padding-left: 0;
+
+    &::after {
+      left: 0;
+    }
   }
 }
 
 @media (hover: hover) and (pointer: fine) {
   .tab:hover:not(:disabled) {
     color: var(--text-primary);
-    background: color-mix(in srgb, var(--bg-tertiary) 55%, transparent);
   }
 }
 
 .tabActive {
   color: var(--text-primary);
-  font-weight: 650;
+  font-weight: 550;
 
   &::after {
-    background: var(--text-primary);
+    height: 1.5px;
+    background: var(--accent-indigo);
   }
 
   /* 整体禁用（保存中）时激活 tab 仍保持完整对比度 */
@@ -83,13 +93,9 @@
   }
 }
 
+// Flow: the tabs are quiet words; their icons stay out of the way.
 .tabGlyph {
-  flex-shrink: 0;
-  color: var(--text-tertiary);
-
-  .tabActive & {
-    color: var(--text-primary);
-  }
+  display: none;
 }
 
 .tabLabel {

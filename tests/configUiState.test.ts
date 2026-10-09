@@ -1,6 +1,5 @@
 import { describe, expect, test } from 'bun:test';
 import {
-  buildHeaderMeta,
   countSectionErrors,
   countTotalErrors,
   readSavedMode,
@@ -152,58 +151,6 @@ describe('resolveDirtyTabs', () => {
   test('unknown keys are ignored instead of crashing', () => {
     const tabs = resolveDirtyTabs(new Set(['not-a-real-key']));
     expect(tabs.size).toBe(0);
-  });
-});
-
-describe('buildHeaderMeta', () => {
-  const base = {
-    fieldCount: 58,
-    status: resolveStatus(statusInput()),
-    dirtyCount: 0,
-    sourceDirty: false,
-    errorCount: 0,
-  };
-
-  test('blocking statuses come directly from the page status machine', () => {
-    for (const key of ['disconnected', 'loading', 'load_failed'] as const) {
-      const status = resolveStatus(
-        statusInput({
-          disconnected: key === 'disconnected',
-          loading: key === 'loading',
-          loadFailed: key === 'load_failed',
-        })
-      );
-      const meta = buildHeaderMeta({ ...base, status, dirtyCount: 3 });
-      expect(meta.map((segment) => segment.key)).toEqual(['fields', key]);
-    }
-  });
-
-  test('clean state ends with a synced segment', () => {
-    const meta = buildHeaderMeta(base);
-    expect(meta.map((segment) => segment.key)).toEqual(['fields', 'synced']);
-    expect(meta[0].count).toBe(58);
-  });
-
-  test('dirty and errors stack after the field count', () => {
-    const status = resolveStatus(statusInput({ validationBlocked: true, dirty: true }));
-    const meta = buildHeaderMeta({ ...base, status, dirtyCount: 3, errorCount: 2 });
-    expect(meta.map((segment) => segment.key)).toEqual(['fields', 'dirty', 'errors']);
-    expect(meta[1].count).toBe(3);
-    expect(meta[1].tone).toBe('warning');
-    expect(meta[2].count).toBe(2);
-    expect(meta[2].tone).toBe('error');
-  });
-
-  test('source dirty supersedes the visual dirty count', () => {
-    const status = resolveStatus(statusInput({ dirty: true }));
-    const meta = buildHeaderMeta({ ...base, status, dirtyCount: 3, sourceDirty: true });
-    expect(meta.map((segment) => segment.key)).toEqual(['fields', 'dirty_source']);
-  });
-
-  test('yaml error shows without a synced tail', () => {
-    const status = resolveStatus(statusInput({ yamlError: true }));
-    const meta = buildHeaderMeta({ ...base, status });
-    expect(meta.map((segment) => segment.key)).toEqual(['fields', 'yaml_error']);
   });
 });
 

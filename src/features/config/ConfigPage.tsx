@@ -3,12 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { usePageTransitionLayer } from '@/components/common/PageTransitionLayer';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { useRevealGroup } from '@/hooks/motion';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useVisualConfig } from '@/hooks/useVisualConfig';
 import { useAuthStore, useNotificationStore, useThemeStore } from '@/stores';
+import { MoreDisclosure, PageHeader } from '@/components/flow';
+import flow from '@/components/flow/flowPage.module.scss';
 import {
   CONFIG_MODE_STORAGE_KEY,
+  CONFIG_SECTION_IDS,
   CONFIG_SECTION_STORAGE_KEY,
   LEGACY_EDITOR_MODE_STORAGE_KEY,
   configPanelDomId,
@@ -18,7 +20,6 @@ import {
 } from './constants';
 import {
   CONFIG_FIELD_COUNT,
-  buildHeaderMeta,
   countSectionErrors,
   countTotalErrors,
   readSavedMode,
@@ -30,7 +31,7 @@ import { findConfigFieldById } from './searchIndex';
 import { shouldReloadVisualDraft, useConfigDocument } from './hooks/useConfigDocument';
 import { useFieldJump } from './hooks/useFieldJump';
 import { useSourceSearch } from './hooks/useSourceSearch';
-import { ConfigHeader } from './components/ConfigHeader';
+import { describeConfig } from './configHeadline';
 import { ConfigSearch } from './components/ConfigSearch';
 import { ConfigTabs } from './components/ConfigTabs';
 import { DiffModal } from './components/DiffModal';
@@ -64,7 +65,6 @@ export function ConfigPage() {
   const connectionStatus = useAuthStore((state) => state.connectionStatus);
   const resolvedTheme = useThemeStore((state) => state.resolvedTheme);
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const revealRef = useRevealGroup<HTMLDivElement>();
 
   const {
     visualValues,
@@ -247,14 +247,6 @@ export function ConfigPage() {
     saving: doc.saving,
     dirty: doc.isDirty,
   });
-  const headerMeta = buildHeaderMeta({
-    fieldCount: CONFIG_FIELD_COUNT,
-    status,
-    dirtyCount: visualDirtyFields.size,
-    sourceDirty: doc.sourceDirty,
-    errorCount: mode === 'visual' ? totalErrors : 0,
-  });
-
   const saveDisabled =
     disableControls ||
     doc.loading ||
@@ -299,42 +291,53 @@ export function ConfigPage() {
     }
   };
 
+  const headline = describeConfig({
+    status,
+    dirtyCount: visualDirtyFields.size,
+    sourceDirty: doc.sourceDirty,
+    errorCount: mode === 'visual' ? totalErrors : 0,
+    fieldCount: CONFIG_FIELD_COUNT,
+    sectionCount: CONFIG_SECTION_IDS.length,
+    recoveryRequired: doc.recoveryRequired,
+  });
+  const modeDisabled = doc.saving || doc.loading || doc.diffModalOpen || doc.recoveryRequired;
+
   return (
-    <div className={styles.page} ref={revealRef}>
-      <ConfigHeader
-        meta={headerMeta}
-        reloadDisabled={doc.loading || doc.saving}
-        reloading={doc.loading}
-        onReload={doc.handleReload}
+    <div className={`${flow.page} ${styles.page}`}>
+      <PageHeader
+        eyebrow={t('config_management.flow.eyebrow')}
+        title={t(headline.title.key, headline.title.values)}
+        subtitle={
+          headline.subtitle ? t(headline.subtitle.key, headline.subtitle.values) : undefined
+        }
+        live
       />
 
       {doc.error && (
-        <div className="error-box" role="alert">
-          {doc.error}
-        </div>
+        <p className={flow.note} data-tone="bad" role="alert">
+          <span>{doc.error}</span>
+          <button
+            type="button"
+            className={flow.textButton}
+            onClick={doc.handleReload}
+            disabled={doc.loading || doc.saving}
+          >
+            {t('config_management.reload')}
+          </button>
+        </p>
       )}
       {!doc.error && visualParseError && (
-        <div className="error-box" role="alert">
+        <p className={flow.note} data-tone="bad" role="alert">
           {t('config_management.visual_mode_unavailable_detail', { message: visualParseError })}
-        </div>
+        </p>
       )}
-
-      <div className={styles.toolbar} data-reveal>
-        {mode === 'visual' ? (
-          <ConfigSearch disabled={disableControls || doc.loading} onJump={jumpToField} />
-        ) : (
-          <SourceSearchBar search={sourceSearch} disabled={disableControls || doc.loading} />
-        )}
-        <ModeSwitch
-          mode={mode}
-          disabled={doc.saving || doc.loading || doc.diffModalOpen || doc.recoveryRequired}
-          onChange={handleModeChange}
-        />
-      </div>
 
       {mode === 'visual' ? (
         <>
-          <div className={styles.tabsRow} data-reveal>
+          <div className={styles.toolbar}>
+            <ConfigSearch disabled={disableControls || doc.loading} onJump={jumpToField} />
+          </div>
+          <div className={styles.tabsRow}>
             <ConfigTabs
               active={activeSection}
               errorCounts={errorCounts}
@@ -344,7 +347,7 @@ export function ConfigPage() {
             />
           </div>
           <div
-            className={styles.panel}
+            className={`${styles.panel} ${flow.quietButtons}`}
             role="tabpanel"
             id={configPanelDomId(activeSection)}
             aria-labelledby={configTabDomId(activeSection)}
@@ -353,14 +356,67 @@ export function ConfigPage() {
           </div>
         </>
       ) : (
-        <SourcePanel
-          search={sourceSearch}
-          value={doc.content}
-          onChange={doc.handleChange}
-          theme={resolvedTheme}
-          editable={!disableControls && !doc.loading && !doc.saving && !doc.diffModalOpen}
-        />
+        <>
+          <p className={flow.actions}>
+            <span>{t('config_management.flow.source_note')}</span>
+            <button
+              type="button"
+              className={flow.textButton}
+              disabled={modeDisabled}
+              onClick={() => handleModeChange('visual')}
+            >
+              {t('config_management.flow.back_to_settings')}
+            </button>
+          </p>
+          <div className={styles.toolbar}>
+            <SourceSearchBar search={sourceSearch} disabled={disableControls || doc.loading} />
+          </div>
+          <SourcePanel
+            search={sourceSearch}
+            value={doc.content}
+            onChange={doc.handleChange}
+            theme={resolvedTheme}
+            editable={!disableControls && !doc.loading && !doc.saving && !doc.diffModalOpen}
+          />
+        </>
       )}
+
+      <div className={flow.moreWrap}>
+        <MoreDisclosure
+          label={t('config_management.flow.more')}
+          summary={t(
+            mode === 'visual'
+              ? 'config_management.flow.more_summary_visual'
+              : 'config_management.flow.more_summary_source'
+          )}
+        >
+          <div className={flow.moreBody}>
+            <section className={flow.moreSection}>
+              <h3 className={flow.sectionLabel}>{t('config_management.flow.editor_title')}</h3>
+              <p className={flow.quiet}>{t('config_management.flow.editor_hint')}</p>
+              <div>
+                <ModeSwitch mode={mode} disabled={modeDisabled} onChange={handleModeChange} />
+              </div>
+            </section>
+            <section className={flow.moreSection}>
+              <h3 className={flow.sectionLabel}>{t('config_management.flow.reload_title')}</h3>
+              <p className={flow.quiet}>{t('config_management.flow.reload_hint')}</p>
+              <p className={flow.actions}>
+                <button
+                  type="button"
+                  className={flow.textButton}
+                  onClick={doc.handleReload}
+                  disabled={doc.loading || doc.saving}
+                >
+                  {doc.loading
+                    ? t('config_management.flow.reloading')
+                    : t('config_management.reload')}
+                </button>
+              </p>
+            </section>
+          </div>
+        </MoreDisclosure>
+      </div>
 
       <FloatingSaveBar
         visible={isCurrentLayer && doc.isDirty}
