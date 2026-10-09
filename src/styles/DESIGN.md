@@ -57,7 +57,7 @@ Existing theme tokens (`src/styles/themes.scss`) stay the source of colour. Flow
 | `StatusDot`      | `StatusDot.tsx`      | A coloured dot (the only colour) plus a plain-language label. Tones: ok, warn, bad, off, unknown.                                                                                                          |
 | `MoreDisclosure` | `MoreDisclosure.tsx` | The page's single "More": a button with `aria-expanded`/`aria-controls`, a labelled region with an animated height, content kept mounted (inert while closed), optional summary and forced-open note.      |
 | `DeviceGlyph`    | `DeviceGlyph.tsx`    | Laptop outline for client sources.                                                                                                                                                                         |
-| `TrafficFlow`    | `TrafficFlow.tsx`    | Gateway → providers → accounts, read-only. Path thickness is the share of traffic in the window; travelling dots are recent volume (none for accounts that cannot serve); red flecks are failures. Nested list for assistive technology, SVG `aria-hidden`. |
+| `TrafficFlow`    | `TrafficFlow.tsx`    | Gateway → providers → accounts, read-only. One time window throughout (Overview uses the last 30 minutes, labelled once): path thickness is the share of traffic, travelling dots are volume for accounts serving now (none for backups or accounts that cannot serve), red flecks are failures. Nested list for assistive technology, SVG `aria-hidden`. |
 | `trafficLayout`  | `trafficLayout.ts`   | Pure geometry for TrafficFlow (wide three-column and narrow one-column layouts, paths, `strokeFor`, `dotsFor`).                                                                                           |
 | `ActionMenu`     | `ActionMenu.tsx`     | A button that opens a short menu (`aria-haspopup="menu"`, `role="menuitem"`, ↑/↓/Home/End, Escape returns focus). `primary` for a page's one filled action (Accounts' "Add account"), `quiet` for an overflow. |
 
@@ -83,8 +83,8 @@ primary `ActionMenu` per page.
 
 | Page     | Main view                                                                                                    | Under More                                                                                   |
 | -------- | ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
-| Overview | The state sentence (`describeOverview`), TrafficFlow, 5-hour and weekly rails per account, one line of totals | Throughput chart, gateway settings and versions, links to other pages                        |
-| Accounts | The state sentence, search, provider tabs (only providers with accounts), one row per account, Add account   | Show filter, sort, list/cards, page size, batch selection, model rules, scoped Delete        |
+| Overview | The state sentence (`describeOverview`), TrafficFlow, 5-hour and weekly rails per account, one line of totals | Throughput chart, per-provider requests and success rate, account health, gateway settings, links |
+| Accounts | The state sentence, search, one row per account grouped by provider (Claude in routing order), Add account; provider tabs only for 7+ accounts | Show filter, sort, list/cards, page size, batch selection, model rules, scoped Delete        |
 | Routing  | The order sentence, FlowDiagram of clients → gateway → accounts                                              | Shared strategy, session affinity, per-client rules, client keys                             |
 | Quota    | Per-account quota cards and the windows timeline (only providers with accounts get a tab)                    | Sort                                                                                         |
 
