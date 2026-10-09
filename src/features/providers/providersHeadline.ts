@@ -5,14 +5,32 @@
  */
 
 import type { Copy } from '@/features/clientProfiles/routing/routingOrder';
+import { isMultiProtocolSponsorBrand } from './sponsorDefinitions';
 import type { ProviderBrand } from './types';
 
 const P = 'providersPage.flow';
 
+export interface HeadlineResource {
+  disabled: boolean;
+  brand?: ProviderBrand;
+  /** OpenAI-compatible providers hold several keys in one entry. */
+  apiKeyEntryCount?: number;
+}
+
 export interface HeadlineGroup {
   id: ProviderBrand;
-  resources: ReadonlyArray<{ disabled: boolean }>;
+  resources: ReadonlyArray<HeadlineResource>;
 }
+
+/**
+ * How many API keys one entry stands for: an OpenAI-compatible provider counts each of its keys;
+ * a sponsor set-up (Quick Start, quick fill, Kimi) is not a key.
+ */
+export const keyEntriesOf = (resource: HeadlineResource): number => {
+  if (resource.brand && isMultiProtocolSponsorBrand(resource.brand)) return 0;
+  if (resource.brand === 'openaiCompatibility') return Math.max(0, resource.apiKeyEntryCount ?? 1);
+  return 1;
+};
 
 export interface ProvidersHeadline {
   title: Copy;
@@ -31,11 +49,17 @@ export interface DescribeProvidersInput {
 export const countKeys = (groups: ReadonlyArray<HeadlineGroup>) => {
   let total = 0;
   let disabled = 0;
+  let sponsors = 0;
   for (const group of groups) {
-    total += group.resources.length;
-    disabled += group.resources.filter((resource) => resource.disabled).length;
+    for (const resource of group.resources) {
+      const keys = keyEntriesOf(resource);
+      if (keys === 0 && resource.brand && isMultiProtocolSponsorBrand(resource.brand))
+        sponsors += 1;
+      total += keys;
+      if (resource.disabled) disabled += keys;
+    }
   }
-  return { total, disabled, active: total - disabled };
+  return { total, disabled, active: total - disabled, sponsors };
 };
 
 /** Providers with at least one key, in their catalogue order, and the rest. */
@@ -57,7 +81,15 @@ export function describeProviders({
     if (loading) return { title: { key: `${P}.title_loading` }, subtitle: null, tone: 'off' };
   }
   const list = groups ?? [];
-  const { total, disabled, active } = countKeys(list);
+  const { total, disabled, active, sponsors } = countKeys(list);
+  const names = join(splitProviderGroups(list).configured.map((group) => nameOf(group.id)));
+  if (total === 0 && sponsors > 0) {
+    return {
+      title: { key: `${P}.title_sponsors`, values: { count: sponsors } },
+      subtitle: { key: `${P}.subtitle_sponsors`, values: { names } },
+      tone: failed ? 'bad' : 'ok',
+    };
+  }
   if (total === 0) {
     return {
       title: { key: `${P}.title_none` },
@@ -65,7 +97,6 @@ export function describeProviders({
       tone: failed ? 'bad' : 'off',
     };
   }
-  const names = join(splitProviderGroups(list).configured.map((group) => nameOf(group.id)));
   let subtitle: Copy;
   if (active === 0) subtitle = { key: `${P}.subtitle_all_off`, values: { names } };
   else if (disabled > 0)
