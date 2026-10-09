@@ -2818,7 +2818,6 @@
     }
   },
   "routing": {
-    "eyebrow": "Claude",
     "loading": "正在加载路由…",
     "title_first": "新对话会使用 {{account}}。",
     "follow_backup": "如果 {{account}} 用完，会自动切换到 {{backup}}。",
@@ -2829,15 +2828,16 @@
     "follow_back_at": "{{when}}会切回 {{out}}。",
     "follow_back_later": "{{out}} 恢复额度后会切回。",
     "follow_preview": "这只是预览，没有做任何更改。",
-    "title_none": "目前没有可用额度的 Claude 账号。",
+    "title_none": "目前没有可用额度的 {{provider}} 账号。",
     "follow_none": "在有账号恢复之前，新对话会失败。",
-    "title_empty": "还没有 Claude 账号。",
-    "follow_empty": "在「OAuth 登录」中登录 Claude 后会显示在这里。",
+    "title_empty": "还没有可路由的账号。",
+    "follow_empty": "在「OAuth 登录」中登录后，账号会显示在这里。",
     "rank": {
       "first": "优先",
       "backup": "备用",
       "shared": "共享",
-      "off": "已关闭"
+      "off": "已关闭",
+      "only": "唯一账号"
     },
     "health": {
       "available": "可用",
@@ -2866,13 +2866,12 @@
     "hint": {
       "sooner_bad": "{{account}} 更早重置（{{when}}），除非先用它，否则剩余的 {{percent}}% 会浪费。",
       "sooner_good": "{{account}} 更早重置（{{when}}），先用它不会浪费额度。",
-      "drag": "拖动账号，或聚焦后按 ↑ / ↓，即可调整谁先用。",
-      "single": "再添加一个 Claude 账号即可拥有备用。"
+      "drag": "拖动账号，或聚焦后按 ↑ / ↓，即可调整谁先用。"
     },
     "make_first": "改为先用 {{account}}",
     "preview_start": "预览：{{account}} 用完",
     "preview_end": "结束预览",
-    "list_label": "按顺序排列的 Claude 账号",
+    "list_label": "按顺序排列的 {{provider}} 账号",
     "card_label": "{{rank}}：{{account}}。{{status}}",
     "reorder_hint": "按上下方向键移动，按 Home 设为优先。",
     "hub": "网关",
@@ -2890,11 +2889,11 @@
       "locked_broken": "{{client}} 已锁定为 {{account}}，但它目前无法服务，因此请求会失败。",
       "locked_missing": "{{client}} 锁定的账号无法使用，因此请求会失败。",
       "refused": "{{client}} 有一条锁定规则，但此网关尚未执行锁定，因此它的请求会被拒绝。",
-      "locked_other": "{{client}} 已锁定到一个账号（见「更多」）。"
-    },
-    "codex": {
-      "one": "Codex 自动使用它唯一的账号，无需选择。",
-      "many": "Codex 自动在 {{count}} 个账号之间分担。"
+      "locked_other": "{{client}} 已锁定到一个账号（见「更多」）。",
+      "single_one": "{{names}} 使用这个账号。",
+      "single_two": "{{names}} 都使用这个账号。",
+      "single_many": "{{names}} 都使用这个账号。",
+      "refused_provider": "{{client}} 已锁定账号，因此无法使用 {{provider}}。"
     },
     "profiles_unsupported": "此网关没有客户端配置，所有客户端密钥都使用上面的顺序。锁定和客户端密钥需要更新版本的 CLIProxyAPI。",
     "more": "更多",
@@ -2929,15 +2928,19 @@
       "new_client": "新建客户端"
     },
     "follow_tie": "{{accounts}} 的优先级相同，因此由 {{account}} 胜出。把其中一个移到最上面即可设定明确的顺序。",
-    "title_all_off": "所有 Claude 账号都已关闭。",
+    "title_all_off": "所有 {{provider}} 账号都已关闭。",
     "follow_all_off": "在「账号」中开启一个，新对话就会使用它。",
-    "off_list_label": "已关闭的 Claude 账号",
+    "off_list_label": "已关闭的 {{provider}} 账号",
     "save_partial": "新顺序只保存了一部分（{{message}}）。现在优先使用 {{account}}。",
     "save_partial_unknown": "新顺序只保存了一部分（{{message}}）。请刷新查看网关当前的设置。",
     "undo": "撤销",
     "profiles_incompatible": "此网关使用本面板无法识别的客户端配置 API 版本，因此已隐藏锁定和客户端密钥。上面的顺序仍然有效。",
     "accounts_failed": "无法加载账号，因此无法显示顺序。",
-    "save_unconfirmed": "无法确认新顺序是否已保存；下面显示的是网关当前的设置。"
+    "save_unconfirmed": "无法确认新顺序是否已保存；下面显示的是网关当前的设置。",
+    "title_single": "{{provider}} 使用 {{account}}。",
+    "follow_single": "这是唯一的 {{provider}} 账号，用完时没有备用。",
+    "undo_changed": "账号已发生变化，无法恢复之前的顺序。",
+    "fixed_note": "部分 {{provider}} 账号由网关在运行时管理，因此无法在这里调整顺序。"
   },
   "overview": {
     "eyebrow": "概览",

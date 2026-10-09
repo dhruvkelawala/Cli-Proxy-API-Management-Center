@@ -2831,7 +2831,6 @@
     }
   },
   "routing": {
-    "eyebrow": "Claude",
     "loading": "Loading routing…",
     "title_first": "New conversations go to {{account}}.",
     "follow_backup": "If {{account}} runs out, they switch to {{backup}} automatically.",
@@ -2842,15 +2841,16 @@
     "follow_back_at": "They move back to {{out}} {{when}}.",
     "follow_back_later": "They move back to {{out}} when it has room again.",
     "follow_preview": "This is a preview. Nothing has changed.",
-    "title_none": "No Claude account has room right now.",
+    "title_none": "No {{provider}} account has room right now.",
     "follow_none": "New conversations will fail until one recovers.",
-    "title_empty": "No Claude accounts yet.",
-    "follow_empty": "Sign in with Claude under OAuth Login and it will show up here.",
+    "title_empty": "No accounts to route yet.",
+    "follow_empty": "Sign in under OAuth Login and they will show up here.",
     "rank": {
       "first": "First",
       "backup": "Backup",
       "shared": "Shared",
-      "off": "Off"
+      "off": "Off",
+      "only": "Only account"
     },
     "health": {
       "available": "Available",
@@ -2879,13 +2879,12 @@
     "hint": {
       "sooner_bad": "{{account}} resets sooner ({{when}}), so its {{percent}}% left is lost unless it goes first.",
       "sooner_good": "{{account}} resets sooner ({{when}}), so using it first wastes nothing.",
-      "drag": "Drag an account, or focus it and press ↑ or ↓, to change who goes first.",
-      "single": "Add a second Claude account to have a backup."
+      "drag": "Drag an account, or focus it and press ↑ or ↓, to change who goes first."
     },
     "make_first": "Make {{account}} first",
     "preview_start": "Preview: {{account}} runs out",
     "preview_end": "End preview",
-    "list_label": "Claude accounts in order",
+    "list_label": "{{provider}} accounts in order",
     "card_label": "{{rank}}: {{account}}. {{status}}",
     "reorder_hint": "Press up or down arrow to move it. Home makes it first.",
     "hub": "Gateway",
@@ -2903,11 +2902,11 @@
       "locked_broken": "{{client}} is locked to {{account}}, which can’t serve right now, so its requests fail.",
       "locked_missing": "{{client}} is locked to an account that can’t be used, so its requests fail.",
       "refused": "{{client}} has a locked rule this gateway doesn’t enforce yet, so its requests are refused.",
-      "locked_other": "{{client}} is locked to one account (see More)."
-    },
-    "codex": {
-      "one": "Codex uses its one account automatically. Nothing to choose.",
-      "many": "Codex shares its {{count}} accounts automatically."
+      "locked_other": "{{client}} is locked to one account (see More).",
+      "single_one": "{{names}} uses this account.",
+      "single_two": "{{names}} both use this account.",
+      "single_many": "{{names}} all use this account.",
+      "refused_provider": "{{client}} has a locked account, so it can’t use {{provider}}."
     },
     "profiles_unsupported": "This gateway has no client profiles, so every client key uses the order above. Locks and client keys need a newer CLIProxyAPI.",
     "more": "More",
@@ -2943,15 +2942,19 @@
       "new_client": "New client"
     },
     "follow_tie": "{{accounts}} have the same priority, so {{account}} wins the tie. Move one to the top to set a clear order.",
-    "title_all_off": "Every Claude account is turned off.",
+    "title_all_off": "Every {{provider}} account is turned off.",
     "follow_all_off": "Turn one on under Accounts and new conversations will go to it.",
-    "off_list_label": "Turned-off Claude accounts",
+    "off_list_label": "Turned-off {{provider}} accounts",
     "save_partial": "Only part of the new order was saved ({{message}}). {{account}} goes first now.",
     "save_partial_unknown": "Only part of the new order was saved ({{message}}). Refresh to see what the gateway has now.",
     "undo": "Undo",
     "profiles_incompatible": "This gateway uses a client profile API version this panel doesn’t understand, so locks and client keys are hidden. The order above still works.",
     "accounts_failed": "Couldn’t load the accounts, so the order can’t be shown.",
-    "save_unconfirmed": "Couldn’t confirm the new order; showing what the gateway has now."
+    "save_unconfirmed": "Couldn’t confirm the new order; showing what the gateway has now.",
+    "title_single": "{{provider}} uses {{account}}.",
+    "follow_single": "It is the only {{provider}} account, so there is no backup if it runs out.",
+    "undo_changed": "The accounts changed, so the old order can’t be restored.",
+    "fixed_note": "Some {{provider}} accounts are managed by the gateway at runtime, so their order can’t be changed here."
   },
   "overview": {
     "eyebrow": "Overview",

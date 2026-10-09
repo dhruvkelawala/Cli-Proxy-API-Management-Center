@@ -1,36 +1,29 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiClient, authFilesApi } from '@/services/api';
-import { useConfigStore, useNotificationStore, useQuotaStore } from '@/stores';
+import { useConfigStore, useNotificationStore } from '@/stores';
 import { useClientProfilesStore } from '@/stores/useClientProfilesStore';
 import { notifyAuthFilesChanged } from '@/features/authFiles/authFilesEvents';
-import { accountProviderKey } from '@/features/authFiles/accountPresentation';
-import {
-  releaseQuotaTargets,
-  settleQuotaReads,
-  takeStaleQuotaTargets,
-} from '@/features/quota/quotaFreshness';
-import { useQuotaBatchLoader } from '@/features/quota/hooks/useQuotaBatchLoader';
-import { getQuotaCacheKey } from '@/utils/quota/identity';
+import { useAccountQuota } from '@/features/quota/hooks/useAccountQuota';
+import { providerLabel } from '@/features/dashboard/utils';
 import type { AuthFileItem } from '@/types';
 import { useClientRoutesData } from '../hooks/useClientRoutesData';
 import {
   buildOrder,
-  summarizeClaudeQuota,
+  isSingleAccount,
+  overridesLanded,
+  routingProviders,
   type FormatWhen,
   type JoinNames,
   type OrderModel,
 } from './routingOrder';
-import { useNow } from '@/hooks/useNow';
 import {
   makeGuardedUndo,
-  reorderInFlight,
+  reordersInFlight,
   runExclusiveReorder,
   runReorder,
   type ReorderEffects,
 } from './reorderFlow';
-
-const PROVIDER = 'claude';
 export {
   QUOTA_MAX_AGE_MS,
   settleQuotaReads,
@@ -77,9 +70,33 @@ export const buildNameJoiner = (locale: string): JoinNames => {
   }
 };
 
+export interface RoutingSection {
+  /** Provider key ("claude", "codex", …). */
+  provider: string;
+  /** Display name ("Claude", "Codex", …); proper nouns, not translated. */
+  name: string;
+  model: OrderModel;
+  saving: boolean;
+  simulateOut: string | null;
+}
+
+type PerProvider<T> = Record<string, T>;
+
 /**
- * Claude account order for the Routing page, with real priority writes (see reorderFlow).
- * Writes keep going if the page closes; only a connection change stops them.
+ * Providers whose fallback preview must end: the section is down to one account (or none), so
+ * there is no backup to preview and no "End preview" control.
+ */
+export const stalePreviews = (sections: readonly RoutingSection[]): string[] =>
+  sections
+    .filter((section) => section.simulateOut !== null && isSingleAccount(section.model))
+    .map((section) => section.provider);
+
+/**
+ * Account order per provider for the Routing page, with real priority writes (see
+ * reorderFlow). One section per provider that has accounts, derived from the Accounts list.
+ * Each provider has its own optimistic order, preview, saving state, one-at-a-time slot and
+ * Undo; a reorder only ever plans and writes that provider's accounts. Writes keep going if the
+ * page closes; only a connection change stops them.
  */
 export function useRoutingOrder() {
   const { t, i18n } = useTranslation();
@@ -88,118 +105,142 @@ export function useRoutingOrder() {
   const config = useConfigStore((state) => state.config);
   const data = useClientRoutesData();
   const { files, strategy, reloadFiles } = data;
-  const claudeQuota = useQuotaStore((state) => state.claudeQuota);
-  const { batchLoading, loadQuota } = useQuotaBatchLoader();
+  // Five-hour and weekly quota (Claude, Codex) from the shared cache, kept fresh.
+  const { quotaFor } = useAccountQuota(files);
 
-  const [overrides, setOverrides] = useState<Record<string, number> | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [simulateOut, setSimulateOut] = useState<string | null>(null);
+  const [overrides, setOverrides] = useState<PerProvider<Record<string, number> | null>>({});
+  const [saving, setSaving] = useState<PerProvider<boolean>>({});
+  const [simulateOut, setSimulateOut] = useState<PerProvider<string | null>>({});
   const mountedRef = useRef(true);
   useEffect(() => {
     mountedRef.current = true;
-    // A reorder started by an earlier visit may still be writing: show it, and block new ones.
-    const pending = reorderInFlight(apiClient.getConnectionRevision());
-    if (pending) {
-      setSaving(true);
-      void pending.then(() => {
-        if (mountedRef.current) setSaving(false);
+    // Reorders started by an earlier visit may still be writing: show them, and block new
+    // ones for the same provider until they finish.
+    reordersInFlight(apiClient.getConnectionRevision()).forEach(({ scope, done }) => {
+      setSaving((prev) => ({ ...prev, [scope]: true }));
+      void done.then(() => {
+        if (mountedRef.current) setSaving((prev) => ({ ...prev, [scope]: false }));
       });
-    }
+    });
     return () => {
       mountedRef.current = false;
     };
   }, []);
-  // Minute clock: quota windows that expire while the page is open drop out on the next tick.
-  const now = useNow();
-
-  const providerFiles = useMemo(
-    () => (files ?? []).filter((file) => accountProviderKey(file) === PROVIDER),
-    [files]
-  );
-
-  // Weekly room left comes from the Quota page's cache and loader. On open, anything this page
-  // has not seen read successfully in the last five minutes is re-read once.
-  const attemptedQuota = useRef(new Set<string>());
-  useEffect(() => {
-    const connection = apiClient.getConnectionRevision();
-    const stateFor = (file: AuthFileItem) => claudeQuota[getQuotaCacheKey(file)];
-    settleQuotaReads(providerFiles, connection, Date.now(), stateFor, undefined, batchLoading);
-    const stale = takeStaleQuotaTargets(
-      providerFiles,
-      connection,
-      Date.now(),
-      attemptedQuota.current,
-      stateFor
-    );
-    if (stale.length) {
-      void loadQuota(stale.map((file) => ({ file, type: PROVIDER }))).then((started) => {
-        if (!started) releaseQuotaTargets(stale, connection, attemptedQuota.current);
-      });
-    }
-  }, [providerFiles, claudeQuota, loadQuota, batchLoading]);
 
   const sessionAffinity = config?.routingSessionAffinity === true;
   const buildFrom = useCallback(
     (
+      provider: string,
       list: AuthFileItem[],
       extra: { overrides?: Record<string, number> | null; out?: string | null }
     ) =>
       strategy
         ? buildOrder({
             files: list,
-            provider: PROVIDER,
+            provider,
             strategy,
             sessionAffinity,
             inventory: snapshot?.accounts ?? [],
-            quotaFor: (file: AuthFileItem) =>
-              summarizeClaudeQuota(claudeQuota[getQuotaCacheKey(file)], now),
+            quotaFor,
             priorityOverrides: extra.overrides ?? undefined,
             simulateOut: extra.out ?? null,
           })
         : null,
-    [claudeQuota, now, sessionAffinity, snapshot, strategy]
+    [quotaFor, sessionAffinity, snapshot, strategy]
   );
-  const model: OrderModel | null = useMemo(
-    () => (files ? buildFrom(files, { overrides, out: simulateOut }) : null),
-    [buildFrom, files, overrides, simulateOut]
-  );
+
+  const sections: RoutingSection[] | null = useMemo(() => {
+    if (!files || !strategy) return null;
+    return routingProviders(files).flatMap((provider) => {
+      const model = buildFrom(provider, files, {
+        overrides: overrides[provider],
+        out: simulateOut[provider],
+      });
+      return model
+        ? [
+            {
+              provider,
+              // routingProviders leaves out "unknown", so the fallback is never shown.
+              name: providerLabel(provider, provider),
+              model,
+              saving: saving[provider] === true,
+              simulateOut: simulateOut[provider] ?? null,
+            },
+          ]
+        : [];
+    });
+  }, [buildFrom, files, overrides, saving, simulateOut, strategy]);
 
   const locale = i18n.language || 'en';
   const formatWhen = useMemo(() => buildWhenFormatter(t, locale), [t, locale]);
   const joinNames = useMemo(() => buildNameJoiner(locale), [locale]);
 
-  const setOrderRef = useRef<(ids: string[]) => Promise<void>>(async () => {});
+  const setPreview = useCallback((provider: string, accountId: string | null) => {
+    setSimulateOut((prev) => ({ ...prev, [provider]: accountId }));
+  }, []);
+
+  // An optimistic order whose reload was superseded (another section reloaded later) is
+  // dropped once the list on screen shows its priorities, so it never flickers back.
+  useEffect(() => {
+    if (!files) return;
+    setOverrides((prev) => {
+      const landed = Object.entries(prev).filter(
+        ([, value]) => value !== null && overridesLanded(value, files)
+      );
+      if (landed.length === 0) return prev;
+      const next = { ...prev };
+      landed.forEach(([provider]) => {
+        next[provider] = null;
+      });
+      return next;
+    });
+  }, [files]);
+
+  // A section that dropped to one account has nothing left to preview.
+  useEffect(() => {
+    if (!sections) return;
+    stalePreviews(sections).forEach((provider) => setPreview(provider, null));
+  }, [sections, setPreview]);
+
+  const setOrderRef = useRef<
+    (provider: string, ids: string[], options?: { isUndo?: boolean }) => Promise<void>
+  >(async () => {});
   const setOrder = useCallback(
-    async (ids: string[]) => {
-      if (!model) return;
+    async (provider: string, ids: string[], options: { isUndo?: boolean } = {}) => {
+      const section = sections?.find((item) => item.provider === provider);
+      if (!section) return;
+      const { model } = section;
       const revision = apiClient.getConnectionRevision();
       const previous = model.order.map((account) => account.id);
       const fx: ReorderEffects = {
         connectionRevision: () => apiClient.getConnectionRevision(),
         patchAccount: (name, patch) => authFilesApi.patchFields(name, patch),
         isPageOpen: () => mountedRef.current,
-        setOverrides,
-        setSaving,
+        setOverrides: (value) => setOverrides((prev) => ({ ...prev, [provider]: value })),
+        setSaving: (value) => setSaving((prev) => ({ ...prev, [provider]: value })),
         reloadFiles,
         notifyAccountsChanged: notifyAuthFilesChanged,
         notify: (message, type, action) => showNotification(message, type, undefined, action),
         t: (key, values) => t(key, values),
-        firstLabelIn: (list) => buildFrom(list, {})?.order[0]?.label ?? null,
+        firstLabelIn: (list) => buildFrom(provider, list, {})?.order[0]?.label ?? null,
       };
-      // Undo is bound to this connection and this page visit, and re-plans from the page's
-      // data at the time it is pressed (setOrderRef always holds the latest setOrder).
+      // Undo is bound to this connection, page visit and provider, and re-plans from the
+      // page's data at the time it is pressed (setOrderRef always holds the latest setOrder).
       const undo = makeGuardedUndo({
         connectionRevision: () => apiClient.getConnectionRevision(),
         isPageOpen: () => mountedRef.current,
-        apply: () => setOrderRef.current(previous),
+        apply: () => setOrderRef.current(provider, previous, { isUndo: true }),
+        scope: provider,
       });
-      setSimulateOut(null);
-      // One reorder per connection at a time, even across page visits.
-      await runExclusiveReorder(revision, () =>
-        runReorder(model.order, ids, fx, () => void undo())
+      setPreview(provider, null);
+      // One reorder per connection and provider at a time, even across page visits.
+      await runExclusiveReorder(
+        revision,
+        () => runReorder(model.order, ids, fx, () => void undo(), options),
+        provider
       );
     },
-    [buildFrom, model, reloadFiles, showNotification, t]
+    [buildFrom, reloadFiles, sections, setPreview, showNotification, t]
   );
   useEffect(() => {
     setOrderRef.current = setOrder;
@@ -207,11 +248,9 @@ export function useRoutingOrder() {
 
   return {
     ...data,
-    model,
-    saving,
+    sections,
     setOrder,
-    simulateOut,
-    setSimulateOut,
+    setPreview,
     formatWhen,
     joinNames,
   };

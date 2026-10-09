@@ -16,7 +16,12 @@ import {
   saveAccountTunings,
   type RoutingSaveDeps,
 } from '@/features/config/routing/routingSettingsState';
-import { planReorder, type OrderAccount, type PriorityChange } from './routingOrder';
+import {
+  isPermutationOf,
+  planReorder,
+  type OrderAccount,
+  type PriorityChange,
+} from './routingOrder';
 
 export type OrderSaveResult =
   | { kind: 'stale' }
@@ -69,7 +74,15 @@ export interface ReorderEffects {
   firstLabelIn: (files: AuthFileItem[]) => string | null;
 }
 
-export type ReorderOutcome = 'noop' | 'saved' | 'failed' | 'partial' | 'unconfirmed' | 'stale';
+export type ReorderOutcome =
+  | 'noop'
+  | 'saved'
+  | 'failed'
+  | 'partial'
+  | 'unconfirmed'
+  | 'stale'
+  /** Undo could not apply: the provider's accounts are no longer the ones it was offered for. */
+  | 'changed';
 
 /** Statuses after which a write may or may not have been applied by the gateway. */
 const UNCERTAIN_STATUSES = new Set([408, 502, 503, 504]);
@@ -88,55 +101,71 @@ export const isUncertainWriteError = (error: unknown): boolean => {
 };
 
 /* ------------------------------------------------------------------ */
-/* One reorder at a time, per connection, across page remounts          */
+/* One reorder at a time per connection and provider, across remounts   */
 /* ------------------------------------------------------------------ */
 
-let inFlight: { revision: number; done: Promise<void> } | null = null;
-
-/** The save running for this connection (it may belong to a page that has since closed). */
-export const reorderInFlight = (revision: number): Promise<void> | null =>
-  inFlight && inFlight.revision === revision ? inFlight.done : null;
+type InFlightSlot = { revision: number; scope: string; done: Promise<void> };
+const inFlight = new Map<string, InFlightSlot>();
+const slotKey = (revision: number, scope: string) => `${revision}\u0000${scope}`;
 
 /**
- * Runs `task` as the single reorder for this connection. Returns false (and runs nothing)
- * while another one is still writing, even if the page that started it has unmounted.
+ * The save running for this connection and scope (a provider), which may belong to a page that
+ * has since closed. Each provider has its own slot, so a Codex save never blocks Claude.
+ */
+export const reorderInFlight = (revision: number, scope = ''): Promise<void> | null =>
+  inFlight.get(slotKey(revision, scope))?.done ?? null;
+
+/** Every save still running for this connection, with its scope. */
+export const reordersInFlight = (revision: number): { scope: string; done: Promise<void> }[] =>
+  [...inFlight.values()]
+    .filter((slot) => slot.revision === revision)
+    .map(({ scope, done }) => ({ scope, done }));
+
+/**
+ * Runs `task` as the single reorder for this connection and scope. Returns false (and runs
+ * nothing) while another one for the same scope is still writing, even if the page that
+ * started it has unmounted.
  */
 export const runExclusiveReorder = async (
   revision: number,
-  task: () => Promise<unknown>
+  task: () => Promise<unknown>,
+  scope = ''
 ): Promise<boolean> => {
-  if (reorderInFlight(revision)) return false;
+  if (reorderInFlight(revision, scope)) return false;
   let finish = () => {};
   const done = new Promise<void>((resolve) => {
     finish = resolve;
   });
-  const slot = { revision, done };
-  inFlight = slot;
+  const key = slotKey(revision, scope);
+  const slot: InFlightSlot = { revision, scope, done };
+  inFlight.set(key, slot);
   try {
     await task();
   } finally {
-    if (inFlight === slot) inFlight = null;
+    if (inFlight.get(key) === slot) inFlight.delete(key);
     finish();
   }
   return true;
 };
 
 /**
- * Undo bound to the connection and page it was offered on. It does nothing after a
- * connection change or once that page has closed; pressed while another save is still
- * writing, it waits for that save and checks again, so it is never silently dropped.
- * `apply` re-plans from the page's current data (it goes through runReorder).
+ * Undo bound to the connection, page and scope (provider) it was offered on. It does nothing
+ * after a connection change or once that page has closed; pressed while another save for the
+ * same scope is still writing, it waits for that save and checks again, so it is never
+ * silently dropped. `apply` re-plans from the page's current data (it goes through runReorder).
  */
 export const makeGuardedUndo = (deps: {
   connectionRevision: () => number;
   isPageOpen: () => boolean;
   apply: () => Promise<unknown>;
+  scope?: string;
 }): (() => Promise<'applied' | 'ignored'>) => {
   const revision = deps.connectionRevision();
+  const scope = deps.scope ?? '';
   const valid = () => deps.connectionRevision() === revision && deps.isPageOpen();
   return async () => {
     if (!valid()) return 'ignored';
-    const pending = reorderInFlight(revision);
+    const pending = reorderInFlight(revision, scope);
     if (pending) {
       await pending;
       // Let the page take in the list that save re-read before planning from it.
@@ -153,8 +182,22 @@ export const runReorder = async (
   nextIds: readonly string[],
   fx: ReorderEffects,
   /** Shown as Undo on the success toast; writes the previous order through this same path. */
-  undo?: () => void
+  undo?: () => void,
+  options: { isUndo?: boolean } = {}
 ): Promise<ReorderOutcome> => {
+  if (
+    options.isUndo &&
+    !isPermutationOf(
+      order.map((account) => account.id),
+      nextIds
+    )
+  ) {
+    // An account was added, removed or turned off since: say so instead of doing nothing.
+    fx.notify(fx.t('routing.undo_changed'), 'info');
+    return 'changed';
+  }
+  // Runtime-only channels cannot be patched; never start a write that would half-apply.
+  if (order.some((account) => account.fixed)) return 'noop';
   const changes = planReorder(order, nextIds);
   if (changes.length === 0) return 'noop';
   const first = order.find((account) => account.id === nextIds[0]);
@@ -221,8 +264,11 @@ export const runReorder = async (
   }
 
   fx.notifyAccountsChanged();
-  await fx.reloadFiles();
-  fx.setOverrides(null);
+  // Keep the optimistic order until a list that includes this write is in place. A reload that
+  // was superseded by another section's (latest wins) returns null; the page then drops the
+  // override once the newer list shows these priorities (overridesLanded).
+  const fresh = await fx.reloadFiles();
+  if (fresh) fx.setOverrides(null);
   const open = fx.isPageOpen();
   if (open) fx.setSaving(false);
   if (first) {

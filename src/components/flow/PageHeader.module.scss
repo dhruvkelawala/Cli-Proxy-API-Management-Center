@@ -29,6 +29,13 @@
   animation: titleIn 280ms var(--ease-out-strong);
 }
 
+// A later section's headline: one step smaller so the page reads calmly.
+.title[data-level='section'] {
+  font-size: clamp(21px, 3.4vw, 24px);
+  line-height: 1.2;
+  letter-spacing: -0.016em;
+}
+
 .subtitle {
   margin: 12px 0 0;
   max-width: 56ch;

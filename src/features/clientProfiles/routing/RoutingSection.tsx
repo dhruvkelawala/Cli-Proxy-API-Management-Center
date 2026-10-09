@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   DeviceGlyph,
@@ -14,6 +14,9 @@ import {
   describeClientsLine,
   describeServing,
   healthCopy,
+  isSingleAccount,
+  canReorder,
+  hasFixedAccounts,
   healthTone,
   quotaCopy,
   rankKey,
@@ -28,12 +31,16 @@ import {
 } from './routingOrder';
 import styles from './RoutingPage.module.scss';
 
-export interface RoutingHeroProps {
+export interface RoutingSectionProps {
+  /** Provider key ("claude", "codex", …), for data attributes and ids. */
+  provider: string;
+  /** Display name ("Claude", "Codex", …). */
+  name: string;
+  /** The page's first section: carries the page headline (h1); later ones use an h2. */
+  primary: boolean;
   model: OrderModel;
-  /** Client profiles resolved against the order; null when profiles are unsupported. */
+  /** Client profiles resolved for this provider; null when profiles are unsupported. */
   routes: ClientRoute[] | null;
-  /** The quiet line for the other provider (Codex), if any. */
-  otherLine: Copy | null;
   hubLabel?: string;
   saving: boolean;
   simulateOut: string | null;
@@ -41,8 +48,6 @@ export interface RoutingHeroProps {
   joinNames: JoinNames;
   onReorder: (ids: string[]) => void;
   onPreview: (accountId: string | null) => void;
-  /** Quiet notices shown in the main view (enforcement, load problems). */
-  notices?: ReactNode;
 }
 
 type Card = FlowDestination & { account: OrderAccount };
@@ -55,13 +60,17 @@ const pathState = (account: OrderAccount): FlowPathState =>
       : 'out';
 
 /**
- * The Routing page's main view: the sentence, the live flow (clients → gateway → accounts in
- * order) and the few lines that matter. Presentational; state lives in useRoutingOrder.
+ * One provider on the Routing page: its sentence, the live flow (clients → gateway → that
+ * provider's accounts in order) and the few lines that matter. With several accounts the order
+ * can be changed and a fallback previewed; with one account there is a single solid path and
+ * nothing to reorder. Presentational; state lives in useRoutingOrder.
  */
-export function RoutingHero({
+export function RoutingSection({
+  provider,
+  name,
+  primary,
   model,
   routes,
-  otherLine,
   hubLabel,
   saving,
   simulateOut,
@@ -69,13 +78,18 @@ export function RoutingHero({
   joinNames,
   onReorder,
   onPreview,
-  notices,
-}: RoutingHeroProps) {
+}: RoutingSectionProps) {
   const { t } = useTranslation();
+  const titleId = useId();
   const text = (copy: Copy) => t(copy.key, copy.values);
-  const serving = describeServing(model, joinNames, formatWhen);
+  const single = isSingleAccount(model);
+  // Runtime-only channels cannot have their priority written: show the order, don't offer to
+  // change it.
+  const reorderable = canReorder(model);
+  const fixed = !single && hasFixedAccounts(model);
+  const serving = describeServing(model, joinNames, formatWhen, name);
   const hint = resetHint(model, formatWhen);
-  const clients = describeClientsLine(routes ?? [], joinNames);
+  const clients = describeClientsLine(routes ?? [], joinNames, single, name);
   const [first] = model.order;
 
   const sources: FlowSource[] =
@@ -103,12 +117,22 @@ export function RoutingHero({
     return copy ? text(copy) : undefined;
   };
 
+  const rank = (account: OrderAccount, place: number) =>
+    t(rankKey(account, place, model.shared, single));
+
   return (
-    <>
+    <section
+      className={styles.providerSection}
+      aria-labelledby={titleId}
+      data-provider={provider}
+      data-primary={primary}
+    >
       <PageHeader
-        eyebrow={t('routing.eyebrow')}
+        eyebrow={name}
         title={text(serving.title)}
         subtitle={text(serving.follow)}
+        level={primary ? 1 : 2}
+        titleId={titleId}
         live
       />
 
@@ -117,14 +141,15 @@ export function RoutingHero({
           <FlowDiagram
             sources={sources}
             destinations={cards}
-            label={t('routing.list_label')}
+            label={t('routing.list_label', { provider: name })}
             hubLabel={hubLabel}
-            reorderHint={t('routing.reorder_hint')}
-            onReorder={onReorder}
+            // One account: one solid path and nothing to move.
+            reorderHint={reorderable ? t('routing.reorder_hint') : undefined}
+            onReorder={reorderable ? onReorder : undefined}
             reorderDisabled={saving}
             destinationLabel={(card, place) =>
               t('routing.card_label', {
-                rank: t(rankKey(card.account, place, model.shared)),
+                rank: rank(card.account, place),
                 account: card.account.label,
                 status: [statusText(card.account), quotaText(card.account)]
                   .filter(Boolean)
@@ -137,7 +162,7 @@ export function RoutingHero({
                   className={styles.rank}
                   data-first={place === 0 && !model.shared && card.account.role === 'active'}
                 >
-                  {t(rankKey(card.account, place, model.shared))}
+                  {rank(card.account, place)}
                 </span>
                 <span className={styles.accountName}>{card.account.label}</span>
                 <StatusDot tone={healthTone(card.account)} label={statusText(card.account)} />
@@ -157,7 +182,7 @@ export function RoutingHero({
       )}
 
       {model.off.length > 0 && (
-        <ul className={styles.offList} aria-label={t('routing.off_list_label')}>
+        <ul className={styles.offList} aria-label={t('routing.off_list_label', { provider: name })}>
           {model.off.map((account) => (
             <li key={account.id}>
               <span className={styles.offRank}>{t('routing.rank.off')}</span>
@@ -168,17 +193,17 @@ export function RoutingHero({
         </ul>
       )}
 
-      {cards.length > 0 && (
+      {(cards.length > 1 || simulateOut !== null) && (
         <div className={styles.below}>
           <p className={styles.hint}>
             <span>
-              {hint
-                ? text(hint.copy)
-                : cards.length > 1
-                  ? t('routing.hint.drag')
-                  : t('routing.hint.single')}
+              {fixed
+                ? t('routing.fixed_note', { provider: name })
+                : hint
+                  ? text(hint.copy)
+                  : t('routing.hint.drag')}
             </span>
-            {hint?.account && (
+            {reorderable && hint?.account && (
               <button
                 type="button"
                 className={styles.textButton}
@@ -190,7 +215,8 @@ export function RoutingHero({
             )}
           </p>
           <div className={styles.actionsRow}>
-            {first && cards.length > 1 && (simulateOut || first.role === 'active') && (
+            {/* "End preview" stays reachable whenever a preview is on. */}
+            {first && (simulateOut !== null || (cards.length > 1 && first.role === 'active')) && (
               <button
                 type="button"
                 className={styles.textButton}
@@ -209,24 +235,14 @@ export function RoutingHero({
         </div>
       )}
 
-      <div className={styles.footnotes}>
-        {routes !== null && (
+      {routes !== null && (
+        <div className={styles.footnotes}>
           <p data-problem={clients.problem}>
             <DeviceGlyph />
             <span>{clients.copies.map(text).join(' ')}</span>
           </p>
-        )}
-        {otherLine && (
-          <p>
-            <span className={styles.otherMark} aria-hidden="true">
-              ◇
-            </span>
-            <span>{text(otherLine)}</span>
-          </p>
-        )}
-      </div>
-
-      {notices ? <div className={styles.notices}>{notices}</div> : null}
-    </>
+        </div>
+      )}
+    </section>
   );
 }

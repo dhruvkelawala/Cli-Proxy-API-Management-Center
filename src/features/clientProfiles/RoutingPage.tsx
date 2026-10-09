@@ -2,7 +2,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { MoreDisclosure } from '@/components/flow';
+import { MoreDisclosure, PageHeader } from '@/components/flow';
 import { usePageTransitionLayer } from '@/components/common/PageTransitionLayer';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
@@ -29,11 +29,11 @@ import { FailureNotice } from './components/Notices';
 import { QuietNotice } from './routing/QuietNotice';
 import { PolicySheet } from './components/PolicySheet';
 import { ProfileSheet } from './components/ProfileSheet';
-import { RoutingHero } from './routing/RoutingHero';
+import { RoutingSection } from './routing/RoutingSection';
 import { RoutingMore } from './routing/RoutingMore';
 import {
   describeClientRoutes,
-  otherProviderLine,
+  describeServing,
   profilesSupportNoticeKey,
 } from './routing/routingOrder';
 import { useRoutingOrder } from './routing/useRoutingOrder';
@@ -51,9 +51,20 @@ type SheetState =
 
 let sheetSequence = 0;
 
+/** No accounts at all: the page-level "nothing to route yet" sentence. */
+const EMPTY_MODEL = {
+  order: [],
+  off: [],
+  serving: [],
+  sameLevel: true,
+  shared: false,
+  tie: false,
+} satisfies Parameters<typeof describeServing>[0];
+
 /**
- * Routing (#/client-routes): who goes first for Claude, who is the backup, and whether every
- * client follows that order. Reordering writes real account priorities. Rare settings (shared
+ * Routing (#/client-routes): one section per provider that has accounts (Claude, then Codex,
+ * then the rest): who goes first, who is the backup, and whether every client follows that
+ * order. Reordering writes real account priorities. Rare settings (shared
  * strategy, session affinity, weights, per-client locks, client keys) live under one More.
  */
 export function RoutingPage() {
@@ -66,7 +77,7 @@ export function RoutingPage() {
   const load = useClientProfilesStore((state) => state.load);
   const apiBase = useAuthStore((state) => state.apiBase);
   const routing = useRoutingOrder();
-  const { files, strategy, apiKeys, wsAuth, refresh, model, filesFailed, reloadFiles } = routing;
+  const { files, strategy, apiKeys, wsAuth, refresh, sections, filesFailed, reloadFiles } = routing;
   const unsupportedReason = useClientProfilesStore((state) => state.unsupportedReason);
 
   const [contextVersion, setContextVersion] = useState(0);
@@ -125,25 +136,30 @@ export function RoutingPage() {
 
   const profilesReady = status === 'ready' && snapshot !== null && capabilities !== null;
   const enforced = capabilities ? capabilities.enforcement : null;
-  // Resolved even when the Accounts list failed: More's clients and keys must stay usable.
+  // Each section's clients line, from each profile's rule for that provider.
+  const routesFor = useCallback(
+    (provider: string, accounts: Parameters<typeof describeClientRoutes>[2]) =>
+      profilesReady && snapshot
+        ? describeClientRoutes(snapshot, provider, accounts, enforced)
+        : null,
+    [enforced, profilesReady, snapshot]
+  );
+  // More's per-client rules: resolved even when the Accounts list failed, so clients and keys
+  // stay usable.
+  const claudeSection = sections?.find((section) => section.provider === 'claude');
   const routes = useMemo(
     () =>
-      profilesReady && snapshot
-        ? describeClientRoutes(
-            snapshot,
-            'claude',
-            model ? [...model.order, ...model.off] : [],
-            enforced
-          )
-        : null,
-    [enforced, model, profilesReady, snapshot]
+      routesFor(
+        'claude',
+        claudeSection ? [...claudeSection.model.order, ...claudeSection.model.off] : []
+      ),
+    [claudeSection, routesFor]
   );
   const hasLockedRule = Boolean(
     snapshot?.profiles.some((profile) =>
       CLIENT_PROFILE_PROVIDERS.some((provider) => profile.policies[provider].mode !== 'automatic')
     )
   );
-  const otherLine = useMemo(() => (files ? otherProviderLine(files, 'codex') : null), [files]);
 
   const openRule = (profileRef: string, provider: ClientProfileProvider) =>
     setSheet({ kind: 'policy', profileRef, provider, open: true, id: (sheetSequence += 1) });
@@ -209,31 +225,38 @@ export function RoutingPage() {
 
   return (
     <div className={styles.page}>
-      {model ? (
-        <RoutingHero
-          notices={notices}
-          model={model}
-          routes={routes}
-          otherLine={otherLine}
-          hubLabel={t('routing.hub')}
-          saving={routing.saving}
-          simulateOut={routing.simulateOut}
-          formatWhen={routing.formatWhen}
-          joinNames={routing.joinNames}
-          onReorder={(ids) => void routing.setOrder(ids)}
-          onPreview={routing.setSimulateOut}
+      {sections === null ? (
+        !filesFailed && (
+          <div className={styles.loading} role="status">
+            <LoadingSpinner size={18} />
+            <span>{t('routing.loading')}</span>
+          </div>
+        )
+      ) : sections.length === 0 ? (
+        <PageHeader
+          title={t(describeServing(EMPTY_MODEL, routing.joinNames, routing.formatWhen).title.key)}
+          subtitle={t('routing.follow_empty')}
         />
       ) : (
-        <>
-          {!filesFailed && (
-            <div className={styles.loading} role="status">
-              <LoadingSpinner size={18} />
-              <span>{t('routing.loading')}</span>
-            </div>
-          )}
-          <div className={styles.notices}>{notices}</div>
-        </>
+        sections.map((section, index) => (
+          <RoutingSection
+            key={section.provider}
+            provider={section.provider}
+            name={section.name}
+            primary={index === 0}
+            model={section.model}
+            routes={routesFor(section.provider, [...section.model.order, ...section.model.off])}
+            hubLabel={t('routing.hub')}
+            saving={section.saving}
+            simulateOut={section.simulateOut}
+            formatWhen={routing.formatWhen}
+            joinNames={routing.joinNames}
+            onReorder={(ids) => void routing.setOrder(section.provider, ids)}
+            onPreview={(accountId) => routing.setPreview(section.provider, accountId)}
+          />
+        ))
       )}
+      <div className={styles.notices}>{notices}</div>
 
       <div className={styles.moreWrap}>
         <MoreDisclosure
