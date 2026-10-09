@@ -17,6 +17,8 @@ export interface AttemptLike {
   url?: string;
   status?: 'idle' | 'waiting' | 'success' | 'error';
   polling?: boolean;
+  /** Increasing number stamped when the attempt starts; later attempts win the headline. */
+  startedAt?: number;
 }
 
 export const splitOAuthProviders = <T extends { id: string }>(cards: ReadonlyArray<T>) => ({
@@ -24,10 +26,16 @@ export const splitOAuthProviders = <T extends { id: string }>(cards: ReadonlyArr
   other: cards.filter((card) => !PRIMARY_OAUTH_PROVIDERS.includes(card.id)),
 });
 
-/** A sign-in that still needs the user (a link to open, a callback to paste, an error to read). */
-export const attemptNeedsUser = (state: AttemptLike | undefined): boolean =>
+/**
+ * A sign-in still under way (preparing, or waiting for the browser). An error or a finished
+ * sign-in is not pending: it can be read or dismissed without holding More open.
+ */
+export const attemptPending = (state: AttemptLike | undefined): boolean =>
   Boolean(
-    state && (state.url || state.polling || state.status === 'waiting' || state.status === 'error')
+    state &&
+    state.status !== 'error' &&
+    state.status !== 'success' &&
+    (state.polling || state.status === 'waiting')
   );
 
 export const stepOf = (state: AttemptLike | undefined): OAuthStep => {
@@ -39,14 +47,6 @@ export const stepOf = (state: AttemptLike | undefined): OAuthStep => {
   return 'idle';
 };
 
-const PRIORITY: Record<OAuthStep, number> = {
-  added: 4,
-  failed: 3,
-  signin: 2,
-  browser: 1,
-  idle: 0,
-};
-
 export interface OAuthHeadline {
   title: Copy;
   subtitle: Copy;
@@ -56,18 +56,31 @@ export interface OAuthHeadline {
 }
 
 /**
- * "Sign in a new account." until a sign-in starts; then the step it is on. With several at once,
- * the most decisive wins: added, then failed, then waiting in the browser.
+ * "Sign in a new account." until a sign-in starts; then the step it is on. With several, a sign-in
+ * still under way wins over a finished or failed one, and among equals the latest started wins,
+ * so an old result never hides what the user is doing now.
  */
 export function describeOAuth(
   states: Readonly<Record<string, AttemptLike | undefined>>,
   nameOf: (provider: string) => string
 ): OAuthHeadline {
-  let focus: { provider: string; step: OAuthStep } | null = null;
+  let focus: { provider: string; step: OAuthStep; active: boolean; at: number } | null = null;
   for (const [provider, state] of Object.entries(states)) {
     const step = stepOf(state);
     if (step === 'idle') continue;
-    if (!focus || PRIORITY[step] > PRIORITY[focus.step]) focus = { provider, step };
+    const candidate = {
+      provider,
+      step,
+      active: step === 'browser' || step === 'signin',
+      at: state?.startedAt ?? 0,
+    };
+    if (
+      !focus ||
+      (candidate.active && !focus.active) ||
+      (candidate.active === focus.active && candidate.at > focus.at)
+    ) {
+      focus = candidate;
+    }
   }
   if (!focus) {
     return {

@@ -20,7 +20,7 @@ import {
 import type { PluginListEntry } from '@/types';
 import { createOAuthAttempts, type OAuthAttempt } from './oauthAttempts';
 import { validateDevinCallback } from './devinOAuth';
-import { attemptNeedsUser, describeOAuth, splitOAuthProviders, type OAuthStep } from './oauthFlow';
+import { attemptPending, describeOAuth, splitOAuthProviders, type OAuthStep } from './oauthFlow';
 import styles from './OAuthPage.module.scss';
 import iconMeta from '@/assets/icons/meta.svg';
 import iconCodex from '@/assets/icons/codex.svg';
@@ -35,6 +35,8 @@ import iconDevin from '@/assets/icons/devin.svg';
 import iconDevinDark from '@/assets/icons/devin-dark.svg';
 
 interface ProviderState {
+  /** Increasing per attempt, so the headline follows the latest sign-in. */
+  startedAt?: number;
   url?: string;
   userCode?: string;
   state?: string;
@@ -290,6 +292,7 @@ export function OAuthPage() {
     })
   );
   const vertexFileInputRef = useRef<HTMLInputElement | null>(null);
+  const attemptSeq = useRef(0);
 
   const clearTimers = useCallback(() => {
     attempts.current.invalidateAll();
@@ -351,6 +354,12 @@ export function OAuthPage() {
     provider.kind === 'plugin'
       ? provider.title
       : t(`auth_login.flow.names.${getProviderI18nPrefix(provider.id)}`);
+
+  /** One short line per provider; the long description stays as the line's tooltip. */
+  const getProviderLine = (provider: OAuthProviderCard) =>
+    provider.kind === 'plugin'
+      ? t('auth_login.flow.lines.plugin', { name: provider.title })
+      : t(`auth_login.flow.lines.${getProviderI18nPrefix(provider.id)}`);
 
   const getProviderText = (provider: OAuthProviderCard, suffix: string) =>
     provider.kind === 'plugin'
@@ -482,7 +491,9 @@ export function OAuthPage() {
     // explicit cancellation before replacing that Devin session.
     if (provider === 'devin' && states[provider]?.state) return;
     const attempt = attempts.current.begin(provider);
+    attemptSeq.current += 1;
     updateProviderState(provider, {
+      startedAt: attemptSeq.current,
       url: undefined,
       userCode: undefined,
       state: undefined,
@@ -673,10 +684,14 @@ export function OAuthPage() {
     const showKimiSignUp = provider.kind === 'builtin' && ['kimi', 'kimi-ai'].includes(provider.id);
     const canSubmitCallback =
       (provider.kind === 'plugin' || CALLBACK_SUPPORTED.has(provider.id)) && Boolean(state.url);
+    const shortName = getProviderShortName(provider);
     const loginButtonLabel =
       state.status === 'success'
         ? t('auth_login.login_another_account')
-        : getProviderText(provider, 'oauth_button');
+        : t('auth_login.flow.sign_in');
+    // Errors can be dismissed; a Devin session still open on the server is cancelled instead.
+    const canDismiss =
+      state.status === 'error' && !state.polling && !(provider.id === 'devin' && state.state);
     const statusBadgeClassName = [
       'status-badge',
       state.status === 'success' ? 'success' : '',
@@ -697,7 +712,9 @@ export function OAuthPage() {
             <h3 className={styles.providerName} title={getProviderTitleText(provider)}>
               {getProviderShortName(provider)}
             </h3>
-            <p className={styles.providerHint}>{getProviderText(provider, 'oauth_hint')}</p>
+            <p className={styles.providerHint} title={getProviderText(provider, 'oauth_hint')}>
+              {getProviderLine(provider)}
+            </p>
           </div>
           <div className={styles.providerActions}>
             {showKimiSignUp ? (
@@ -720,6 +737,11 @@ export function OAuthPage() {
               onClick={() => startAuth(provider.id)}
               loading={state.polling}
               disabled={provider.id === 'devin' && Boolean(state.state)}
+              aria-label={
+                state.status === 'success'
+                  ? undefined
+                  : t('auth_login.flow.sign_in_with', { name: shortName })
+              }
             >
               {loginButtonLabel}
             </Button>
@@ -843,6 +865,18 @@ export function OAuthPage() {
                   : getProviderText(provider, 'oauth_status_waiting')}
             </div>
           )}
+          {canDismiss && (
+            <div className={styles.successActions}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => resetProviderAttempt(provider.id)}
+                aria-label={t('auth_login.flow.dismiss_named', { name: shortName })}
+              >
+                {t('auth_login.flow.dismiss')}
+              </Button>
+            </div>
+          )}
           {state.status === 'success' && (
             <div className={styles.successActions}>
               <Button variant="secondary" size="sm" onClick={() => navigate('/auth-files')}>
@@ -861,12 +895,9 @@ export function OAuthPage() {
     return card ? getProviderShortName(card) : id;
   };
   const headline = describeOAuth(states, nameOf);
-  const otherNeedsUser = otherProviders.some((provider) => attemptNeedsUser(states[provider.id]));
-  // A chosen-but-not-imported file or an error is a draft: More stays open while it holds one.
-  const vertexBusy =
-    vertexState.loading ||
-    Boolean(vertexState.error) ||
-    (Boolean(vertexState.file) && !vertexState.result);
+  // More is held open only by something under way: a sign-in there, or an import in progress.
+  const otherPending = otherProviders.some((provider) => attemptPending(states[provider.id]));
+  const vertexPending = vertexState.loading;
   const stepIndex: Record<OAuthStep, number> = {
     idle: -1,
     browser: 0,
@@ -895,6 +926,8 @@ export function OAuthPage() {
       <div className={styles.steps}>
         <StepFlow
           label={t('auth_login.flow.steps_label')}
+          failedNote={t('auth_login.flow.step_failed')}
+          doneNote={t('auth_login.flow.step_done')}
           current={stepIndex[headline.step]}
           state={stepState}
           steps={[
@@ -929,7 +962,7 @@ export function OAuthPage() {
             ...otherProviders.map((provider) => getProviderShortName(provider)),
             t('auth_login.flow.vertex_short'),
           ].join(', ')}
-          forcedOpen={otherNeedsUser || vertexBusy}
+          forcedOpen={otherPending || vertexPending}
           forcedNote={t('auth_login.flow.more_forced')}
         >
           <div className={flow.moreBody}>
