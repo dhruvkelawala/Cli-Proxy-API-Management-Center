@@ -16,6 +16,10 @@ export interface StepFlowProps {
   state: StepFlowState;
   /** Accessible name of the list. */
   label: string;
+  /** Shown under a failed step, so failure is said in words, not only by a red cross. */
+  failedNote?: string;
+  /** Read out after a finished step (visually the check says it). */
+  doneNote?: string;
 }
 
 /**
@@ -24,7 +28,7 @@ export interface StepFlowProps {
  * failed one a red cross. Reduced motion keeps the states and drops the dot. The list carries the
  * meaning for assistive technology (`aria-current="step"`); the drawing is decorative.
  */
-export function StepFlow({ steps, current, state, label }: StepFlowProps) {
+export function StepFlow({ steps, current, state, label, failedNote, doneNote }: StepFlowProps) {
   return (
     <ol className={styles.flow} aria-label={label} data-state={state}>
       {steps.map((step, index) => {
@@ -46,7 +50,15 @@ export function StepFlow({ steps, current, state, label }: StepFlowProps) {
                 <span className={styles.core} />
               )}
             </span>
-            <span className={styles.label}>{step.label}</span>
+            <span className={styles.label}>
+              {step.label}
+              {node === 'done' && doneNote ? (
+                <span className={styles.srOnly}>, {doneNote}</span>
+              ) : null}
+            </span>
+            {node === 'failed' && failedNote ? (
+              <span className={styles.failedNote}>{failedNote}</span>
+            ) : null}
             {link ? (
               <span className={styles.connector} data-link={link} aria-hidden="true">
                 {link === 'live' ? <span className={styles.dot} /> : null}

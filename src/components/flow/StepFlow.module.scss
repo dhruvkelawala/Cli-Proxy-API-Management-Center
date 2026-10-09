@@ -83,6 +83,21 @@
   }
 }
 
+.failedNote {
+  margin-top: -6px;
+  font-size: 12px;
+  color: var(--text-operational-danger, var(--danger-color));
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 // From this node's right edge to the next node's left edge.
 .connector {
   position: absolute;
