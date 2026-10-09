@@ -1,8 +1,9 @@
 # Flow design language
 
 The management center is moving, page by page, to one calm style ("Flow"). Routing
-(`#/client-routes`) is the reference implementation. Overview, Accounts and the remaining pages
-follow in later phases and should reuse what is listed here rather than invent new pieces.
+(`#/client-routes`) is the reference implementation; Overview (`#/`), Accounts (`#/auth-files`)
+and Quota (`#/quota`) follow it. The remaining pages follow in later phases and should reuse what
+is listed here rather than invent new pieces.
 
 ## Principles
 
@@ -56,6 +57,9 @@ Existing theme tokens (`src/styles/themes.scss`) stay the source of colour. Flow
 | `StatusDot`      | `StatusDot.tsx`      | A coloured dot (the only colour) plus a plain-language label. Tones: ok, warn, bad, off, unknown.                                                                                                          |
 | `MoreDisclosure` | `MoreDisclosure.tsx` | The page's single "More": a button with `aria-expanded`/`aria-controls`, a labelled region with an animated height, content kept mounted (inert while closed), optional summary and forced-open note.      |
 | `DeviceGlyph`    | `DeviceGlyph.tsx`    | Laptop outline for client sources.                                                                                                                                                                         |
+| `TrafficFlow`    | `TrafficFlow.tsx`    | Gateway → providers → accounts, read-only. Path thickness is the share of traffic in the window; travelling dots are recent volume (none for accounts that cannot serve); red flecks are failures. Nested list for assistive technology, SVG `aria-hidden`. |
+| `trafficLayout`  | `trafficLayout.ts`   | Pure geometry for TrafficFlow (wide three-column and narrow one-column layouts, paths, `strokeFor`, `dotsFor`).                                                                                           |
+| `ActionMenu`     | `ActionMenu.tsx`     | A button that opens a short menu (`aria-haspopup="menu"`, `role="menuitem"`, ↑/↓/Home/End, Escape returns focus). `primary` for a page's one filled action (Accounts' "Add account"), `quiet` for an overflow. |
 
 Related: `usePrefersReducedMotion` (`src/hooks/`), and the sidebar's primary list plus one
 collapsible More group (`src/components/layout/navModel.ts`).
@@ -72,4 +76,19 @@ collapsible More group (`src/components/layout/navModel.ts`).
 ```
 
 Text buttons (underlined with a hairline, indigo when pressed) are the default action style on
-Flow pages; filled buttons are reserved for saving forms inside More or sheets.
+Flow pages; filled buttons are reserved for saving forms inside More or sheets, plus at most one
+primary `ActionMenu` per page.
+
+## Pages
+
+| Page     | Main view                                                                                                    | Under More                                                                                   |
+| -------- | ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| Overview | The state sentence (`describeOverview`), TrafficFlow, 5-hour and weekly rails per account, one line of totals | Throughput chart, gateway settings and versions, links to other pages                        |
+| Accounts | The state sentence, search, provider tabs (only providers with accounts), one row per account, Add account   | Show filter, sort, list/cards, page size, batch selection, model rules, scoped Delete        |
+| Routing  | The order sentence, FlowDiagram of clients → gateway → accounts                                              | Shared strategy, session affinity, per-client rules, client keys                             |
+| Quota    | Per-account quota cards and the windows timeline (only providers with accounts get a tab)                    | Sort                                                                                         |
+
+An account row opens its details sheet, which starts with how the account is doing (status, pool,
+cooldown, quota, pinned clients) and its one-off actions (models, refresh, download, delete).
+Quota outside the Quota page comes from the shared cache through `useAccountQuota`, which re-reads
+anything older than five minutes once per visit (`quotaFreshness`).
