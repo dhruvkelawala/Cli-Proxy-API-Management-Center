@@ -54,8 +54,19 @@ import { isSupportedLanguage } from '@/utils/language';
 import { gatewayDisplayHost } from '@/utils/connection';
 import { getSidebarShortcutLabel, isSidebarToggleShortcut } from '@/utils/sidebarShortcut';
 import type { Theme } from '@/types';
+import {
+  buildSidebarNav,
+  findActiveNavLink,
+  flattenNavItems,
+  readNavMoreOpen,
+  writeNavMoreOpen,
+  type SidebarNavItem,
+  type SidebarIconKey,
+  type SidebarNavLinkItem,
+} from './navModel';
+import { NAV_MORE_LIST_ID, SidebarMoreGroup } from './SidebarMoreGroup';
 
-const sidebarIcons: Record<string, ReactNode> = {
+const sidebarIcons: Record<SidebarIconKey, ReactNode> = {
   dashboard: <IconSidebarDashboard size={18} />,
   quickStart: <IconSidebarQuickStart size={18} />,
   aiProviders: <IconSidebarProviders size={18} />,
@@ -70,40 +81,8 @@ const sidebarIcons: Record<string, ReactNode> = {
   system: <IconSidebarSystem size={18} />,
 };
 
-interface SidebarNavLinkItem {
-  kind?: 'link';
-  path: string;
-  labelKey?: string;
-  metaKey?: string;
-  label?: string;
-  meta?: string;
-  badge?: number;
-  badgeLabel?: string;
-  icon: ReactNode;
-}
-
-interface SidebarNavDrawerItem {
-  kind: 'drawer';
-  id: string;
-  label: string;
-  meta?: string;
-  icon: ReactNode;
-  children: SidebarNavLinkItem[];
-}
-
-type SidebarNavItem = SidebarNavLinkItem | SidebarNavDrawerItem;
-
 const NAV_TOOLTIP_ID = 'sidebar-nav-tooltip';
 const NAV_TOOLTIP_VIEWPORT_MARGIN = 8;
-
-interface SidebarNavGroup {
-  id: string;
-  labelKey: string;
-  items: SidebarNavItem[];
-}
-
-const flattenNavItems = (items: SidebarNavItem[]): SidebarNavLinkItem[] =>
-  items.flatMap((item) => (item.kind === 'drawer' ? item.children : [item]));
 
 /** 点击菜单外或按下 Escape 时关闭弹出菜单 */
 function useMenuDismiss(
@@ -348,6 +327,12 @@ export function MainLayout() {
     return () => document.removeEventListener('keydown', handleEscape);
   }, [sidebarOpen, closeSidebarRestoringFocus]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [navMoreOpen, setNavMoreOpen] = useState(() =>
+    readNavMoreOpen(typeof window === 'undefined' ? null : window.localStorage)
+  );
+  useEffect(() => {
+    writeNavMoreOpen(typeof window === 'undefined' ? null : window.localStorage, navMoreOpen);
+  }, [navMoreOpen]);
   const [authFilesCount, setAuthFilesCount] = useState<number | null>(null);
   const [railTooltip, setRailTooltip] = useState<{
     targetID: string;
@@ -608,127 +593,20 @@ export function MainLayout() {
     : [];
 
   const isApiKeyFunConfigured = hasApiKeyFunConfig(config);
-  const quickStartNavItem: SidebarNavLinkItem = {
-    path: '/quick-start',
-    label: isApiKeyFunConfigured ? APIKEY_FUN_DISPLAY_NAME : undefined,
-    labelKey: isApiKeyFunConfigured ? undefined : 'nav.quick_start',
-    metaKey: 'nav_meta.quick_start',
-    icon: sidebarIcons.quickStart,
-  };
-
-  const navGroups: SidebarNavGroup[] = [
-    {
-      id: 'operate',
-      labelKey: 'nav_groups.operate',
-      items: [
-        {
-          path: '/',
-          labelKey: 'nav.dashboard',
-          metaKey: 'nav_meta.dashboard',
-          icon: sidebarIcons.dashboard,
-        },
-        ...(!isApiKeyFunConfigured ? [quickStartNavItem] : []),
-      ],
-    },
-    {
-      id: 'gateway',
-      labelKey: 'nav_groups.gateway',
-      items: [
-        {
-          path: '/ai-providers',
-          labelKey: 'nav.ai_providers',
-          metaKey: 'nav_meta.ai_providers',
-          icon: sidebarIcons.aiProviders,
-        },
-        {
-          path: '/auth-files',
-          labelKey: 'nav.auth_files',
-          metaKey: 'nav_meta.auth_files',
-          badge: authFilesCount ?? undefined,
-          badgeLabel:
-            typeof authFilesCount === 'number'
-              ? t('sidebar.auth_files_count', { count: authFilesCount })
-              : undefined,
-          icon: sidebarIcons.authFiles,
-        },
-        {
-          path: '/client-routes',
-          labelKey: 'nav.client_routes',
-          metaKey: 'nav_meta.client_routes',
-          icon: sidebarIcons.clientRoutes,
-        },
-        {
-          path: '/oauth',
-          labelKey: 'nav.oauth',
-          metaKey: 'nav_meta.oauth',
-          icon: sidebarIcons.oauth,
-        },
-        ...(isApiKeyFunConfigured ? [quickStartNavItem] : []),
-      ],
-    },
-    {
-      id: 'observe',
-      labelKey: 'nav_groups.observe',
-      items: [
-        {
-          path: '/quota',
-          labelKey: 'nav.quota_management',
-          metaKey: 'nav_meta.quota_management',
-          icon: sidebarIcons.quota,
-        },
-        {
-          path: '/logs',
-          labelKey: 'nav.logs',
-          metaKey: 'nav_meta.logs',
-          icon: sidebarIcons.logs,
-        },
-      ],
-    },
-    {
-      id: 'control',
-      labelKey: 'nav_groups.control',
-      items: [
-        {
-          path: '/config',
-          labelKey: 'nav.config_management',
-          metaKey: 'nav_meta.config_management',
-          icon: sidebarIcons.config,
-        },
-        ...(supportsPlugin
-          ? [
-              {
-                path: '/plugins',
-                labelKey: 'nav.plugins',
-                metaKey: 'nav_meta.plugins',
-                icon: sidebarIcons.plugins,
-              },
-              {
-                path: '/plugin-store',
-                labelKey: 'nav.plugin_store',
-                metaKey: 'nav_meta.plugin_store',
-                icon: sidebarIcons.pluginStore,
-              },
-            ]
-          : []),
-        {
-          path: '/system',
-          labelKey: 'nav.system_info',
-          metaKey: 'nav_meta.system_info',
-          icon: sidebarIcons.system,
-        },
-      ],
-    },
-    ...(pluginPageNavItems.length > 0
-      ? [
-          {
-            id: 'plugin-pages',
-            labelKey: 'nav_groups.plugin_pages',
-            items: pluginPageNavItems,
-          },
-        ]
-      : []),
-  ];
-  const navItems = navGroups.flatMap((group) => flattenNavItems(group.items));
+  const sidebarNav = buildSidebarNav({
+    icons: sidebarIcons,
+    supportsPlugin,
+    quickStartLabel: isApiKeyFunConfigured ? APIKEY_FUN_DISPLAY_NAME : undefined,
+    authFilesCount,
+    authFilesCountLabel:
+      typeof authFilesCount === 'number'
+        ? t('sidebar.auth_files_count', { count: authFilesCount })
+        : undefined,
+    pluginPageItems: pluginPageNavItems,
+  });
+  // A More page opened while the group is collapsed stays visible under the toggle.
+  const activeMoreLink = findActiveNavLink(sidebarNav.more, location.pathname);
+  const navItems = flattenNavItems([...sidebarNav.primary, ...sidebarNav.more]);
   const navOrder = navItems.map((item) => item.path);
   const getRouteOrder = (pathname: string) => {
     const trimmedPath =
@@ -1198,16 +1076,56 @@ export function MainLayout() {
           </div>
 
           <div className="nav-section">
-            {navGroups.map((group, idx) => (
-              <div className="nav-group" key={group.id}>
-                {showSidebarLabels ? (
-                  <div className="nav-group-label">{t(group.labelKey)}</div>
-                ) : (
-                  idx > 0 && <div className="nav-group-divider" aria-hidden="true" />
-                )}
-                {group.items.map((item) => renderNavItem(item))}
-              </div>
-            ))}
+            <div className="nav-group">{sidebarNav.primary.map((item) => renderNavItem(item))}</div>
+            <SidebarMoreGroup
+              open={navMoreOpen}
+              onToggle={() => setNavMoreOpen((open) => !open)}
+              showLabels={showSidebarLabels}
+              label={t('nav.more')}
+              items={sidebarNav.more}
+              activeLink={activeMoreLink}
+              renderItem={renderNavItem}
+              renderLink={(item) => renderNavLink(item)}
+              describedBy={
+                !showSidebarLabels && railTooltip?.targetID === NAV_MORE_LIST_ID
+                  ? NAV_TOOLTIP_ID
+                  : undefined
+              }
+              onMouseEnter={
+                showSidebarLabels
+                  ? undefined
+                  : (event) =>
+                      handleRailTooltipMouseEnter(
+                        event,
+                        NAV_MORE_LIST_ID,
+                        t('nav.more'),
+                        t('nav_meta.more')
+                      )
+              }
+              onMouseLeave={showSidebarLabels ? undefined : handleRailTooltipMouseLeave}
+              onFocus={
+                showSidebarLabels
+                  ? undefined
+                  : (event) =>
+                      handleRailTooltipFocus(
+                        event,
+                        NAV_MORE_LIST_ID,
+                        t('nav.more'),
+                        t('nav_meta.more')
+                      )
+              }
+              onBlur={
+                showSidebarLabels
+                  ? undefined
+                  : (event) =>
+                      handleRailTooltipBlur(
+                        event,
+                        NAV_MORE_LIST_ID,
+                        t('nav.more'),
+                        t('nav_meta.more')
+                      )
+              }
+            />
           </div>
         </aside>
 

@@ -101,14 +101,17 @@
     "quick_start": "Быстрый старт",
     "ai_providers": "Поставщики AI",
     "auth_files": "Аккаунты",
-    "client_routes": "Маршруты клиентов",
+    "client_routes": "Маршрутизация",
     "oauth": "OAuth вход",
     "quota_management": "Управление квотами",
     "plugins": "Плагины",
     "plugin_store": "Магазин плагинов",
     "config_management": "Панель конфигурации",
     "logs": "Просмотр логов",
-    "system_info": "Информация системы"
+    "system_info": "Информация системы",
+    "overview": "Обзор",
+    "quota": "Квота",
+    "more": "Ещё"
   },
   "nav_groups": {
     "operate": "Работа",
@@ -121,14 +124,15 @@
     "quick_start": "Настройка APIKEY.FUN",
     "ai_providers": "Маршрутизация моделей",
     "auth_files": "Аккаунты и учётные данные",
-    "client_routes": "Подписка для каждого клиента",
+    "client_routes": "Кто первый, кто запасной",
     "oauth": "Авторизация OAuth",
     "quota_management": "API ключи и лимиты",
     "plugins": "Переключатели и ресурсы плагинов",
     "plugin_store": "Поиск и установка плагинов",
     "logs": "Трассировка запросов",
     "config_management": "Базовая конфигурация шлюза",
-    "system_info": "Состояние и диагностика"
+    "system_info": "Состояние и диагностика",
+    "more": "Настройка, журналы, конфигурация и система"
   },
   "dashboard": {
     "hero_verdict_good": "Всё стабильно",

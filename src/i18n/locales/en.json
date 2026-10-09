@@ -101,14 +101,17 @@
     "quick_start": "Quick Start",
     "ai_providers": "AI Providers",
     "auth_files": "Accounts",
-    "client_routes": "Client routes",
+    "client_routes": "Routing",
     "oauth": "OAuth Login",
     "quota_management": "Quota Management",
     "plugins": "Plugins",
     "plugin_store": "Plugin Store",
     "config_management": "Config Panel",
     "logs": "Logs Viewer",
-    "system_info": "Management Center Info"
+    "system_info": "Management Center Info",
+    "overview": "Overview",
+    "quota": "Quota",
+    "more": "More"
   },
   "nav_groups": {
     "operate": "Operate",
@@ -122,14 +125,15 @@
     "quick_start": "APIKEY.FUN setup",
     "ai_providers": "Upstream model routing",
     "auth_files": "Accounts & credentials",
-    "client_routes": "Subscription per client",
+    "client_routes": "Who goes first, who is the backup",
     "oauth": "OAuth authorization",
     "quota_management": "API keys & limits",
     "plugins": "Plugin toggles & config",
     "plugin_store": "Discover & install plugins",
     "logs": "Request tracing",
     "config_management": "Gateway configuration",
-    "system_info": "Runtime & diagnostics"
+    "system_info": "Runtime & diagnostics",
+    "more": "Setup, logs, config and system"
   },
   "dashboard": {
     "hero_verdict_good": "All systems steady",

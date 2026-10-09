@@ -101,14 +101,17 @@
     "quick_start": "快速開始",
     "ai_providers": "AI 供應商",
     "auth_files": "帳號",
-    "client_routes": "用戶端路由",
+    "client_routes": "路由",
     "oauth": "OAuth 登入",
     "quota_management": "配額管理",
     "plugins": "插件管理",
     "plugin_store": "插件商店",
     "config_management": "設定面板",
     "logs": "記錄檢視",
-    "system_info": "中心資訊"
+    "system_info": "中心資訊",
+    "overview": "概覽",
+    "quota": "額度",
+    "more": "更多"
   },
   "nav_groups": {
     "operate": "運行",
@@ -122,14 +125,15 @@
     "quick_start": "APIKEY.FUN 快速設定",
     "ai_providers": "上游模型路由",
     "auth_files": "帳號與憑證",
-    "client_routes": "為每個用戶端選擇訂閱",
+    "client_routes": "誰先用，誰做備用",
     "oauth": "OAuth 授權登入",
     "quota_management": "API Key 與限額",
     "plugins": "插件啟停與設定",
     "plugin_store": "探索並安裝插件",
     "logs": "請求追蹤與排查",
     "config_management": "閘道基礎設定",
-    "system_info": "運行與診斷資訊"
+    "system_info": "運行與診斷資訊",
+    "more": "設定、日誌、配置與系統"
   },
   "dashboard": {
     "hero_verdict_good": "運行平穩",

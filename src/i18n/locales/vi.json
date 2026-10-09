@@ -101,14 +101,17 @@
     "quick_start": "Bắt đầu nhanh",
     "ai_providers": "AI Provider",
     "auth_files": "Tài khoản",
-    "client_routes": "Định tuyến máy khách",
+    "client_routes": "Định tuyến",
     "oauth": "Đăng nhập OAuth",
     "quota_management": "Quản lý Quota",
     "plugins": "Plugin",
     "plugin_store": "Cửa hàng Plugin",
     "config_management": "Bảng cấu hình",
     "logs": "Trình xem Log",
-    "system_info": "Thông tin Trung tâm Quản lý"
+    "system_info": "Thông tin Trung tâm Quản lý",
+    "overview": "Tổng quan",
+    "quota": "Hạn mức",
+    "more": "Thêm"
   },
   "nav_groups": {
     "operate": "Vận hành",
@@ -122,14 +125,15 @@
     "quick_start": "Thiết lập APIKEY.FUN",
     "ai_providers": "Định tuyến model upstream",
     "auth_files": "Tài khoản & credential",
-    "client_routes": "Gói đăng ký cho từng máy khách",
+    "client_routes": "Ai dùng trước, ai dự phòng",
     "oauth": "Ủy quyền OAuth",
     "quota_management": "API key & giới hạn",
     "plugins": "Bật/tắt & cấu hình plugin",
     "plugin_store": "Khám phá & cài đặt plugin",
     "logs": "Truy vết yêu cầu",
     "config_management": "Cấu hình gateway",
-    "system_info": "Runtime & chẩn đoán"
+    "system_info": "Runtime & chẩn đoán",
+    "more": "Thiết lập, nhật ký, cấu hình và hệ thống"
   },
   "dashboard": {
     "hero_verdict_good": "Mọi hệ thống ổn định",

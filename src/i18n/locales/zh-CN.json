@@ -101,14 +101,17 @@
     "quick_start": "快速开始",
     "ai_providers": "AI 提供商",
     "auth_files": "账号",
-    "client_routes": "客户端路由",
+    "client_routes": "路由",
     "oauth": "OAuth 登录",
     "quota_management": "配额管理",
     "plugins": "插件管理",
     "plugin_store": "插件商店",
     "config_management": "配置面板",
     "logs": "日志查看",
-    "system_info": "中心信息"
+    "system_info": "中心信息",
+    "overview": "概览",
+    "quota": "额度",
+    "more": "更多"
   },
   "nav_groups": {
     "operate": "运行",
@@ -122,14 +125,15 @@
     "quick_start": "快速配置",
     "ai_providers": "上游模型路由",
     "auth_files": "账号与凭证",
-    "client_routes": "为每个客户端选择订阅",
+    "client_routes": "谁先用，谁做备用",
     "oauth": "OAuth 授权登录",
     "quota_management": "API Key 与限额",
     "plugins": "插件启停与配置",
     "plugin_store": "发现并安装插件",
     "logs": "请求追踪与排查",
     "config_management": "网关基础配置",
-    "system_info": "运行与诊断信息"
+    "system_info": "运行与诊断信息",
+    "more": "设置、日志、配置与系统"
   },
   "dashboard": {
     "hero_verdict_good": "运行平稳",

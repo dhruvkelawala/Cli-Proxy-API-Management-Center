@@ -588,6 +588,94 @@
     transform: rotate(180deg);
   }
 
+  // One collapsible "More" group under the primary pages (src/styles/DESIGN.md).
+  .nav-more {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1px solid color-mix(in srgb, var(--border-color) 60%, transparent);
+  }
+
+  .nav-more-toggle {
+    width: 100%;
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+
+    &:hover {
+      color: var(--text-primary);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--accent-indigo);
+      outline-offset: 1px;
+    }
+
+    .nav-drawer-caret {
+      transform: rotate(-90deg);
+    }
+
+    &.open .nav-drawer-caret {
+      transform: none;
+    }
+  }
+
+  // Animated height without measuring: 0fr → 1fr.
+  .nav-more-list {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 280ms var(--ease-out-strong);
+
+    &[data-open='true'] {
+      grid-template-rows: 1fr;
+    }
+  }
+
+  .nav-more-inner {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    min-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 180ms var(--ease-out-strong),
+      visibility 0s linear 280ms;
+  }
+
+  // Rare pages read one step quieter than the primary list.
+  .nav-more-inner .nav-item:not(.active) {
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .nav-more-list[data-open='true'] > .nav-more-inner {
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity 240ms var(--ease-out-strong) 40ms,
+      visibility 0s;
+  }
+
+  .nav-more-pinned {
+    display: flex;
+    flex-direction: column;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-more-list,
+    .nav-more-inner,
+    .nav-more-list[data-open='true'] > .nav-more-inner {
+      transition: none;
+    }
+  }
+
   .nav-sub-list {
     display: flex;
     flex-direction: column;
@@ -936,6 +1024,8 @@
     z-index: $z-dropdown;
     width: var(--sidebar-panel-width);
     height: auto;
+    /* The floating header (menu button and tools) stays above the drawer: start below it. */
+    padding-top: calc(var(--header-height, 64px) + 4px);
     transform: translateX(calc(-100% - 24px));
     /* The closed drawer is off-screen: keep its links out of the tab order and the a11y tree
        (hidden only after the slide-out finishes). */
@@ -967,7 +1057,7 @@
 
     &.collapsed {
       width: var(--sidebar-panel-width);
-      padding: 14px 10px;
+      padding: calc(var(--header-height, 64px) + 4px) 10px 14px;
 
       .sidebar-brand,
       .nav-item {
