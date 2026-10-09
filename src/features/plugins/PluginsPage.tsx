@@ -493,8 +493,6 @@ export function PluginsPage() {
     total: pluginStats.discovered,
     running: pluginStats.effective,
   });
-  const searching = filter.trim().length > 0;
-
   const toolbar = (
     <div className={styles.toolbar}>
       <Input
@@ -538,7 +536,7 @@ export function PluginsPage() {
         <p className={flow.note}>{t('plugin_management.global_disabled_hint')}</p>
       ) : null}
 
-      <div className={flow.lead} />
+      <div className={`${flow.lead} ${styles.searchSlot}`}>{toolbar}</div>
 
       {/* ── Plugin List ── */}
       {loading ? (
@@ -695,14 +693,8 @@ export function PluginsPage() {
           summary={t('plugin_management.flow.more_summary', {
             dir: data?.pluginsDir || 'plugins',
           })}
-          forcedOpen={searching}
-          forcedNote={t('plugin_management.flow.more_forced')}
         >
           <div className={flow.moreBody}>
-            <section className={flow.moreSection}>
-              <h3 className={flow.sectionLabel}>{t('plugin_management.flow.find_title')}</h3>
-              {toolbar}
-            </section>
             {data ? (
               <section className={flow.moreSection}>
                 <h3 className={flow.sectionLabel}>{t('plugin_management.flow.runtime_title')}</h3>

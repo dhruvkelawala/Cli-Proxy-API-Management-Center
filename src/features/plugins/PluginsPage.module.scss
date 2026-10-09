@@ -646,7 +646,9 @@
 }
 
 .iconLink {
-  min-height: 0;
+  // Quiet, but still a 24px target.
+  min-width: 24px;
+  min-height: 24px;
   width: auto;
   border: 0;
   background: none;
@@ -667,4 +669,8 @@
 
 .toolbar :global(.form-group) {
   max-width: none;
+}
+
+.searchSlot {
+  margin-bottom: 16px;
 }

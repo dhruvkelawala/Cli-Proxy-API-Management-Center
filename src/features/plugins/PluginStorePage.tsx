@@ -992,8 +992,6 @@ export function PluginStorePage() {
     installed: stats.installed,
     updates: stats.updates,
   });
-  const searching = filter.trim().length > 0;
-
   return (
     <div className={`${flow.page} ${styles.page}`}>
       <PageHeader
@@ -1063,7 +1061,18 @@ export function PluginStorePage() {
         </p>
       ) : null}
 
-      <div className={flow.lead} />
+      <div className={`${flow.lead} ${styles.searchSlot}`}>
+        <div className={styles.toolbar}>
+          <Input
+            type="search"
+            value={filter}
+            onChange={(event) => setFilter(event.target.value)}
+            placeholder={t('plugin_store.search_placeholder')}
+            aria-label={t('plugin_store.search_label')}
+            rightElement={<IconSearch size={16} />}
+          />
+        </div>
+      </div>
 
       {/* ── Status Filter Chips ── */}
       <div className={styles.filterChips} role="group" aria-label={t('plugin_store.filter_label')}>
@@ -1143,23 +1152,8 @@ export function PluginStorePage() {
         <MoreDisclosure
           label={t('plugin_store.flow.more')}
           summary={t('plugin_store.flow.more_summary', { dir: data?.pluginsDir || 'plugins' })}
-          forcedOpen={searching}
-          forcedNote={t('plugin_store.flow.more_forced')}
         >
           <div className={flow.moreBody}>
-            <section className={flow.moreSection}>
-              <h3 className={flow.sectionLabel}>{t('plugin_store.flow.find_title')}</h3>
-              <div className={styles.toolbar}>
-                <Input
-                  type="search"
-                  value={filter}
-                  onChange={(event) => setFilter(event.target.value)}
-                  placeholder={t('plugin_store.search_placeholder')}
-                  aria-label={t('plugin_store.search_label')}
-                  rightElement={<IconSearch size={16} />}
-                />
-              </div>
-            </section>
             {data ? (
               <section className={flow.moreSection}>
                 <h3 className={flow.sectionLabel}>{t('plugin_store.flow.runtime_title')}</h3>
