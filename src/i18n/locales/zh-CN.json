@@ -65,8 +65,6 @@
     "subtitle": "管理中心"
   },
   "login": {
-    "subtitle": "连接 CLI Proxy API v8 或更高版本",
-    "connection_current": "当前地址",
     "connection_auto_hint": "系统将自动使用当前访问地址进行连接",
     "custom_connection_label": "自定义连接地址:",
     "custom_connection_placeholder": "例如: https://example.com:8317",
@@ -94,7 +92,9 @@
       "subtitle": "正在连接 {{url}}。输入它的管理密钥以继续。",
       "more": "连接",
       "more_forced": "输入自定义地址前会保持展开。"
-    }
+    },
+    "show_key": "显示密钥",
+    "hide_key": "隐藏密钥"
   },
   "header": {
     "refresh_all": "刷新全部",
@@ -684,7 +684,6 @@
     "result_file": "存储文件"
   },
   "oauth_excluded": {
-    "editor_description": "为提供商设置不对外展示的模型，支持精确选择和通配符规则。",
     "models_hint": "展开列表选择模型，或在下方输入通配符规则。",
     "title": "OAuth 模型禁用",
     "description": "按提供商分列展示，点击卡片编辑或删除；支持 * 通配符，范围跟随上方的配置文件过滤标签。",
@@ -752,7 +751,6 @@
     "rules_reserved": "“*” 会停用整个 provider，请改用「已停用」开关"
   },
   "oauth_model_alias": {
-    "editor_description": "为提供商的模型设置调用别名，统一客户端使用的模型名称。",
     "edit_title": "编辑 {{provider}} 的模型别名",
     "mapping_hint": "选择原模型，并填写客户端使用的别名。",
     "mapping_row": "别名映射 {{number}}",
@@ -1000,6 +998,23 @@
         "antigravity": "Antigravity",
         "xai": "xAI",
         "devin": "Devin"
+      },
+      "sign_in": "登录",
+      "sign_in_with": "使用 {{name}} 登录",
+      "dismiss": "关闭",
+      "dismiss_named": "关闭 {{name}} 的登录结果",
+      "step_failed": "未完成",
+      "step_done": "已完成",
+      "lines": {
+        "anthropic": "使用你的 Claude 账号登录。",
+        "codex": "使用你的 ChatGPT 账号登录 Codex。",
+        "antigravity": "使用你的 Google 账号登录。",
+        "meta": "使用你的 Meta 账号登录，可能需要输入设备码。",
+        "kimi": "使用 kimi.com（国内）账号登录。",
+        "kimi_ai": "使用 kimi.ai（国际）账号登录。",
+        "xai": "使用你的 xAI 账号登录。",
+        "devin": "使用你的 Devin 账号登录。需要 CLI Proxy API v7.3.1 或更高版本；请在五分钟内完成。",
+        "plugin": "通过 {{name}} 插件登录。"
       }
     }
   },
@@ -1033,7 +1048,6 @@
     "clear_search": "清除搜索",
     "reading_enabled": "持续读取",
     "filter_load_more": "展开更多匹配日志",
-    "title": "日志查看",
     "refresh_button": "刷新日志",
     "clear_button": "清空日志",
     "fullscreen_button": "全屏显示",
@@ -1059,10 +1073,8 @@
     "empty_title": "暂无日志记录",
     "empty_desc": "当启用\"日志记录到文件\"功能后，日志将显示在这里",
     "cpa_file_logging_required": "当前连接的是 CPA，日志查看需要先开启“日志记录到文件”。",
-    "cpa_file_logging_required_title": "需要开启文件日志",
     "cpa_file_logging_required_desc": "CPA 的日志接口读取本地日志文件。请在配置中开启 logging-to-file 后再刷新查看。",
     "file_logging_required": "当前日志接口需要先开启“日志记录到文件”后才能读取文件日志。",
-    "file_logging_required_title": "需要开启文件日志",
     "file_logging_required_desc": "当前日志接口读取本地日志文件。请在配置中开启 logging-to-file 后再刷新查看。",
     "log_content": "日志内容",
     "loading": "正在加载日志...",
@@ -1102,7 +1114,6 @@
       "eyebrow": "日志",
       "title_disconnected": "未连接到网关。",
       "title_file_off": "写入日志文件已关闭。",
-      "subtitle_file_off": "网关只显示写入文件的日志。打开“写入日志文件”后再回来。",
       "open_setting": "打开“写入日志文件”设置",
       "title_failed": "无法读取日志。",
       "subtitle_failed": "会自动重试；也可以立即刷新。",
@@ -1119,16 +1130,16 @@
       "subtitle_paused_unread_other": "已加载 {{count}} 行。打开实时读取以跟随新日志。",
       "more": "更多",
       "more_summary": "错误请求日志 · 下载 · 清空",
-      "loaded_title": "已加载的日志"
+      "loaded_title": "已加载的日志",
+      "title_checking": "正在检查是否开启了写入日志文件…",
+      "title_setting_failed": "无法读取日志设置。",
+      "subtitle_setting_failed": "能读取网关配置后才会显示日志。刷新即可重试。",
+      "subtitle_failed_detail": "{{message}} 会自动重试；也可以立即刷新。"
     }
   },
   "config_management": {
     "title": "配置面板",
-    "meta_fields": "{{count}} 项配置",
-    "meta_dirty": "{{count}} 项待保存",
-    "meta_dirty_source": "源码有未保存修改",
     "meta_errors": "{{count}} 项校验错误",
-    "meta_synced": "已同步",
     "actions": {
       "discard": "放弃更改",
       "save": "保存更改"
@@ -1541,7 +1552,6 @@
         "add": "添加 API 密钥",
         "generate": "生成",
         "empty": "暂无 API 密钥",
-        "hint": "每个条目代表一个 API 密钥（与 「API 密钥管理」 页面样式一致）",
         "edit_title": "编辑 API 密钥",
         "add_title": "添加 API 密钥",
         "input_label": "API 密钥",
@@ -1855,7 +1865,6 @@
   },
   "plugin_management": {
     "title": "插件管理",
-    "description": "查看已发现和已注册的插件，管理实例开关、配置字段和资源入口。",
     "refresh": "刷新",
     "load_failed": "加载插件失败",
     "config_load_failed": "读取插件配置失败",
@@ -1927,9 +1936,7 @@
       "subtitle_some": "插件开启并在网关注册后才会运行。",
       "open_store": "插件商店",
       "more": "更多",
-      "more_summary": "搜索 · 目录 {{dir}} · 刷新",
-      "more_forced": "搜索正在筛选列表时会保持展开。",
-      "find_title": "搜索",
+      "more_summary": "目录 {{dir}} · 刷新",
       "runtime_title": "运行状态"
     }
   },
@@ -2045,9 +2052,7 @@
       "subtitle_installed_zero": "还没有安装任何一个。",
       "open_installed": "已安装的插件",
       "more": "更多",
-      "more_summary": "搜索 · 目录 {{dir}} · 刷新",
-      "more_forced": "搜索正在筛选列表时会保持展开。",
-      "find_title": "搜索",
+      "more_summary": "目录 {{dir}} · 刷新",
       "runtime_title": "运行状态"
     }
   },
@@ -2061,8 +2066,6 @@
     "empty_src_desc": "该插件菜单未提供可嵌入的页面地址。"
   },
   "system_info": {
-    "title": "管理中心信息",
-    "about_title": "CLI Proxy API Management Center",
     "models_title": "可用模型列表",
     "models_desc": "展示 /models 返回的模型，并自动使用服务器保存的 API Key 进行鉴权。",
     "models_loading": "正在加载可用模型...",
@@ -2076,7 +2079,6 @@
     "version_current_missing": "未获取到服务器版本号，暂无法比对",
     "version_unknown": "未知",
     "quick_links_title": "快捷链接",
-    "quick_links_desc": "访问项目仓库和文档，获取帮助和更新。",
     "link_main_repo": "主程序仓库",
     "link_main_repo_desc": "CLI Proxy API 核心程序源代码",
     "link_webui_repo": "WebUI 仓库",
@@ -2126,7 +2128,8 @@
     "copy_failed": "复制失败",
     "link_copied": "已复制",
     "copied": "已复制到剪贴板",
-    "action_available": "此消息中可使用「{{action}}」。"
+    "action_available": "此消息中可使用「{{action}}」。",
+    "load_failed": "加载失败"
   },
   "language": {
     "switch": "语言",
@@ -2241,12 +2244,6 @@
         "continue": "继续",
         "continue-and-cooldown": "继续并冷却"
       }
-    },
-    "header": {
-      "title": "AI 提供商",
-      "activeResources": "{{active}}/{{total}} 个活跃资源",
-      "providerFamilies": "{{count}} 个提供商家族",
-      "updatedAt": "更新于 {{time}}"
     },
     "actions": {
       "refresh": "刷新",
@@ -2559,13 +2556,16 @@
       "start_with": "从这里开始",
       "more": "更多",
       "more_all": "全部提供商",
-      "more_summary_one": "{{count}} 个提供商 · 搜索、排序、按模型筛选",
+      "more_summary_one": "{{count}} 个提供商，{{empty}} 个没有密钥 · 搜索、排序、按模型筛选",
       "more_summary_other": "{{count}} 个提供商，{{empty}} 个没有密钥 · 搜索、排序、按模型筛选",
       "more_summary_none": "{{count}} 个提供商 · 搜索、排序、按模型筛选",
       "browse_hint": "网关支持的所有提供商，可搜索、排序并按模型筛选。",
       "sync_title": "同步",
       "sync_hint": "密钥读取自网关配置。",
-      "updated": "读取于 {{time}}"
+      "updated": "读取于 {{time}}",
+      "title_sponsors_one": "已设置 1 个快速填充提供商。",
+      "title_sponsors_other": "已设置 {{count}} 个快速填充提供商。",
+      "subtitle_sponsors": "{{names}}。还没有你自己的 API 密钥。"
     }
   },
   "claude_reset": {

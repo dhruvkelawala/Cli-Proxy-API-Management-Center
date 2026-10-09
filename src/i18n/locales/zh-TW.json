@@ -65,8 +65,6 @@
     "subtitle": "管理中心"
   },
   "login": {
-    "subtitle": "連線至 CLI Proxy API v8 或更新版本",
-    "connection_current": "目前位址",
     "connection_auto_hint": "系統將自動使用目前存取位址進行連線",
     "custom_connection_label": "自訂連線位址:",
     "custom_connection_placeholder": "例如: https://example.com:8317",
@@ -94,7 +92,9 @@
       "subtitle": "正在連線 {{url}}。輸入它的管理金鑰以繼續。",
       "more": "連線",
       "more_forced": "輸入自訂位址前會保持展開。"
-    }
+    },
+    "show_key": "顯示金鑰",
+    "hide_key": "隱藏金鑰"
   },
   "header": {
     "refresh_all": "全部重新整理",
@@ -684,7 +684,6 @@
     "result_file": "儲存檔案"
   },
   "oauth_excluded": {
-    "editor_description": "為供應商設定不對外顯示的模型，支援精確選取和萬用字元規則。",
     "models_hint": "展開清單選取模型，或在下方輸入萬用字元規則。",
     "title": "OAuth 模型停用",
     "description": "按供應商分列展示，點擊卡片編輯或刪除；支援 * 萬用字元，範圍跟隨上方的設定檔篩選標籤。",
@@ -752,7 +751,6 @@
     "rules_reserved": "「*」會停用整個 provider，請改用「已停用」開關"
   },
   "oauth_model_alias": {
-    "editor_description": "為供應商的模型設定呼叫別名，統一用戶端使用的模型名稱。",
     "edit_title": "編輯 {{provider}} 的模型別名",
     "mapping_hint": "選取原模型，並填寫用戶端使用的別名。",
     "mapping_row": "別名對應 {{number}}",
@@ -1026,6 +1024,23 @@
         "antigravity": "Antigravity",
         "xai": "xAI",
         "devin": "Devin"
+      },
+      "sign_in": "登入",
+      "sign_in_with": "使用 {{name}} 登入",
+      "dismiss": "關閉",
+      "dismiss_named": "關閉 {{name}} 的登入結果",
+      "step_failed": "未完成",
+      "step_done": "已完成",
+      "lines": {
+        "anthropic": "使用你的 Claude 帳號登入。",
+        "codex": "使用你的 ChatGPT 帳號登入 Codex。",
+        "antigravity": "使用你的 Google 帳號登入。",
+        "meta": "使用你的 Meta 帳號登入，可能需要輸入裝置碼。",
+        "kimi": "使用 kimi.com（中國）帳號登入。",
+        "kimi_ai": "使用 kimi.ai（國際）帳號登入。",
+        "xai": "使用你的 xAI 帳號登入。",
+        "devin": "使用你的 Devin 帳號登入。需要 CLI Proxy API v7.3.1 或更新版本；請在五分鐘內完成。",
+        "plugin": "透過 {{name}} 外掛登入。"
       }
     }
   },
@@ -1059,7 +1074,6 @@
     "clear_search": "清除搜尋",
     "reading_enabled": "持續讀取",
     "filter_load_more": "展開更多符合的記錄",
-    "title": "記錄檢視",
     "refresh_button": "重新整理記錄",
     "clear_button": "清空記錄",
     "fullscreen_button": "全螢幕顯示",
@@ -1085,10 +1099,8 @@
     "empty_title": "暫無記錄",
     "empty_desc": "當啟用「記錄到檔案」功能後，記錄將顯示在這裡",
     "cpa_file_logging_required": "目前連線的是 CPA，記錄檢視需要先開啟「記錄到檔案」。",
-    "cpa_file_logging_required_title": "需要開啟檔案記錄",
     "cpa_file_logging_required_desc": "CPA 的記錄介面會讀取本機記錄檔。請在設定中開啟 logging-to-file 後再重新整理查看。",
     "file_logging_required": "目前記錄介面需要先開啟「記錄到檔案」後才能讀取檔案記錄。",
-    "file_logging_required_title": "需要開啟檔案記錄",
     "file_logging_required_desc": "目前記錄介面會讀取本機記錄檔。請在設定中開啟 logging-to-file 後再重新整理查看。",
     "log_content": "記錄內容",
     "loading": "正在載入記錄...",
@@ -1128,7 +1140,6 @@
       "eyebrow": "日誌",
       "title_disconnected": "未連線到閘道。",
       "title_file_off": "寫入日誌檔案已關閉。",
-      "subtitle_file_off": "閘道只顯示寫入檔案的日誌。開啟「寫入日誌檔案」後再回來。",
       "open_setting": "開啟「寫入日誌檔案」設定",
       "title_failed": "無法讀取日誌。",
       "subtitle_failed": "會自動重試；也可以立即重新整理。",
@@ -1145,16 +1156,16 @@
       "subtitle_paused_unread_other": "已載入 {{count}} 行。開啟即時讀取以跟隨新日誌。",
       "more": "更多",
       "more_summary": "錯誤請求日誌 · 下載 · 清空",
-      "loaded_title": "已載入的日誌"
+      "loaded_title": "已載入的日誌",
+      "title_checking": "正在檢查是否開啟了寫入日誌檔案…",
+      "title_setting_failed": "無法讀取日誌設定。",
+      "subtitle_setting_failed": "能讀取閘道設定後才會顯示日誌。重新整理即可重試。",
+      "subtitle_failed_detail": "{{message}} 會自動重試；也可以立即重新整理。"
     }
   },
   "config_management": {
     "title": "設定面板",
-    "meta_fields": "{{count}} 項設定",
-    "meta_dirty": "{{count}} 項待儲存",
-    "meta_dirty_source": "原始碼有未儲存修改",
     "meta_errors": "{{count}} 項驗證錯誤",
-    "meta_synced": "已同步",
     "actions": {
       "discard": "放棄變更",
       "save": "儲存變更"
@@ -1567,7 +1578,6 @@
         "add": "新增 API 金鑰",
         "generate": "產生",
         "empty": "暫無 API 金鑰",
-        "hint": "每個條目代表一個 API 金鑰（與「API 金鑰管理」頁面樣式一致）",
         "edit_title": "編輯 API 金鑰",
         "add_title": "新增 API 金鑰",
         "input_label": "API 金鑰",
@@ -1881,7 +1891,6 @@
   },
   "plugin_management": {
     "title": "插件管理",
-    "description": "查看已發現和已註冊的插件，管理實例開關、設定欄位和資源入口。",
     "refresh": "重新整理",
     "load_failed": "載入插件失敗",
     "config_load_failed": "讀取插件設定失敗",
@@ -1953,9 +1962,7 @@
       "subtitle_some": "外掛開啟並在閘道註冊後才會執行。",
       "open_store": "外掛商店",
       "more": "更多",
-      "more_summary": "搜尋 · 目錄 {{dir}} · 重新整理",
-      "more_forced": "搜尋正在篩選清單時會保持展開。",
-      "find_title": "搜尋",
+      "more_summary": "目錄 {{dir}} · 重新整理",
       "runtime_title": "執行狀態"
     }
   },
@@ -2071,9 +2078,7 @@
       "subtitle_installed_zero": "還沒有安裝任何一個。",
       "open_installed": "已安裝的外掛",
       "more": "更多",
-      "more_summary": "搜尋 · 目錄 {{dir}} · 重新整理",
-      "more_forced": "搜尋正在篩選清單時會保持展開。",
-      "find_title": "搜尋",
+      "more_summary": "目錄 {{dir}} · 重新整理",
       "runtime_title": "執行狀態"
     }
   },
@@ -2087,8 +2092,6 @@
     "empty_src_desc": "此插件選單未提供可嵌入的頁面位址。"
   },
   "system_info": {
-    "title": "管理中心資訊",
-    "about_title": "CLI Proxy API Management Center",
     "models_title": "可用模型清單",
     "models_desc": "展示 /models 回傳的模型，並自動使用伺服器儲存的 API Key 進行驗證。",
     "models_loading": "正在載入可用模型...",
@@ -2102,7 +2105,6 @@
     "version_current_missing": "未取得到伺服器版本號，暫無法比對",
     "version_unknown": "未知",
     "quick_links_title": "快速連結",
-    "quick_links_desc": "存取專案儲存庫和文件，取得協助和更新。",
     "link_main_repo": "主程式儲存庫",
     "link_main_repo_desc": "CLI Proxy API 核心程式原始碼",
     "link_webui_repo": "WebUI 儲存庫",
@@ -2152,7 +2154,8 @@
     "copy_failed": "複製失敗",
     "link_copied": "已複製",
     "copied": "已複製到剪貼簿",
-    "action_available": "此訊息中可使用「{{action}}」。"
+    "action_available": "此訊息中可使用「{{action}}」。",
+    "load_failed": "載入失敗"
   },
   "language": {
     "switch": "語言",
@@ -2267,12 +2270,6 @@
         "continue": "繼續",
         "continue-and-cooldown": "繼續並冷卻"
       }
-    },
-    "header": {
-      "title": "AI 提供商",
-      "activeResources": "{{active}}/{{total}} 個活躍資源",
-      "providerFamilies": "{{count}} 個提供商家族",
-      "updatedAt": "更新於 {{time}}"
     },
     "actions": {
       "refresh": "重新整理",
@@ -2585,13 +2582,16 @@
       "start_with": "從這裡開始",
       "more": "更多",
       "more_all": "全部提供商",
-      "more_summary_one": "{{count}} 個提供商 · 搜尋、排序、依模型篩選",
+      "more_summary_one": "{{count}} 個提供商，{{empty}} 個沒有金鑰 · 搜尋、排序、依模型篩選",
       "more_summary_other": "{{count}} 個提供商，{{empty}} 個沒有金鑰 · 搜尋、排序、依模型篩選",
       "more_summary_none": "{{count}} 個提供商 · 搜尋、排序、依模型篩選",
       "browse_hint": "閘道支援的所有提供商，可搜尋、排序並依模型篩選。",
       "sync_title": "同步",
       "sync_hint": "金鑰讀取自閘道設定。",
-      "updated": "讀取於 {{time}}"
+      "updated": "讀取於 {{time}}",
+      "title_sponsors_one": "已設定 1 個快速填入提供商。",
+      "title_sponsors_other": "已設定 {{count}} 個快速填入提供商。",
+      "subtitle_sponsors": "{{names}}。還沒有你自己的 API 金鑰。"
     }
   },
   "claude_reset": {

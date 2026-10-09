@@ -65,8 +65,6 @@
     "subtitle": "Management Center"
   },
   "login": {
-    "subtitle": "Connect to CLI Proxy API v8 or later",
-    "connection_current": "Current URL",
     "connection_auto_hint": "The system will automatically use the current URL for connection",
     "custom_connection_label": "Custom Connection URL:",
     "custom_connection_placeholder": "Eg: https://example.com:8317",
@@ -94,7 +92,9 @@
       "subtitle": "Connecting to {{url}}. Enter its management key to continue.",
       "more": "Connection",
       "more_forced": "Open until a custom address is entered."
-    }
+    },
+    "show_key": "Show key",
+    "hide_key": "Hide key"
   },
   "header": {
     "refresh_all": "Refresh All",
@@ -691,7 +691,6 @@
     "result_file": "Persisted file"
   },
   "oauth_excluded": {
-    "editor_description": "Choose which models a provider exposes using individual selections or wildcard rules.",
     "models_hint": "Expand the list to select models, or enter wildcard rules below.",
     "title": "OAuth Model Disablement",
     "description": "Per-provider model disablement is shown as cards; click a card to edit or delete. Wildcards * are supported and the scope follows the auth file filter.",
@@ -759,7 +758,6 @@
     "rules_reserved": "“*” disables the whole provider — use the Disabled switch instead"
   },
   "oauth_model_alias": {
-    "editor_description": "Give provider models consistent names for use in your clients.",
     "edit_title": "Edit model aliases for {{provider}}",
     "mapping_hint": "Choose a source model, then enter the alias your clients will use.",
     "mapping_row": "Alias mapping {{number}}",
@@ -1007,6 +1005,23 @@
         "antigravity": "Antigravity",
         "xai": "xAI",
         "devin": "Devin"
+      },
+      "sign_in": "Sign in",
+      "sign_in_with": "Sign in with {{name}}",
+      "dismiss": "Dismiss",
+      "dismiss_named": "Dismiss the {{name}} sign-in result",
+      "step_failed": "Didn't finish",
+      "step_done": "done",
+      "lines": {
+        "anthropic": "Sign in with your Claude account.",
+        "codex": "Sign in with your ChatGPT account for Codex.",
+        "antigravity": "Sign in with your Google account.",
+        "meta": "Sign in with your Meta account; you may be asked for a device code.",
+        "kimi": "Sign in with a kimi.com (China) account.",
+        "kimi_ai": "Sign in with a kimi.ai (international) account.",
+        "xai": "Sign in with your xAI account.",
+        "devin": "Sign in with your Devin account. Needs CLI Proxy API v7.3.1 or later; finish within five minutes.",
+        "plugin": "Sign in through the {{name}} plugin."
       }
     }
   },
@@ -1040,7 +1055,6 @@
     "clear_search": "Clear search",
     "reading_enabled": "Continuous reading",
     "filter_load_more": "Show more matching logs",
-    "title": "Logs Viewer",
     "refresh_button": "Refresh Logs",
     "clear_button": "Clear Logs",
     "fullscreen_button": "Full Screen",
@@ -1066,10 +1080,8 @@
     "empty_title": "No Logs Available",
     "empty_desc": "When \"Enable logging to file\" is enabled, logs will be displayed here",
     "cpa_file_logging_required": "The connected runtime is CPA. Log viewing requires logging to file to be enabled first.",
-    "cpa_file_logging_required_title": "File logging is required",
     "cpa_file_logging_required_desc": "CPA reads this log view from local log files. Enable logging-to-file in the config, then refresh.",
     "file_logging_required": "This logs endpoint requires logging to file before file logs can be read.",
-    "file_logging_required_title": "File logging is required",
     "file_logging_required_desc": "This logs endpoint reads local log files. Enable logging-to-file in the config, then refresh.",
     "log_content": "Log Content",
     "loading": "Loading logs...",
@@ -1109,7 +1121,6 @@
       "eyebrow": "Logs",
       "title_disconnected": "Not connected to the gateway.",
       "title_file_off": "Logging to file is off.",
-      "subtitle_file_off": "The gateway only shows logs it writes to a file. Turn on “Log to file”, then come back.",
       "open_setting": "Open the Log to file setting",
       "title_failed": "The logs couldn't be read.",
       "subtitle_failed": "Reading retries on its own; refresh to try now.",
@@ -1126,16 +1137,16 @@
       "subtitle_paused_unread_other": "{{count}} lines loaded. Turn on live reading to follow new lines.",
       "more": "More",
       "more_summary": "Error request logs · download · clear",
-      "loaded_title": "Loaded lines"
+      "loaded_title": "Loaded lines",
+      "title_checking": "Checking whether logging to file is on…",
+      "title_setting_failed": "Couldn't read the logging setting.",
+      "subtitle_setting_failed": "Logs appear once the gateway's configuration can be read. Refresh to try again.",
+      "subtitle_failed_detail": "{{message}} Reading retries on its own; refresh to try now."
     }
   },
   "config_management": {
     "title": "Config Panel",
-    "meta_fields": "{{count}} settings",
-    "meta_dirty": "{{count}} unsaved",
-    "meta_dirty_source": "Unsaved source edits",
     "meta_errors": "{{count}} validation errors",
-    "meta_synced": "In sync",
     "actions": {
       "discard": "Discard changes",
       "save": "Save changes"
@@ -1548,7 +1559,6 @@
         "add": "Add API Key",
         "generate": "Generate",
         "empty": "No API keys",
-        "hint": "Each entry represents an API key (consistent with 'API Key Management' page style)",
         "edit_title": "Edit API Key",
         "add_title": "Add API Key",
         "input_label": "API Key",
@@ -1864,7 +1874,6 @@
   },
   "plugin_management": {
     "title": "Plugin Management",
-    "description": "Review discovered and registered plugins, then manage instance toggles, config fields, and resource links.",
     "refresh": "Refresh",
     "load_failed": "Failed to load plugins",
     "config_load_failed": "Failed to read plugin config",
@@ -1936,9 +1945,7 @@
       "subtitle_some": "A plugin runs once it's on and registered with the gateway.",
       "open_store": "Plugin Store",
       "more": "More",
-      "more_summary": "Search · folder {{dir}} · refresh",
-      "more_forced": "Open while a search filters the list.",
-      "find_title": "Search",
+      "more_summary": "Folder {{dir}} · refresh",
       "runtime_title": "Runtime"
     }
   },
@@ -2054,9 +2061,7 @@
       "subtitle_installed_zero": "None of them are installed yet.",
       "open_installed": "Installed plugins",
       "more": "More",
-      "more_summary": "Search · folder {{dir}} · refresh",
-      "more_forced": "Open while a search filters the list.",
-      "find_title": "Search",
+      "more_summary": "Folder {{dir}} · refresh",
       "runtime_title": "Runtime"
     }
   },
@@ -2070,8 +2075,6 @@
     "empty_src_desc": "This plugin menu does not provide an embeddable page URL."
   },
   "system_info": {
-    "title": "Management Center Info",
-    "about_title": "CLI Proxy API Management Center",
     "models_title": "Available Models",
     "models_desc": "Shows the /models response and uses saved API keys for auth automatically.",
     "models_loading": "Loading available models...",
@@ -2085,7 +2088,6 @@
     "version_current_missing": "Server version is unavailable; cannot compare",
     "version_unknown": "Unknown",
     "quick_links_title": "Quick Links",
-    "quick_links_desc": "Access project repositories and documentation for help and updates.",
     "link_main_repo": "Main Repository",
     "link_main_repo_desc": "CLI Proxy API core program source code",
     "link_webui_repo": "WebUI Repository",
@@ -2135,7 +2137,8 @@
     "copy_failed": "Copy failed",
     "link_copied": "Link copied to clipboard",
     "copied": "Copied to clipboard",
-    "action_available": "{{action}} is available in this message."
+    "action_available": "{{action}} is available in this message.",
+    "load_failed": "Loading failed"
   },
   "language": {
     "switch": "Language",
@@ -2250,12 +2253,6 @@
         "continue": "Continue",
         "continue-and-cooldown": "Continue and cool down"
       }
-    },
-    "header": {
-      "title": "AI Providers",
-      "activeResources": "{{active}}/{{total}} active resources",
-      "providerFamilies": "{{count}} provider families",
-      "updatedAt": "Updated {{time}}"
     },
     "actions": {
       "refresh": "Refresh",
@@ -2568,13 +2565,16 @@
       "start_with": "Start with",
       "more": "More",
       "more_all": "All providers",
-      "more_summary_one": "{{count}} provider · search, sort and filter by model",
+      "more_summary_one": "{{count}} provider, {{empty}} without keys · search, sort and filter by model",
       "more_summary_other": "{{count}} providers, {{empty}} without keys · search, sort and filter by model",
       "browse_hint": "Every provider the gateway supports, with search, sort and a model filter.",
       "sync_title": "Sync",
       "sync_hint": "Keys are read from the gateway's configuration.",
       "updated": "Read at {{time}}",
-      "more_summary_none": "{{count}} providers · search, sort and filter by model"
+      "more_summary_none": "{{count}} providers · search, sort and filter by model",
+      "title_sponsors_one": "1 quick-fill provider set up.",
+      "title_sponsors_other": "{{count}} quick-fill providers set up.",
+      "subtitle_sponsors": "{{names}}. No API keys of your own yet."
     }
   },
   "claude_reset": {

@@ -65,8 +65,6 @@
     "subtitle": "Trung tâm Quản lý"
   },
   "login": {
-    "subtitle": "Vui lòng nhập thông tin kết nối để truy cập giao diện quản lý",
-    "connection_current": "URL hiện tại",
     "connection_auto_hint": "Hệ thống sẽ tự động dùng URL hiện tại để kết nối",
     "custom_connection_label": "URL kết nối tùy chỉnh:",
     "custom_connection_placeholder": "Ví dụ: https://example.com:8317",
@@ -94,7 +92,9 @@
       "subtitle": "Đang kết nối tới {{url}}. Nhập khóa quản lý của nó để tiếp tục.",
       "more": "Kết nối",
       "more_forced": "Luôn mở cho đến khi nhập địa chỉ tùy chỉnh."
-    }
+    },
+    "show_key": "Hiện khóa",
+    "hide_key": "Ẩn khóa"
   },
   "header": {
     "refresh_all": "Làm mới tất cả",
@@ -671,7 +671,6 @@
     "upgrade_required": "Phiên bản CPA hiện tại không hỗ trợ vô hiệu hóa model OAuth. Vui lòng nâng cấp.",
     "upgrade_required_title": "Vui lòng nâng cấp CLI Proxy API",
     "upgrade_required_desc": "Phiên bản máy chủ hiện tại không hỗ trợ lấy danh sách vô hiệu hóa model OAuth. Vui lòng nâng cấp lên phiên bản CPA (CLI Proxy API) mới nhất và thử lại.",
-    "editor_description": "Chọn các model mà provider hiển thị bằng cách chọn riêng lẻ hoặc dùng quy tắc ký tự đại diện (wildcard).",
     "models_hint": "Mở rộng danh sách để chọn model hoặc nhập quy tắc ký tự đại diện bên dưới.",
     "flow": {
       "title_pick": "Chọn nhà cung cấp để ẩn mô hình.",
@@ -776,7 +775,6 @@
     "upgrade_required": "Tính năng này yêu cầu phiên bản CLI Proxy API (CPA) mới hơn. Vui lòng nâng cấp.",
     "upgrade_required_title": "Vui lòng nâng cấp CLI Proxy API",
     "upgrade_required_desc": "Máy chủ hiện tại không hỗ trợ API bí danh model OAuth. Vui lòng nâng cấp lên phiên bản CLI Proxy API (CPA) mới nhất.",
-    "editor_description": "Đặt tên gọi nhất quán cho các model của provider để sử dụng trong client của bạn.",
     "edit_title": "Chỉnh sửa bí danh model cho {{provider}}",
     "mapping_hint": "Chọn model gốc, sau đó nhập bí danh mà client của bạn sẽ dùng.",
     "mapping_row": "Ánh xạ bí danh {{number}}",
@@ -964,6 +962,23 @@
         "antigravity": "Antigravity",
         "xai": "xAI",
         "devin": "Devin"
+      },
+      "sign_in": "Đăng nhập",
+      "sign_in_with": "Đăng nhập bằng {{name}}",
+      "dismiss": "Bỏ qua",
+      "dismiss_named": "Bỏ qua kết quả đăng nhập {{name}}",
+      "step_failed": "Chưa hoàn tất",
+      "step_done": "đã xong",
+      "lines": {
+        "anthropic": "Đăng nhập bằng tài khoản Claude của bạn.",
+        "codex": "Đăng nhập Codex bằng tài khoản ChatGPT của bạn.",
+        "antigravity": "Đăng nhập bằng tài khoản Google của bạn.",
+        "meta": "Đăng nhập bằng tài khoản Meta; có thể cần mã thiết bị.",
+        "kimi": "Đăng nhập bằng tài khoản kimi.com (Trung Quốc).",
+        "kimi_ai": "Đăng nhập bằng tài khoản kimi.ai (quốc tế).",
+        "xai": "Đăng nhập bằng tài khoản xAI của bạn.",
+        "devin": "Đăng nhập bằng tài khoản Devin. Cần CLI Proxy API v7.3.1 trở lên; hoàn tất trong năm phút.",
+        "plugin": "Đăng nhập qua plugin {{name}}."
       }
     }
   },
@@ -977,7 +992,6 @@
     "no_requests": "Không có yêu cầu"
   },
   "logs": {
-    "title": "Trình xem Log",
     "refresh_button": "Làm mới Log",
     "clear_button": "Xóa Log",
     "fullscreen_button": "Toàn màn hình",
@@ -1003,10 +1017,8 @@
     "empty_title": "Chưa có Log",
     "empty_desc": "Khi bật \"Ghi log ra file\", log sẽ hiển thị tại đây",
     "cpa_file_logging_required": "Runtime đang kết nối là CPA. Xem log yêu cầu bật ghi log ra file trước.",
-    "cpa_file_logging_required_title": "Cần bật ghi log ra file",
     "cpa_file_logging_required_desc": "CPA đọc khung xem log này từ file log cục bộ. Hãy bật logging-to-file trong cấu hình rồi làm mới.",
     "file_logging_required": "Endpoint log này cần bật ghi log ra file trước khi đọc được file log.",
-    "file_logging_required_title": "Cần bật ghi log ra file",
     "file_logging_required_desc": "Endpoint log này đọc file log cục bộ. Hãy bật logging-to-file trong cấu hình rồi làm mới.",
     "log_content": "Nội dung Log",
     "loading": "Đang tải log...",
@@ -1066,7 +1078,6 @@
       "eyebrow": "Nhật ký",
       "title_disconnected": "Chưa kết nối với cổng.",
       "title_file_off": "Ghi nhật ký ra tệp đang tắt.",
-      "subtitle_file_off": "Cổng chỉ hiển thị nhật ký mà nó ghi ra tệp. Bật “Ghi nhật ký ra tệp” rồi quay lại.",
       "open_setting": "Mở cài đặt Ghi nhật ký ra tệp",
       "title_failed": "Không đọc được nhật ký.",
       "subtitle_failed": "Việc đọc sẽ tự thử lại; làm mới để thử ngay.",
@@ -1083,16 +1094,16 @@
       "subtitle_paused_unread_other": "Đã tải {{count}} dòng. Bật đọc trực tiếp để theo dõi dòng mới.",
       "more": "Thêm",
       "more_summary": "Nhật ký yêu cầu lỗi · tải xuống · xóa",
-      "loaded_title": "Các dòng đã tải"
+      "loaded_title": "Các dòng đã tải",
+      "title_checking": "Đang kiểm tra việc ghi nhật ký ra tệp…",
+      "title_setting_failed": "Không đọc được cài đặt nhật ký.",
+      "subtitle_setting_failed": "Nhật ký sẽ hiện khi đọc được cấu hình của cổng. Làm mới để thử lại.",
+      "subtitle_failed_detail": "{{message}} Việc đọc sẽ tự thử lại; làm mới để thử ngay."
     }
   },
   "config_management": {
     "title": "Bảng cấu hình",
-    "meta_fields": "{{count}} cài đặt",
-    "meta_dirty": "{{count}} chưa lưu",
-    "meta_dirty_source": "Chỉnh sửa nguồn chưa lưu",
     "meta_errors": "{{count}} lỗi xác thực",
-    "meta_synced": "Đã đồng bộ",
     "actions": {
       "discard": "Hủy thay đổi",
       "save": "Lưu thay đổi"
@@ -1341,7 +1352,6 @@
         "add": "Thêm API Key",
         "generate": "Tạo",
         "empty": "Chưa có API key",
-        "hint": "Mỗi mục là một API key (nhất quán với phong cách trang 'Quản lý API Key')",
         "edit_title": "Chỉnh sửa API Key",
         "add_title": "Thêm API Key",
         "input_label": "API Key",
@@ -1821,7 +1831,6 @@
   },
   "plugin_management": {
     "title": "Quản lý Plugin",
-    "description": "Xem plugin đã phát hiện và đăng ký, sau đó quản lý bật/tắt phiên bản, trường cấu hình và liên kết tài nguyên.",
     "refresh": "Làm mới",
     "load_failed": "Không thể tải plugin",
     "config_load_failed": "Không thể đọc cấu hình plugin",
@@ -1893,9 +1902,7 @@
       "subtitle_some": "Plugin chạy khi được bật và đã đăng ký với cổng.",
       "open_store": "Cửa hàng plugin",
       "more": "Thêm",
-      "more_summary": "Tìm kiếm · thư mục {{dir}} · làm mới",
-      "more_forced": "Luôn mở khi tìm kiếm đang lọc danh sách.",
-      "find_title": "Tìm kiếm",
+      "more_summary": "Thư mục {{dir}} · làm mới",
       "runtime_title": "Trạng thái chạy"
     }
   },
@@ -2011,9 +2018,7 @@
       "subtitle_installed_zero": "Chưa cài cái nào.",
       "open_installed": "Plugin đã cài",
       "more": "Thêm",
-      "more_summary": "Tìm kiếm · thư mục {{dir}} · làm mới",
-      "more_forced": "Luôn mở khi tìm kiếm đang lọc danh sách.",
-      "find_title": "Tìm kiếm",
+      "more_summary": "Thư mục {{dir}} · làm mới",
       "runtime_title": "Trạng thái chạy"
     }
   },
@@ -2027,8 +2032,6 @@
     "empty_src_desc": "Menu plugin này không cung cấp URL trang nhúng được."
   },
   "system_info": {
-    "title": "Thông tin Trung tâm Quản lý",
-    "about_title": "Trung tâm Quản lý CLI Proxy API",
     "models_title": "Model khả dụng",
     "models_desc": "Hiển thị phản hồi /models và tự động dùng API key đã lưu để xác thực.",
     "models_loading": "Đang tải model khả dụng...",
@@ -2042,7 +2045,6 @@
     "version_current_missing": "Không có phiên bản máy chủ; không thể so sánh",
     "version_unknown": "Không rõ",
     "quick_links_title": "Liên kết nhanh",
-    "quick_links_desc": "Truy cập repository dự án và tài liệu để được trợ giúp và cập nhật.",
     "link_main_repo": "Repository chính",
     "link_main_repo_desc": "Mã nguồn chương trình lõi CLI Proxy API",
     "link_webui_repo": "Repository WebUI",
@@ -2092,7 +2094,8 @@
     "type_info": "Thông tin",
     "type_warning": "Cảnh báo",
     "type_error": "Lỗi",
-    "action_available": "Có thể dùng “{{action}}” trong thông báo này."
+    "action_available": "Có thể dùng “{{action}}” trong thông báo này.",
+    "load_failed": "Tải thất bại"
   },
   "language": {
     "switch": "Ngôn ngữ",
@@ -2124,12 +2127,6 @@
     "version": "Phiên bản giao diện quản lý"
   },
   "providersPage": {
-    "header": {
-      "title": "AI Provider",
-      "activeResources": "{{active}}/{{total}} tài nguyên đang hoạt động",
-      "providerFamilies": "{{count}} nhóm provider",
-      "updatedAt": "Cập nhật {{time}}"
-    },
     "actions": {
       "refresh": "Làm mới",
       "syncing": "Đang đồng bộ",
@@ -2531,13 +2528,16 @@
       "start_with": "Bắt đầu với",
       "more": "Thêm",
       "more_all": "Tất cả nhà cung cấp",
-      "more_summary_one": "{{count}} nhà cung cấp · tìm kiếm, sắp xếp, lọc theo mô hình",
+      "more_summary_one": "{{count}} nhà cung cấp, {{empty}} chưa có khóa · tìm kiếm, sắp xếp, lọc theo mô hình",
       "more_summary_other": "{{count}} nhà cung cấp, {{empty}} chưa có khóa · tìm kiếm, sắp xếp, lọc theo mô hình",
       "more_summary_none": "{{count}} nhà cung cấp · tìm kiếm, sắp xếp, lọc theo mô hình",
       "browse_hint": "Mọi nhà cung cấp mà cổng hỗ trợ, có tìm kiếm, sắp xếp và lọc theo mô hình.",
       "sync_title": "Đồng bộ",
       "sync_hint": "Khóa được đọc từ cấu hình của cổng.",
-      "updated": "Đọc lúc {{time}}"
+      "updated": "Đọc lúc {{time}}",
+      "title_sponsors_one": "Đã thiết lập 1 nhà cung cấp điền nhanh.",
+      "title_sponsors_other": "Đã thiết lập {{count}} nhà cung cấp điền nhanh.",
+      "subtitle_sponsors": "{{names}}. Bạn chưa có khóa API riêng."
     }
   },
   "devin_quota": {
