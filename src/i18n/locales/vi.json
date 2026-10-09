@@ -2733,6 +2733,7 @@
     "save_partial_unknown": "Chỉ lưu được một phần thứ tự mới ({{message}}). Hãy làm mới để xem cổng hiện có gì.",
     "undo": "Hoàn tác",
     "profiles_incompatible": "Cổng này dùng phiên bản API hồ sơ máy khách mà bảng điều khiển không hiểu, nên khóa và khóa máy khách bị ẩn. Thứ tự ở trên vẫn hoạt động.",
-    "accounts_failed": "Không tải được tài khoản nên không thể hiển thị thứ tự."
+    "accounts_failed": "Không tải được tài khoản nên không thể hiển thị thứ tự.",
+    "save_unconfirmed": "Không xác nhận được thứ tự mới; đang hiển thị những gì cổng hiện có."
   }
 }

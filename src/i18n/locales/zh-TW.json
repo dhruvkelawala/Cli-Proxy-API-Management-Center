@@ -2743,6 +2743,7 @@
     "save_partial_unknown": "新順序只儲存了一部分（{{message}}）。請重新整理查看閘道目前的設定。",
     "undo": "復原",
     "profiles_incompatible": "此閘道使用本面板無法辨識的用戶端設定檔 API 版本，因此已隱藏鎖定與用戶端金鑰。上面的順序仍然有效。",
-    "accounts_failed": "無法載入帳號，因此無法顯示順序。"
+    "accounts_failed": "無法載入帳號，因此無法顯示順序。",
+    "save_unconfirmed": "無法確認新順序是否已儲存；下面顯示的是閘道目前的設定。"
   }
 }

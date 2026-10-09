@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test';
+import { readFileSync } from 'node:fs';
 import {
   buildOrder,
   describeClientRoutes,
@@ -22,13 +23,14 @@ import {
 import {
   QUOTA_MAX_AGE_MS,
   buildWhenFormatter,
+  settleQuotaReads,
   takeStaleQuotaTargets,
 } from '@/features/clientProfiles/routing/useRoutingOrder';
 import { saveOrderChanges } from '@/features/clientProfiles/routing/reorderFlow';
 import type { RoutingSaveDeps } from '@/features/config/routing/routingSettingsState';
 import { credentialRefForAuthFile } from '@/features/clientProfiles/model';
 import { buildAccountTuningPatch } from '@/features/config/routing/routingSettingsState';
-import type { AuthFileItem } from '@/types';
+import type { AuthFileItem, ClaudeQuotaState } from '@/types';
 import type { ClientProfileAccount, ClientProfilesSnapshot } from '@/types/clientProfiles';
 
 const HOUR = 3_600_000;
@@ -677,16 +679,55 @@ describe('review fixes: hint, locks, quota freshness', () => {
     expect(allPast.status).toBe('none');
   });
 
-  test('quota is re-read on open when this page has not read it in five minutes', () => {
-    const seen = new Map<string, number>();
+  test('quota counts as fresh only after a successful read; a failed read is retried', () => {
+    const fresh = { readAt: new Map<string, number>(), pending: new Map<string, unknown>() };
     const files = [work, personal, { ...third, disabled: true }];
-    expect(takeStaleQuotaTargets(files, 1, 0, seen).map((f) => f.name)).toEqual([
+    const cache = new Map<AuthFileItem, ClaudeQuotaState | undefined>();
+    const stateFor = (file: AuthFileItem) => cache.get(file);
+    const visit1 = new Set<string>();
+    expect(takeStaleQuotaTargets(files, 1, 0, visit1, stateFor, fresh).map((f) => f.name)).toEqual([
       'claude-work.json',
       'claude-personal.json',
     ]);
-    expect(takeStaleQuotaTargets(files, 1, QUOTA_MAX_AGE_MS - 1, seen)).toEqual([]);
-    expect(takeStaleQuotaTargets(files, 1, QUOTA_MAX_AGE_MS + 1, seen)).toHaveLength(2);
-    // A different connection never reuses another session's freshness.
-    expect(takeStaleQuotaTargets(files, 2, QUOTA_MAX_AGE_MS + 2, seen)).toHaveLength(2);
+    // Same visit: already asked, not asked again (no retry loop).
+    expect(takeStaleQuotaTargets(files, 1, 1, visit1, stateFor, fresh)).toEqual([]);
+    // Work's read succeeds, Personal's fails.
+    cache.set(work, { status: 'success', windows: [] });
+    cache.set(personal, { status: 'error', windows: [], error: 'x' });
+    settleQuotaReads(files, 1, 10, stateFor, fresh);
+    expect(fresh.pending.size).toBe(0);
+    // Next visit: only the failed one is read again.
+    const visit2 = new Set<string>();
+    expect(takeStaleQuotaTargets(files, 1, 20, visit2, stateFor, fresh).map((f) => f.name)).toEqual(
+      ['claude-personal.json']
+    );
+    // Five minutes after the success, Work is stale again.
+    const visit3 = new Set<string>();
+    expect(
+      takeStaleQuotaTargets(files, 1, 10 + QUOTA_MAX_AGE_MS, visit3, stateFor, fresh).map(
+        (f) => f.name
+      )
+    ).toEqual(['claude-work.json']);
+    // Another connection never reuses this session's freshness.
+    expect(takeStaleQuotaTargets(files, 2, 21, new Set(), stateFor, fresh)).toHaveLength(2);
+  });
+
+  test('an old cache entry still in place does not count as the requested read', () => {
+    const fresh = { readAt: new Map<string, number>(), pending: new Map<string, unknown>() };
+    const old: ClaudeQuotaState = { status: 'success', windows: [] };
+    const stateFor = () => old;
+    takeStaleQuotaTargets([work], 1, 0, new Set(), stateFor, fresh);
+    settleQuotaReads([work], 1, 5, stateFor, fresh);
+    expect(fresh.readAt.size).toBe(0);
+    expect(fresh.pending.size).toBe(1);
+  });
+
+  test('the page passes its ticking clock into the quota summary', () => {
+    const source = readFileSync(
+      new URL('../src/features/clientProfiles/routing/useRoutingOrder.ts', import.meta.url),
+      'utf8'
+    );
+    expect(source).toContain('const now = useNow();');
+    expect(source).toContain('summarizeClaudeQuota(claudeQuota[getQuotaCacheKey(file)], now)');
   });
 });

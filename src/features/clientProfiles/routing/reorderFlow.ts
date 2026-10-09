@@ -69,7 +69,84 @@ export interface ReorderEffects {
   firstLabelIn: (files: AuthFileItem[]) => string | null;
 }
 
-export type ReorderOutcome = 'noop' | 'saved' | 'failed' | 'partial' | 'stale';
+export type ReorderOutcome = 'noop' | 'saved' | 'failed' | 'partial' | 'unconfirmed' | 'stale';
+
+/** Statuses after which a write may or may not have been applied by the gateway. */
+const UNCERTAIN_STATUSES = new Set([408, 502, 503, 504]);
+const UNCERTAIN_CODES = new Set(['ECONNABORTED', 'ETIMEDOUT', 'ERR_NETWORK', 'ECONNRESET']);
+
+/**
+ * True when a failed write may still have reached the gateway: no HTTP response at all
+ * (network error, timeout) or a gateway/timeout status. A 4xx/500 with a response is a refusal.
+ */
+export const isUncertainWriteError = (error: unknown): boolean => {
+  if (typeof error !== 'object' || error === null) return true;
+  const { status, code } = error as { status?: unknown; code?: unknown };
+  if (typeof code === 'string' && UNCERTAIN_CODES.has(code)) return true;
+  if (typeof status !== 'number' || !Number.isFinite(status) || status === 0) return true;
+  return UNCERTAIN_STATUSES.has(status);
+};
+
+/* ------------------------------------------------------------------ */
+/* One reorder at a time, per connection, across page remounts          */
+/* ------------------------------------------------------------------ */
+
+let inFlight: { revision: number; done: Promise<void> } | null = null;
+
+/** The save running for this connection (it may belong to a page that has since closed). */
+export const reorderInFlight = (revision: number): Promise<void> | null =>
+  inFlight && inFlight.revision === revision ? inFlight.done : null;
+
+/**
+ * Runs `task` as the single reorder for this connection. Returns false (and runs nothing)
+ * while another one is still writing, even if the page that started it has unmounted.
+ */
+export const runExclusiveReorder = async (
+  revision: number,
+  task: () => Promise<unknown>
+): Promise<boolean> => {
+  if (reorderInFlight(revision)) return false;
+  let finish = () => {};
+  const done = new Promise<void>((resolve) => {
+    finish = resolve;
+  });
+  const slot = { revision, done };
+  inFlight = slot;
+  try {
+    await task();
+  } finally {
+    if (inFlight === slot) inFlight = null;
+    finish();
+  }
+  return true;
+};
+
+/**
+ * Undo bound to the connection and page it was offered on. It does nothing after a
+ * connection change or once that page has closed; pressed while another save is still
+ * writing, it waits for that save and checks again, so it is never silently dropped.
+ * `apply` re-plans from the page's current data (it goes through runReorder).
+ */
+export const makeGuardedUndo = (deps: {
+  connectionRevision: () => number;
+  isPageOpen: () => boolean;
+  apply: () => Promise<unknown>;
+}): (() => Promise<'applied' | 'ignored'>) => {
+  const revision = deps.connectionRevision();
+  const valid = () => deps.connectionRevision() === revision && deps.isPageOpen();
+  return async () => {
+    if (!valid()) return 'ignored';
+    const pending = reorderInFlight(revision);
+    if (pending) {
+      await pending;
+      // Let the page take in the list that save re-read before planning from it.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      if (!valid()) return 'ignored';
+    }
+    await deps.apply();
+    return 'applied';
+  };
+};
 
 export const runReorder = async (
   order: readonly OrderAccount[],
@@ -86,11 +163,19 @@ export const runReorder = async (
   fx.setOverrides(Object.fromEntries(changes.map((change) => [change.id, change.to])));
 
   const revision = fx.connectionRevision();
+  let lastError: unknown = null;
   const result = await saveOrderChanges(
     {
       connectionRevision: fx.connectionRevision,
       applyConfigPlan: async () => {},
-      patchAccount: fx.patchAccount,
+      patchAccount: async (name, patch) => {
+        try {
+          return await fx.patchAccount(name, patch);
+        } catch (error: unknown) {
+          lastError = error;
+          throw error;
+        }
+      },
       isCurrent: () => revision === fx.connectionRevision(),
     },
     changes
@@ -110,6 +195,13 @@ export const runReorder = async (
     if (partial) fx.notifyAccountsChanged();
     const files = await fx.reloadFiles();
     const message = result.failed.message;
+    if (isUncertainWriteError(lastError)) {
+      // The failed write may have landed: say so, and let the re-read list speak.
+      if (!partial) fx.notifyAccountsChanged();
+      fx.notify(fx.t('routing.save_unconfirmed'), 'error');
+      if (fx.isPageOpen()) fx.setSaving(false);
+      return 'unconfirmed';
+    }
     if (partial) {
       const now = files ? fx.firstLabelIn(files) : null;
       fx.notify(

@@ -1,5 +1,12 @@
 import { describe, expect, test } from 'bun:test';
-import { runReorder, type ReorderEffects } from '@/features/clientProfiles/routing/reorderFlow';
+import {
+  isUncertainWriteError,
+  makeGuardedUndo,
+  reorderInFlight,
+  runExclusiveReorder,
+  runReorder,
+  type ReorderEffects,
+} from '@/features/clientProfiles/routing/reorderFlow';
 import { buildOrder, type OrderAccount } from '@/features/clientProfiles/routing/routingOrder';
 import type { AuthFileItem } from '@/types';
 
@@ -27,6 +34,8 @@ type Call =
 const harness = (
   options: {
     failNames?: string[];
+    /** What a failing patch throws; defaults to a refusal (HTTP 500 with a response). */
+    failWith?: () => unknown;
     closeAfterPatches?: number;
     reloaded?: AuthFileItem[] | null;
     switchConnectionOnPatch?: boolean;
@@ -45,7 +54,11 @@ const harness = (
       if (options.closeAfterPatches !== undefined && patches >= options.closeAfterPatches) {
         open = false;
       }
-      if (options.failNames?.includes(name)) throw new Error('boom');
+      if (options.failNames?.includes(name)) {
+        throw options.failWith
+          ? options.failWith()
+          : Object.assign(new Error('boom'), { status: 500 });
+      }
     },
     isPageOpen: () => open,
     setOverrides: (value) => calls.push(['overrides', value]),
@@ -184,5 +197,134 @@ describe('runReorder', () => {
     expect(calls.filter((c) => c[0] === 'patch')).toEqual([
       ['patch', 'personal.json', { priority: 0 }],
     ]);
+  });
+});
+
+describe('round 2: uncertain failures, exclusive saves and guarded Undo', () => {
+  test('a network error or timeout says the order could not be confirmed, after the re-read', async () => {
+    for (const failWith of [
+      () => Object.assign(new Error('Network Error'), { code: 'ERR_NETWORK' }),
+      () => Object.assign(new Error('timeout'), { code: 'ECONNABORTED' }),
+      () => Object.assign(new Error('Gateway Timeout'), { status: 504 }),
+    ]) {
+      const { fx, calls } = harness({ failNames: ['personal.json'], failWith });
+      const outcome = await runReorder(
+        orderOf([work, personal]),
+        ['personal.json', 'work.json'],
+        fx
+      );
+      expect(outcome).toBe('unconfirmed');
+      const reloadAt = calls.findIndex((c) => c[0] === 'reload');
+      const notifyAt = calls.findIndex((c) => c[0] === 'notify');
+      expect(reloadAt).toBeGreaterThanOrEqual(0);
+      expect(notifyAt).toBeGreaterThan(reloadAt);
+      expect(calls[notifyAt]).toEqual(['notify', 'routing.save_unconfirmed', 'error', null]);
+      // The write may have landed: other views re-read too, and nothing says "put back".
+      expect(calls).toContainEqual(['changed']);
+      expect(JSON.stringify(calls)).not.toContain('save_failed');
+    }
+  });
+
+  test('a refusal with a response is still reported as put back', () => {
+    expect(isUncertainWriteError({ status: 500 })).toBe(false);
+    expect(isUncertainWriteError({ status: 400 })).toBe(false);
+    expect(isUncertainWriteError({ status: 503 })).toBe(true);
+    expect(isUncertainWriteError({ code: 'ETIMEDOUT', status: 500 })).toBe(true);
+    expect(isUncertainWriteError({})).toBe(true);
+  });
+
+  test('only one reorder runs per connection, even if the page that started it closed', async () => {
+    let release = () => {};
+    const first = runExclusiveReorder(
+      7,
+      () =>
+        new Promise<void>((resolve) => {
+          release = resolve;
+        })
+    );
+    expect(reorderInFlight(7)).not.toBeNull();
+    let ran = false;
+    expect(
+      await runExclusiveReorder(7, async () => {
+        ran = true;
+      })
+    ).toBe(false);
+    expect(ran).toBe(false);
+    // Another connection is not blocked by it.
+    expect(reorderInFlight(8)).toBeNull();
+    release();
+    expect(await first).toBe(true);
+    expect(reorderInFlight(7)).toBeNull();
+  });
+
+  test('Undo does nothing after a connection change or once its page has closed', async () => {
+    let revision = 1;
+    let open = true;
+    let applied = 0;
+    const undo = makeGuardedUndo({
+      connectionRevision: () => revision,
+      isPageOpen: () => open,
+      apply: async () => {
+        applied += 1;
+      },
+    });
+    revision = 2;
+    expect(await undo()).toBe('ignored');
+    revision = 1;
+    open = false;
+    expect(await undo()).toBe('ignored');
+    open = true;
+    expect(await undo()).toBe('applied');
+    expect(applied).toBe(1);
+  });
+
+  test('Undo pressed during another save waits for it instead of being dropped', async () => {
+    let release = () => {};
+    const save = runExclusiveReorder(
+      11,
+      () =>
+        new Promise<void>((resolve) => {
+          release = resolve;
+        })
+    );
+    let applied = false;
+    const undo = makeGuardedUndo({
+      connectionRevision: () => 11,
+      isPageOpen: () => true,
+      apply: async () => {
+        applied = true;
+      },
+    });
+    const result = undo();
+    await Promise.resolve();
+    expect(applied).toBe(false);
+    release();
+    await save;
+    expect(await result).toBe('applied');
+    expect(applied).toBe(true);
+  });
+
+  test('Undo waiting on a save is dropped if the connection changes meanwhile', async () => {
+    let release = () => {};
+    let revision = 21;
+    const save = runExclusiveReorder(
+      21,
+      () =>
+        new Promise<void>((resolve) => {
+          release = resolve;
+        })
+    );
+    const undo = makeGuardedUndo({
+      connectionRevision: () => revision,
+      isPageOpen: () => true,
+      apply: async () => {
+        throw new Error('must not run');
+      },
+    });
+    const result = undo();
+    revision = 22;
+    release();
+    await save;
+    expect(await result).toBe('ignored');
   });
 });

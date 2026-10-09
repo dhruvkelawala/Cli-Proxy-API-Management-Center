@@ -2727,6 +2727,7 @@
     "save_partial_unknown": "Only part of the new order was saved ({{message}}). Refresh to see what the gateway has now.",
     "undo": "Undo",
     "profiles_incompatible": "This gateway uses a client profile API version this panel doesn’t understand, so locks and client keys are hidden. The order above still works.",
-    "accounts_failed": "Couldn’t load the accounts, so the order can’t be shown."
+    "accounts_failed": "Couldn’t load the accounts, so the order can’t be shown.",
+    "save_unconfirmed": "Couldn’t confirm the new order; showing what the gateway has now."
   }
 }

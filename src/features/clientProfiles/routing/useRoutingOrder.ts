@@ -7,7 +7,7 @@ import { notifyAuthFilesChanged } from '@/features/authFiles/authFilesEvents';
 import { accountProviderKey, isAccountDisabled } from '@/features/authFiles/accountPresentation';
 import { useQuotaBatchLoader } from '@/features/quota/hooks/useQuotaBatchLoader';
 import { getQuotaCacheKey } from '@/utils/quota/identity';
-import type { AuthFileItem } from '@/types';
+import type { AuthFileItem, ClaudeQuotaState } from '@/types';
 import { useClientRoutesData } from '../hooks/useClientRoutesData';
 import {
   buildOrder,
@@ -16,32 +16,78 @@ import {
   type JoinNames,
   type OrderModel,
 } from './routingOrder';
-import { runReorder, type ReorderEffects } from './reorderFlow';
+import { useNow } from '@/hooks/useNow';
+import {
+  makeGuardedUndo,
+  reorderInFlight,
+  runExclusiveReorder,
+  runReorder,
+  type ReorderEffects,
+} from './reorderFlow';
 
 const PROVIDER = 'claude';
 /** Quota older than this is re-read when the page opens. */
 export const QUOTA_MAX_AGE_MS = 5 * 60_000;
-/**
- * When this page last asked for each account's quota (per connection). The Quota page's cache
- * has no timestamps, so anything this page has not loaded recently counts as stale.
- */
-const quotaRequestedAt = new Map<string, number>();
 
-/** Accounts whose cached quota should be (re)loaded now. Marks the ones it returns. */
+/**
+ * Quota freshness as this page knows it, per `connection:cacheKey`. The Quota page's cache has
+ * no timestamps, so an account only counts as fresh after a read this page saw succeed.
+ */
+export interface QuotaFreshness {
+  /** When a read succeeded. */
+  readAt: Map<string, number>;
+  /** Reads asked for and not settled yet, with the cache entry they replace. */
+  pending: Map<string, unknown>;
+}
+const quotaFreshness: QuotaFreshness = { readAt: new Map(), pending: new Map() };
+
+const quotaMarker = (connection: number, file: AuthFileItem) =>
+  `${connection}:${getQuotaCacheKey(file)}`;
+
+/**
+ * Accounts whose quota should be read now; they are marked pending. `attempted` holds what
+ * this page visit already asked for, so a failed read is retried on the next visit rather
+ * than in a loop.
+ */
 export const takeStaleQuotaTargets = (
   files: readonly AuthFileItem[],
   connection: number,
   now: number,
-  requestedAt: Map<string, number> = quotaRequestedAt
+  attempted: Set<string>,
+  stateFor: (file: AuthFileItem) => unknown,
+  fresh: QuotaFreshness = quotaFreshness
 ): AuthFileItem[] =>
   files.filter((file) => {
     if (isAccountDisabled(file)) return false;
-    const marker = `${connection}:${getQuotaCacheKey(file)}`;
-    const last = requestedAt.get(marker);
+    const marker = quotaMarker(connection, file);
+    if (fresh.pending.has(marker) || attempted.has(marker)) return false;
+    const last = fresh.readAt.get(marker);
     if (last !== undefined && now - last < QUOTA_MAX_AGE_MS) return false;
-    requestedAt.set(marker, now);
+    attempted.add(marker);
+    fresh.pending.set(marker, stateFor(file));
     return true;
   });
+
+/**
+ * Settles pending reads once their cache entry has been replaced: a success marks the account
+ * fresh; a failure only clears the pending mark, so the account stays stale and is retried.
+ */
+export const settleQuotaReads = (
+  files: readonly AuthFileItem[],
+  connection: number,
+  now: number,
+  stateFor: (file: AuthFileItem) => ClaudeQuotaState | undefined,
+  fresh: QuotaFreshness = quotaFreshness
+): void => {
+  files.forEach((file) => {
+    const marker = quotaMarker(connection, file);
+    if (!fresh.pending.has(marker)) return;
+    const state = stateFor(file);
+    if (state === fresh.pending.get(marker) || !state || state.status === 'loading') return;
+    if (state.status === 'success') fresh.readAt.set(marker, now);
+    fresh.pending.delete(marker);
+  });
+};
 
 /** "today at 9:06 PM", "tomorrow at 9:00 AM", "Sat 10:00 AM" in the UI language. */
 export const buildWhenFormatter = (
@@ -100,13 +146,22 @@ export function useRoutingOrder() {
   const [saving, setSaving] = useState(false);
   const [simulateOut, setSimulateOut] = useState<string | null>(null);
   const mountedRef = useRef(true);
-  const savingRef = useRef(false);
   useEffect(() => {
     mountedRef.current = true;
+    // A reorder started by an earlier visit may still be writing: show it, and block new ones.
+    const pending = reorderInFlight(apiClient.getConnectionRevision());
+    if (pending) {
+      setSaving(true);
+      void pending.then(() => {
+        if (mountedRef.current) setSaving(false);
+      });
+    }
     return () => {
       mountedRef.current = false;
     };
   }, []);
+  // Minute clock: quota windows that expire while the page is open drop out on the next tick.
+  const now = useNow();
 
   const providerFiles = useMemo(
     () => (files ?? []).filter((file) => accountProviderKey(file) === PROVIDER),
@@ -114,15 +169,21 @@ export function useRoutingOrder() {
   );
 
   // Weekly room left comes from the Quota page's cache and loader. On open, anything this page
-  // has not read in the last five minutes is re-read once.
+  // has not seen read successfully in the last five minutes is re-read once.
+  const attemptedQuota = useRef(new Set<string>());
   useEffect(() => {
+    const connection = apiClient.getConnectionRevision();
+    const stateFor = (file: AuthFileItem) => claudeQuota[getQuotaCacheKey(file)];
+    settleQuotaReads(providerFiles, connection, Date.now(), stateFor);
     const stale = takeStaleQuotaTargets(
       providerFiles,
-      apiClient.getConnectionRevision(),
-      Date.now()
+      connection,
+      Date.now(),
+      attemptedQuota.current,
+      stateFor
     );
     if (stale.length) void loadQuota(stale.map((file) => ({ file, type: PROVIDER })));
-  }, [providerFiles, loadQuota]);
+  }, [providerFiles, claudeQuota, loadQuota]);
 
   const sessionAffinity = config?.routingSessionAffinity === true;
   const buildFrom = useCallback(
@@ -138,12 +199,12 @@ export function useRoutingOrder() {
             sessionAffinity,
             inventory: snapshot?.accounts ?? [],
             quotaFor: (file: AuthFileItem) =>
-              summarizeClaudeQuota(claudeQuota[getQuotaCacheKey(file)]),
+              summarizeClaudeQuota(claudeQuota[getQuotaCacheKey(file)], now),
             priorityOverrides: extra.overrides ?? undefined,
             simulateOut: extra.out ?? null,
           })
         : null,
-    [claudeQuota, sessionAffinity, snapshot, strategy]
+    [claudeQuota, now, sessionAffinity, snapshot, strategy]
   );
   const model: OrderModel | null = useMemo(
     () => (files ? buildFrom(files, { overrides, out: simulateOut }) : null),
@@ -157,30 +218,33 @@ export function useRoutingOrder() {
   const setOrderRef = useRef<(ids: string[]) => Promise<void>>(async () => {});
   const setOrder = useCallback(
     async (ids: string[]) => {
-      if (!model || savingRef.current) return;
+      if (!model) return;
+      const revision = apiClient.getConnectionRevision();
       const previous = model.order.map((account) => account.id);
       const fx: ReorderEffects = {
         connectionRevision: () => apiClient.getConnectionRevision(),
         patchAccount: (name, patch) => authFilesApi.patchFields(name, patch),
         isPageOpen: () => mountedRef.current,
         setOverrides,
-        setSaving: (next) => {
-          savingRef.current = next;
-          setSaving(next);
-        },
+        setSaving,
         reloadFiles,
         notifyAccountsChanged: notifyAuthFilesChanged,
         notify: (message, type, action) => showNotification(message, type, undefined, action),
         t: (key, values) => t(key, values),
         firstLabelIn: (list) => buildFrom(list, {})?.order[0]?.label ?? null,
       };
+      // Undo is bound to this connection and this page visit, and re-plans from the page's
+      // data at the time it is pressed (setOrderRef always holds the latest setOrder).
+      const undo = makeGuardedUndo({
+        connectionRevision: () => apiClient.getConnectionRevision(),
+        isPageOpen: () => mountedRef.current,
+        apply: () => setOrderRef.current(previous),
+      });
       setSimulateOut(null);
-      savingRef.current = true;
-      try {
-        await runReorder(model.order, ids, fx, () => void setOrderRef.current(previous));
-      } finally {
-        savingRef.current = false;
-      }
+      // One reorder per connection at a time, even across page visits.
+      await runExclusiveReorder(revision, () =>
+        runReorder(model.order, ids, fx, () => void undo())
+      );
     },
     [buildFrom, model, reloadFiles, showNotification, t]
   );

@@ -2717,6 +2717,7 @@
     "save_partial_unknown": "新顺序只保存了一部分（{{message}}）。请刷新查看网关当前的设置。",
     "undo": "撤销",
     "profiles_incompatible": "此网关使用本面板无法识别的客户端配置 API 版本，因此已隐藏锁定和客户端密钥。上面的顺序仍然有效。",
-    "accounts_failed": "无法加载账号，因此无法显示顺序。"
+    "accounts_failed": "无法加载账号，因此无法显示顺序。",
+    "save_unconfirmed": "无法确认新顺序是否已保存；下面显示的是网关当前的设置。"
   }
 }
