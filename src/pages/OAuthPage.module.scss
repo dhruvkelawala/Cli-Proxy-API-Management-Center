@@ -1,168 +1,136 @@
 @use '../styles/mixins' as *;
 
-.container {
-  width: 100%;
+// OAuth (Flow design language, src/styles/DESIGN.md): the sentence, the sign-in steps, then one
+// hairline row per provider. A sign-in under way unfolds under its row.
+
+.page {
 }
 
-.cardTitle {
+.steps {
+  max-width: 460px;
+  margin-top: 36px;
+}
+
+.providers {
+  display: grid;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--hairline);
+}
+
+.provider {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--hairline);
+
+  &[data-open] {
+    padding-bottom: 20px;
+  }
+}
+
+.providerRow {
   display: flex;
-  align-items: center;
-  gap: $spacing-sm;
+  align-items: flex-start;
+  gap: 14px;
+  min-width: 0;
 }
 
-.cardTitleIcon {
-  width: 24px;
-  height: 24px;
-  flex: 0 0 auto;
+.providerMain {
+  display: grid;
+  gap: 3px;
+  flex: 1 1 0;
+  min-width: 0;
 }
 
-.cardTitleIconFallback {
-  width: 24px;
-  height: 24px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
-}
-
-.pageTitle {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 $spacing-xl 0;
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-xl;
-}
-
-.providerSection {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-md;
-}
-
-.providerList {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-xl;
-}
-
-.sectionTitle {
+.providerName {
   margin: 0;
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-}
-
-.featuredCard {
-  position: relative;
-  overflow: hidden;
-  border-color: #000;
-  background:
-    radial-gradient(circle at 92% -35%, rgba(23, 131, 255, 0.24), transparent 42%),
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, #1783ff 10%, var(--bg-primary)),
-      var(--bg-primary) 64%
-    );
-  box-shadow:
-    0 14px 32px -26px rgba(23, 131, 255, 0.95),
-    var(--shadow);
-
-  > * {
-    position: relative;
-    z-index: 1;
-  }
-
-  .cardTitle {
-    gap: $spacing-md;
-    font-size: 21px;
-  }
-
-  .cardTitleIcon {
-    box-sizing: content-box;
-    width: 24px;
-    height: 24px;
-    padding: 7px;
-    border-radius: 11px;
-    background: #000;
-  }
-
-  .featuredActions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: $spacing-sm;
-  }
-
-  :global(.btn-primary) {
-    border-color: #1783ff;
-    background: #1783ff;
-    box-shadow: 0 8px 20px -12px rgba(23, 131, 255, 0.9);
-
-    &:hover {
-      border-color: #0875ed;
-      background: #0875ed;
-    }
-  }
-
-  @include mobile {
-    :global(.card-header > .btn) {
-      width: 100%;
-    }
-  }
-}
-
-:global([data-theme='dark']) .featuredCard .cardTitleIcon {
-  background: #fff;
-}
-
-.recommendedBadge {
-  display: inline-flex;
-  align-items: center;
-  min-height: 24px;
-  padding: 3px 9px;
-  border: 1px solid rgba(23, 131, 255, 0.34);
-  border-radius: $radius-full;
-  background: rgba(23, 131, 255, 0.11);
-  color: color-mix(in srgb, #1783ff 82%, var(--text-primary));
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.featuredHint {
-  max-width: 720px;
-  margin: 0;
-  color: var(--text-secondary);
   font-size: 15px;
-  line-height: 1.65;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
 }
 
-.cardContent {
+.providerHint {
+  margin: 0;
+  max-width: 58ch;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-operational-muted, var(--text-tertiary));
+}
+
+.providerActions {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 6px 18px;
+  padding-top: 1px;
+}
+
+// The sign-in under way: link, device code, callback paste and status, indented under the name.
+.attempt {
   display: flex;
   flex-direction: column;
-  gap: $spacing-md;
+  gap: 14px;
+  margin: 14px 0 0 38px;
+  min-width: 0;
 
-  :global(.form-group) {
-    margin-bottom: 0;
+  &[hidden] {
+    display: none;
   }
 
   :global(.status-badge) {
-    margin-bottom: 0;
     align-self: flex-start;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 13px;
   }
 }
 
-.cardHint {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.6;
+.vertexForm,
+.attempt {
+  :global(.form-group) {
+    margin: 0;
+  }
+
+  :global(.form-group > label) {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  :global(.hint) {
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--text-operational-muted, var(--text-tertiary));
+  }
+}
+
+.vertexForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 4px 0 0 38px;
+  min-width: 0;
+}
+
+.cardTitleIcon {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+  object-fit: contain;
+}
+
+.cardTitleIconFallback {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
   color: var(--text-secondary);
 }
 
@@ -173,46 +141,20 @@
   color: var(--text-tertiary);
 }
 
-.oauthSection {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-lg;
-}
-
-.oauthGrid {
-  display: grid;
-  gap: $spacing-lg;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-
-  @include mobile {
-    grid-template-columns: 1fr;
-  }
-}
-
-.oauthCard {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-md;
-}
-
-.oauthStatus {
-  padding: $spacing-md;
-  border-radius: $radius-md;
-  font-size: 14px;
-
-  &.success {
-    background-color: rgba(34, 197, 94, 0.1);
-    color: #16a34a;
+@include mobile {
+  .providerRow {
+    flex-wrap: wrap;
   }
 
-  &.error {
-    background-color: rgba($error-color, 0.12);
-    color: $error-color;
+  .providerActions {
+    width: 100%;
+    justify-content: flex-start;
+    padding-left: 36px;
   }
 
-  &.waiting {
-    background-color: rgba($primary-color, 0.12);
-    color: var(--primary-color);
+  .attempt,
+  .vertexForm {
+    margin-left: 0;
   }
 }
 
@@ -225,26 +167,26 @@
 
 .callbackActions {
   display: flex;
-  gap: $spacing-md;
+  gap: 6px 18px;
 }
 
 .authUrlBox {
-  background: var(--bg-secondary);
-  border: 1px dashed var(--border-color);
-  border-radius: $radius-md;
-  padding: $spacing-md;
+  padding: 2px 0 2px 14px;
+  border-left: 2px solid color-mix(in srgb, var(--accent-indigo) 55%, transparent);
   display: flex;
   flex-direction: column;
   gap: $spacing-xs;
 }
 
 .authUrlLabel {
-  color: var(--text-secondary);
-  font-size: 14px;
+  color: var(--text-operational-muted, var(--text-tertiary));
+  font-size: 12.5px;
 }
 
 .authUrlValue {
-  font-weight: 700;
+  font-family: $font-mono;
+  font-size: 12.5px;
+  font-weight: 500;
   color: var(--text-primary);
   word-break: break-all;
   overflow-wrap: anywhere;
@@ -256,7 +198,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: $spacing-sm;
+  gap: 6px 18px;
   margin-top: $spacing-sm;
 }
 
@@ -290,8 +232,9 @@
 
 .formItemLabel {
   margin: 0;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 .filePicker {
@@ -305,11 +248,11 @@
   flex: 1;
   min-width: 220px;
   padding: 10px 12px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--hairline);
   border-radius: $radius-md;
-  background: var(--bg-primary);
+  background: transparent;
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: 13.5px;
 }
 
 .fileNamePlaceholder {
@@ -317,10 +260,8 @@
 }
 
 .connectionBox {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: $radius-md;
-  padding: $spacing-md;
+  padding: 2px 0 2px 14px;
+  border-left: 2px solid color-mix(in srgb, var(--success-color) 55%, transparent);
   display: flex;
   flex-direction: column;
   gap: $spacing-sm;
