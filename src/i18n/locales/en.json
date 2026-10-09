@@ -2820,7 +2820,13 @@
       "nearly_out_one": "{{names}} is about to run out.",
       "nearly_out_many": "{{names}} are about to run out.",
       "unreadable": "Can’t read the accounts right now.",
-      "unreadable_follow": "The gateway answered, but the account list didn’t load. It will try again."
+      "unreadable_follow": "The gateway answered, but the account list didn’t load. It will try again.",
+      "resting_cooling_one": "{{out}} is cooling down; {{accounts}} is serving.",
+      "resting_cooling_many": "{{out}} is cooling down; {{accounts}} are serving.",
+      "resting_limit_one": "{{out}} is out of room; {{accounts}} is serving.",
+      "resting_limit_many": "{{out}} is out of room; {{accounts}} are serving.",
+      "resting_out_one": "{{out}} can’t serve; {{accounts}} is serving.",
+      "resting_out_many": "{{out}} can’t serve; {{accounts}} are serving."
     },
     "line": {
       "none": "{{provider}} has no account that can serve.",

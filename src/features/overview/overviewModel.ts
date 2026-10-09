@@ -148,7 +148,17 @@ export interface DescribeOverviewInput {
 
 type Situation =
   | { kind: 'ok'; group: ProviderGroup; serving: OrderAccount[] }
-  | { kind: 'switched'; group: ProviderGroup; out: OrderAccount; serving: OrderAccount }
+  | {
+      kind: 'switched';
+      group: ProviderGroup;
+      out: OrderAccount;
+      serving: OrderAccount;
+      /**
+       * The account that cannot serve shares the serving priority: nothing switched, the others
+       * at that level carry on ("Work is cooling down; Personal is serving").
+       */
+      sameLevel: OrderAccount[] | null;
+    }
   | { kind: 'none'; group: ProviderGroup }
   | { kind: 'all_off'; group: ProviderGroup };
 
@@ -157,11 +167,14 @@ const situationOf = (group: ProviderGroup): Situation => {
   if (model.order.length === 0) return { kind: 'all_off', group };
   const [now] = model.serving;
   if (!now) return { kind: 'none', group };
+  const resting = (account: OrderAccount) => account.role === 'resting' && !account.weightExcluded;
   if (!model.shared) {
-    const out = model.order.find(
-      (account) => account.rank < now.rank && account.role === 'resting' && !account.weightExcluded
-    );
-    if (out) return { kind: 'switched', group, out, serving: now };
+    const out = model.order.find((account) => account.rank < now.rank && resting(account));
+    if (out) return { kind: 'switched', group, out, serving: now, sameLevel: null };
+  }
+  const peer = model.order.find((account) => account.rank === now.rank && resting(account));
+  if (peer) {
+    return { kind: 'switched', group, out: peer, serving: now, sameLevel: model.serving };
   }
   return { kind: 'ok', group, serving: model.serving };
 };
@@ -197,6 +210,12 @@ const sameName = (account: OrderAccount, provider: string) =>
 const outKey = (account: OrderAccount) =>
   account.health === 'limit' ? 'limit' : account.health === 'cooling' ? 'cooling' : 'out';
 
+/** "Work is cooling down; Personal is serving." (or "…; A and B are serving."). */
+const restingCopy = (out: OrderAccount, serving: OrderAccount[], join: JoinNames): Copy => ({
+  key: `${O}.hero.resting_${outKey(out)}_${serving.length > 1 ? 'many' : 'one'}`,
+  values: { out: out.label, accounts: join(serving.map((account) => account.label)) },
+});
+
 /** One short sentence for a provider that is not the headline. */
 const otherLine = (situation: Situation, label: string, join: JoinNames): Copy => {
   const provider = label;
@@ -206,6 +225,7 @@ const otherLine = (situation: Situation, label: string, join: JoinNames): Copy =
     case 'all_off':
       return { key: `${O}.line.all_off`, values: { provider } };
     case 'switched':
+      if (situation.sameLevel) return restingCopy(situation.out, situation.sameLevel, join);
       return {
         key: `${O}.line.switched_${outKey(situation.out)}`,
         values: { provider, out: situation.out.label, account: situation.serving.label },
@@ -302,11 +322,15 @@ export const describeOverview = ({
       break;
     case 'switched': {
       if (tone !== 'bad') tone = 'warn';
-      const { out, serving } = headline;
-      title.push({
-        key: `${O}.hero.switched_${outKey(out)}`,
-        values: { out: out.label, provider, account: serving.label },
-      });
+      const { out, serving, sameLevel } = headline;
+      title.push(
+        sameLevel
+          ? restingCopy(out, sameLevel, join)
+          : {
+              key: `${O}.hero.switched_${outKey(out)}`,
+              values: { out: out.label, provider, account: serving.label },
+            }
+      );
       subtitle.push(
         out.retryAt
           ? { key: `${O}.hero.back_at`, values: { out: out.label, when: formatWhen(out.retryAt) } }
@@ -423,12 +447,12 @@ export const flowStateOf = (account: OrderAccount): FlowAccountState => {
 };
 
 /**
- * How much a path carries, 0-1: its share of the busiest account's recent traffic. Accounts
- * that cannot serve now carry nothing, whatever they did earlier in the window.
+ * How much a path carries, 0-1: its share of the busiest account's recent traffic. Only accounts
+ * serving now carry anything; backups and accounts that cannot serve show no dots.
  */
 export const flowVolume = (item: OverviewAccount, busiest: number): number => {
-  const state = flowStateOf(item.account);
-  if (state === 'off' || state === 'warn' || busiest <= 0) return 0;
+  // Only accounts serving now carry dots; a backup's earlier traffic is not "now".
+  if (flowStateOf(item.account) !== 'live' || busiest <= 0) return 0;
   return Math.min(1, recentTotal(item.traffic) / busiest);
 };
 

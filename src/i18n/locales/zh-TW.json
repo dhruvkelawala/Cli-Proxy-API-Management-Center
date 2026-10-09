@@ -2832,7 +2832,13 @@
       "nearly_out_one": "{{names}} 即將用完。",
       "nearly_out_many": "{{names}} 即將用完。",
       "unreadable": "暫時無法讀取帳號。",
-      "unreadable_follow": "閘道有回應，但帳號清單沒有載入，稍後會自動重試。"
+      "unreadable_follow": "閘道有回應，但帳號清單沒有載入，稍後會自動重試。",
+      "resting_cooling_one": "{{out}} 正在冷卻，{{accounts}} 正在服務。",
+      "resting_cooling_many": "{{out}} 正在冷卻，{{accounts}} 正在服務。",
+      "resting_limit_one": "{{out}} 額度已用完，{{accounts}} 正在服務。",
+      "resting_limit_many": "{{out}} 額度已用完，{{accounts}} 正在服務。",
+      "resting_out_one": "{{out}} 暫不可用，{{accounts}} 正在服務。",
+      "resting_out_many": "{{out}} 暫不可用，{{accounts}} 正在服務。"
     },
     "line": {
       "none": "{{provider}} 沒有可用的帳號。",

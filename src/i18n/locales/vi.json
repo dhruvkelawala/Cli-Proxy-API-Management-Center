@@ -2826,7 +2826,13 @@
       "nearly_out_one": "{{names}} sắp hết hạn mức.",
       "nearly_out_many": "{{names}} sắp hết hạn mức.",
       "unreadable": "Hiện không đọc được tài khoản.",
-      "unreadable_follow": "Gateway có phản hồi nhưng danh sách tài khoản chưa tải được. Sẽ thử lại."
+      "unreadable_follow": "Gateway có phản hồi nhưng danh sách tài khoản chưa tải được. Sẽ thử lại.",
+      "resting_cooling_one": "{{out}} đang hạ nhiệt; {{accounts}} đang phục vụ.",
+      "resting_cooling_many": "{{out}} đang hạ nhiệt; {{accounts}} đang phục vụ.",
+      "resting_limit_one": "{{out}} đã hết hạn mức; {{accounts}} đang phục vụ.",
+      "resting_limit_many": "{{out}} đã hết hạn mức; {{accounts}} đang phục vụ.",
+      "resting_out_one": "{{out}} không phục vụ được; {{accounts}} đang phục vụ.",
+      "resting_out_many": "{{out}} không phục vụ được; {{accounts}} đang phục vụ."
     },
     "line": {
       "none": "{{provider}} không có tài khoản nào phục vụ được.",

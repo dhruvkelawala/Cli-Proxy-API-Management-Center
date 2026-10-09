@@ -2849,7 +2849,13 @@
       "nearly_out_one": "У {{names}} вот-вот закончится лимит.",
       "nearly_out_many": "У {{names}} вот-вот закончится лимит.",
       "unreadable": "Не удаётся прочитать аккаунты.",
-      "unreadable_follow": "Шлюз ответил, но список аккаунтов не загрузился. Попробуем ещё раз."
+      "unreadable_follow": "Шлюз ответил, но список аккаунтов не загрузился. Попробуем ещё раз.",
+      "resting_cooling_one": "{{out}} остывает; обслуживает {{accounts}}.",
+      "resting_cooling_many": "{{out}} остывает; обслуживают {{accounts}}.",
+      "resting_limit_one": "У {{out}} закончился лимит; обслуживает {{accounts}}.",
+      "resting_limit_many": "У {{out}} закончился лимит; обслуживают {{accounts}}.",
+      "resting_out_one": "{{out}} не может обслуживать; обслуживает {{accounts}}.",
+      "resting_out_many": "{{out}} не может обслуживать; обслуживают {{accounts}}."
     },
     "line": {
       "none": "У {{provider}} нет аккаунта, который может обслуживать запросы.",

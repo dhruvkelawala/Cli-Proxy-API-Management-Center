@@ -229,7 +229,8 @@ describe('Overview flow model', () => {
     expect(flowStateOf(first.account)).toBe('live');
     expect(flowStateOf(second.account)).toBe('idle');
     expect(flowVolume(first, 40)).toBe(1);
-    expect(flowVolume(second, 40)).toBeCloseTo(1 / 40, 5);
+    // A backup waiting its turn carries no dots, whatever it did earlier.
+    expect(flowVolume(second, 40)).toBe(0);
   });
 });
 

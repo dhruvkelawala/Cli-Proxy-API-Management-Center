@@ -2806,7 +2806,13 @@
       "nearly_out_one": "{{names}} 即将用完。",
       "nearly_out_many": "{{names}} 即将用完。",
       "unreadable": "暂时无法读取账号。",
-      "unreadable_follow": "网关有响应，但账号列表没有加载出来，稍后会自动重试。"
+      "unreadable_follow": "网关有响应，但账号列表没有加载出来，稍后会自动重试。",
+      "resting_cooling_one": "{{out}} 正在冷却，{{accounts}} 正在服务。",
+      "resting_cooling_many": "{{out}} 正在冷却，{{accounts}} 正在服务。",
+      "resting_limit_one": "{{out}} 额度已用完，{{accounts}} 正在服务。",
+      "resting_limit_many": "{{out}} 额度已用完，{{accounts}} 正在服务。",
+      "resting_out_one": "{{out}} 暂不可用，{{accounts}} 正在服务。",
+      "resting_out_many": "{{out}} 暂不可用，{{accounts}} 正在服务。"
     },
     "line": {
       "none": "{{provider}} 没有可用的账号。",
