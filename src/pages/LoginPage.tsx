@@ -196,6 +196,7 @@ export function LoginPage() {
     managementKey,
     navigate,
     rememberPassword,
+    showCustomBase,
     showNotification,
     t,
   ]);
