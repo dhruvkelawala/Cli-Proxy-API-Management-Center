@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import type { AuthFileItem } from '@/types';
 import { getTypeLabel } from '@/features/authFiles/constants';
 import type { AccountPresentation } from '@/features/authFiles/accountPresentation';
-import type { QuotaSummary } from '@/features/quota/quotaSummary';
+import type { QuotaIndicator } from '@/features/quota/quotaSummary';
 import type { AccountClientLinks } from '@/features/clientProfiles/accountLinks';
 import { groupByProvider } from '../accountsView';
 import { AccountRow } from './AccountRow';
@@ -11,7 +11,7 @@ import styles from './AccountList.module.scss';
 export interface AccountListProps {
   files: AuthFileItem[];
   presentations: Map<AuthFileItem, AccountPresentation>;
-  quotaFor: (file: AuthFileItem) => QuotaSummary;
+  indicatorFor: (file: AuthFileItem) => QuotaIndicator | null;
   linksFor: (file: AuthFileItem) => AccountClientLinks | null;
   /** Show provider headings (when more than one provider is listed). */
   grouped: boolean;
@@ -29,7 +29,7 @@ export interface AccountListProps {
 export function AccountList({
   files,
   presentations,
-  quotaFor,
+  indicatorFor,
   linksFor,
   grouped,
   selecting,
@@ -68,7 +68,7 @@ export function AccountList({
                   key={file.name}
                   file={file}
                   presentation={presentations.get(file)}
-                  quota={quotaFor(file)}
+                  indicator={indicatorFor(file)}
                   clientLinks={linksFor(file)}
                   selecting={selecting}
                   selected={selectedFiles.has(file.name)}

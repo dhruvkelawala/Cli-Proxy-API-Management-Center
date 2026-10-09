@@ -501,7 +501,9 @@
       "more_summary": "筛选、排序、视图、选择和模型规则",
       "selecting": "选择中",
       "model_rules": "模型规则",
-      "model_rules_hint": "为某个提供商的所有账号隐藏或重命名模型。"
+      "model_rules_hint": "为某个提供商的所有账号隐藏或重命名模型。",
+      "quota_limit": "{{percent}}% · 最紧的限额",
+      "quota_generic_label": "{{account}}：最接近上限的窗口剩余额度"
     }
   },
   "antigravity_subscription": {

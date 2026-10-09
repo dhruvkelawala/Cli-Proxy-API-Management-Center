@@ -128,13 +128,7 @@ describe('Accounts row markup (CPA-006)', () => {
       createElement(AccountRow, {
         file: work,
         presentation: presented.get(work),
-        quota: {
-          status: 'ready',
-          sessionLeft: 38,
-          sessionResetAt: null,
-          weekLeft: 54,
-          weekResetAt: null,
-        },
+        indicator: { status: 'ready', left: 38, window: 'session' },
         clientLinks: null,
         selecting,
         selected: false,
@@ -168,7 +162,7 @@ describe('Accounts row markup (CPA-006)', () => {
       createElement(AccountList, {
         files: [work, personal, codex],
         presentations: presented,
-        quotaFor: () => NO_QUOTA,
+        indicatorFor: () => null,
         linksFor: () => null,
         grouped: true,
         selecting: false,

@@ -11,7 +11,7 @@ import {
   isAccountDisabled,
   type AccountPresentation,
 } from '@/features/authFiles/accountPresentation';
-import { tightestWindow, type QuotaSummary } from '@/features/quota/quotaSummary';
+import type { QuotaIndicator } from '@/features/quota/quotaSummary';
 import type { AccountClientLinks } from '@/features/clientProfiles/accountLinks';
 import { accountStatus } from '../accountsView';
 import styles from './AccountList.module.scss';
@@ -19,7 +19,8 @@ import styles from './AccountList.module.scss';
 export interface AccountRowProps {
   file: AuthFileItem;
   presentation?: AccountPresentation;
-  quota: QuotaSummary;
+  /** The window that runs out first (any provider); null when nothing is known. */
+  indicator: QuotaIndicator | null;
   clientLinks?: AccountClientLinks | null;
   /** Batch selection mode: a checkbox leads the row. */
   selecting: boolean;
@@ -41,7 +42,7 @@ export interface AccountRowProps {
 export function AccountRow({
   file,
   presentation,
-  quota,
+  indicator,
   clientLinks,
   selecting,
   selected,
@@ -59,7 +60,7 @@ export function AccountRow({
   const enabled = !isAccountDisabled(file);
   const runtimeOnly = isRuntimeOnlyAuthFile(file);
   const status = accountStatus(presentation);
-  const tight = enabled ? tightestWindow(quota) : null;
+  const tight = enabled && indicator?.status === 'ready' ? indicator : null;
   const pinned = clientLinks?.pinned ?? [];
   const pinnedNames = pinned.map((pin) => pin.label).join(', ');
   const subtitle = title.account ?? (title.titleMono ? null : title.fileLine);
@@ -102,17 +103,14 @@ export function AccountRow({
             label={t(
               tight.window === 'session'
                 ? 'overview.quota.session_label'
-                : 'overview.quota.week_label',
+                : tight.window === 'week'
+                  ? 'overview.quota.week_label'
+                  : 'auth_files.flow.quota_generic_label',
               { account: title.title }
             )}
-            caption={t(
-              tight.window === 'session'
-                ? 'auth_files.flow.quota_session'
-                : 'auth_files.flow.quota_week',
-              { percent: tight.left }
-            )}
+            caption={t(`auth_files.flow.quota_${tight.window}`, { percent: tight.left })}
           />
-        ) : quota.status === 'loading' && enabled ? (
+        ) : indicator?.status === 'loading' && enabled ? (
           <span className={styles.quiet}>{t('overview.quota.checking')}</span>
         ) : null}
       </span>

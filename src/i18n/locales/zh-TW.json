@@ -501,7 +501,9 @@
       "more_summary": "篩選、排序、檢視、選取和模型規則",
       "selecting": "選取中",
       "model_rules": "模型規則",
-      "model_rules_hint": "為某個供應商的所有帳號隱藏或重新命名模型。"
+      "model_rules_hint": "為某個供應商的所有帳號隱藏或重新命名模型。",
+      "quota_limit": "{{percent}}% · 最緊的限額",
+      "quota_generic_label": "{{account}}：最接近上限的視窗剩餘額度"
     }
   },
   "antigravity_subscription": {

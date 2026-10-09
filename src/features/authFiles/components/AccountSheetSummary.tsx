@@ -23,6 +23,9 @@ import type { AccountClientLinks as Links } from '@/features/clientProfiles/acco
 import { AccountClientLinks } from '@/features/clientProfiles/components/AccountClientLinks';
 import { accountStatus, poolCopy } from '../accountsView';
 import { AuthFileCooldownSection } from './AuthFileCooldownSection';
+import { ProviderStatusBar } from '@/components/providers/ProviderStatusBar';
+import { statusBarDataFromRecentRequests, type StatusBarData } from '@/utils/recentRequests';
+import cardStyles from './AuthFileCard.module.scss';
 import styles from './AccountSheetSummary.module.scss';
 
 export interface AccountSheetSummaryProps {
@@ -31,6 +34,8 @@ export interface AccountSheetSummaryProps {
   quota: QuotaSummary;
   now: number;
   clientLinks?: Links | null;
+  /** Recent request blocks (from the status bar cache); falls back to the file's own buckets. */
+  statusData?: StatusBarData | null;
   clientRoutesDisabled: boolean;
   disableControls: boolean;
   deleting: string | null;
@@ -56,6 +61,7 @@ export function AccountSheetSummary({
   quota,
   now,
   clientLinks,
+  statusData,
   clientRoutesDisabled,
   disableControls,
   deleting,
@@ -134,12 +140,18 @@ export function AccountSheetSummary({
         </div>
       )}
 
-      <p className={styles.requests}>
-        {t('auth_files.flow.requests_line', {
-          success: (file.successCount ?? 0).toLocaleString(),
-          failed: (file.failureCount ?? 0).toLocaleString(),
-        })}
-      </p>
+      <div className={styles.requests}>
+        <p>
+          {t('auth_files.flow.requests_line', {
+            success: (file.successCount ?? 0).toLocaleString(),
+            failed: (file.failureCount ?? 0).toLocaleString(),
+          })}
+        </p>
+        <ProviderStatusBar
+          statusData={statusData ?? statusBarDataFromRecentRequests(file.recentRequests ?? [])}
+          styles={cardStyles}
+        />
+      </div>
 
       {clientLinks && onUseOnlyFor && !runtimeOnly && (
         <AccountClientLinks

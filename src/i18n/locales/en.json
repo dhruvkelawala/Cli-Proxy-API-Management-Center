@@ -508,7 +508,9 @@
       "more_summary": "Filters, sort, view, selection and model rules",
       "selecting": "Selecting",
       "model_rules": "Model rules",
-      "model_rules_hint": "Hide models from, or rename models for, every account of a provider."
+      "model_rules_hint": "Hide models from, or rename models for, every account of a provider.",
+      "quota_limit": "{{percent}}% · closest limit",
+      "quota_generic_label": "{{account}}: quota left in the window closest to its limit"
     }
   },
   "antigravity_subscription": {

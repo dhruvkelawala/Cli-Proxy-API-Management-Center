@@ -49,10 +49,15 @@
 }
 
 .requests {
-  margin: 0;
+  display: grid;
+  gap: 8px;
   font-size: 13px;
   color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
+
+  p {
+    margin: 0;
+  }
 }
 
 .actions {

@@ -45,9 +45,14 @@ import { OAuthModelAliasCard } from '@/features/authFiles/components/OAuthModelA
 import { ProviderTabs } from '@/features/authFiles/components/ProviderTabs';
 import { AccountList } from '@/features/authFiles/components/AccountList';
 import { AccountSheetSummary } from '@/features/authFiles/components/AccountSheetSummary';
-import { describeAccounts } from '@/features/authFiles/accountsView';
+import {
+  defaultAccountOrder,
+  describeAccounts,
+  shouldShowProviderTabs,
+} from '@/features/authFiles/accountsView';
 import { joinSentences } from '@/features/overview/overviewModel';
-import { useAccountQuota } from '@/features/quota/hooks/useAccountQuota';
+import { useAccountQuota, windowedQuotaProviderOf } from '@/features/quota/hooks/useAccountQuota';
+import { genericQuotaIndicator, indicatorFromSummary } from '@/features/quota/quotaSummary';
 import { invalidateAuthFileDerivedCaches } from '@/features/authFiles/cacheInvalidation';
 import {
   presentAccounts,
@@ -58,6 +63,7 @@ import { deriveAccountTitle } from '@/features/authFiles/identity';
 import {
   buildWildcardSearch,
   matchesAuthFileSearch,
+  resolveAuthFileQuotaType,
   sortAuthFiles,
 } from '@/features/authFiles/logic';
 import { useAuthFilesData } from '@/features/authFiles/hooks/useAuthFilesData';
@@ -77,7 +83,7 @@ import {
   type AuthFilesStatusFilterMode,
   type AuthFilesSortMode,
 } from '@/features/authFiles/uiState';
-import { useAuthStore, useNotificationStore, useThemeStore } from '@/stores';
+import { useAuthStore, useNotificationStore, useQuotaStore, useThemeStore } from '@/stores';
 import { gatewayDisplayHost } from '@/utils/connection';
 import styles from './AuthFilesPage.module.scss';
 
@@ -484,7 +490,12 @@ export function AuthFilesPage() {
     [filesMatchingStatusFilters, normalizedFilter, normalizedSearch, wildcardSearch]
   );
 
-  const sorted = useMemo(() => sortAuthFiles(filtered, sortMode), [filtered, sortMode]);
+  // Default: Claude in routing order (as on Overview and Routing), other providers by name.
+  const sorted = useMemo(
+    () =>
+      sortMode === 'default' ? defaultAccountOrder(filtered) : sortAuthFiles(filtered, sortMode),
+    [filtered, sortMode]
+  );
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -613,6 +624,24 @@ export function AuthFilesPage() {
   /* ---------- Flow 主视图：一句话、列表、详情抽屉、More ---------- */
 
   const { quotaFor, now } = useAccountQuota(files);
+  // Other providers' quota (click-to-load on the Quota page): shown when it is in the cache.
+  const quotaStore = useQuotaStore();
+  const indicatorFor = useCallback(
+    (file: (typeof files)[number]) => {
+      if (windowedQuotaProviderOf(file)) return indicatorFromSummary(quotaFor(file));
+      const type = resolveAuthFileQuotaType(file, 'all');
+      if (!type) return null;
+      const byType: Record<string, Record<string, unknown>> = {
+        antigravity: quotaStore.antigravityQuota,
+        devin: quotaStore.devinQuota,
+        kimi: quotaStore.kimiQuota,
+        meta: quotaStore.metaQuota,
+        xai: quotaStore.xaiQuota,
+      };
+      return genericQuotaIndicator(byType[type]?.[getQuotaCacheKey(file)], now);
+    },
+    [now, quotaFor, quotaStore]
+  );
   const language = i18n.language || 'en';
   const headline = useMemo(() => {
     const problems = files
@@ -630,7 +659,11 @@ export function AuthFilesPage() {
   );
 
   const providerTypes = existingTypes.filter((type) => type !== 'all');
-  const showProviderTabs = providerTypes.length > 1;
+  const showProviderTabs = shouldShowProviderTabs(
+    providerTypes.length,
+    files.length,
+    normalizedFilter
+  );
   const showSelection = selecting || selectionCount > 0;
   const editorFile = prefixProxyEditor
     ? (files.find((file) => file.name === prefixProxyEditor.fileName) ?? null)
@@ -849,7 +882,7 @@ export function AuthFilesPage() {
           <AccountList
             files={pageItems}
             presentations={accountPresentations}
-            quotaFor={quotaFor}
+            indicatorFor={indicatorFor}
             linksFor={accountClientRoutes.linksFor}
             grouped={normalizedFilter === 'all' && providerTypes.length > 1}
             selecting={showSelection}
@@ -1037,6 +1070,11 @@ export function AuthFilesPage() {
               quota={quotaFor(editorFile)}
               now={now}
               clientLinks={accountClientRoutes.linksFor(editorFile)}
+              statusData={
+                typeof editorFile.authIndex === 'string'
+                  ? statusBarCache.get(editorFile.authIndex)
+                  : null
+              }
               clientRoutesDisabled={accountClientRoutes.disabled}
               disableControls={disableControls}
               deleting={deleting}

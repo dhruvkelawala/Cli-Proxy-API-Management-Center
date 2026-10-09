@@ -113,3 +113,49 @@ export const describeAccounts = (
       : { key: `${A}.all_working` },
   ];
 };
+
+/** With provider headings in the list, tabs only help on longer lists (or to leave a filter). */
+export const PROVIDER_TABS_MIN_ACCOUNTS = 7;
+
+export const shouldShowProviderTabs = (
+  providerCount: number,
+  accountCount: number,
+  activeFilter: string
+): boolean =>
+  activeFilter !== 'all' || (providerCount > 1 && accountCount >= PROVIDER_TABS_MIN_ACCOUNTS);
+
+const providerRank = (provider: string) => {
+  const index = PROVIDER_ORDER.indexOf(provider);
+  return index < 0 ? PROVIDER_ORDER.length : index;
+};
+
+const priorityOf = (file: AuthFileItem) =>
+  typeof file.priority === 'number' && Number.isSafeInteger(file.priority) ? file.priority : 0;
+const routingIdOf = (file: AuthFileItem) =>
+  typeof file.id === 'string' && file.id ? file.id : file.name;
+
+/**
+ * The list's default order, matching Overview and Routing: Claude first, its enabled accounts in
+ * routing order (higher priority first, ties by routing ID as the backend breaks them) and turned
+ * off ones after; then Codex and other providers, each by file name.
+ */
+export const defaultAccountOrder = (files: readonly AuthFileItem[]): AuthFileItem[] =>
+  [...files].sort((a, b) => {
+    const pa = accountProviderKey(a);
+    const pb = accountProviderKey(b);
+    const byProvider = providerRank(pa) - providerRank(pb) || pa.localeCompare(pb);
+    if (byProvider !== 0) return byProvider;
+    if (pa === 'claude') {
+      const offA = a.disabled === true ? 1 : 0;
+      const offB = b.disabled === true ? 1 : 0;
+      if (offA !== offB) return offA - offB;
+      if (!offA) {
+        const byPriority = priorityOf(b) - priorityOf(a);
+        if (byPriority !== 0) return byPriority;
+        const ia = routingIdOf(a);
+        const ib = routingIdOf(b);
+        return ia < ib ? -1 : ia > ib ? 1 : 0;
+      }
+    }
+    return a.name.localeCompare(b.name);
+  });

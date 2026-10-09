@@ -94,3 +94,54 @@ export const tightestWindow = (
   }
   return { window: 'week', left: weekLeft, resetAt: quota.weekResetAt };
 };
+
+/**
+ * The one number a list row shows: whichever window runs out first. `session`/`week` for the
+ * five-hour and weekly windows; `limit` for other providers' windows (closest to its limit).
+ */
+export type QuotaIndicator =
+  { status: 'ready'; left: number; window: 'session' | 'week' | 'limit' } | { status: 'loading' };
+
+export const indicatorFromSummary = (summary: QuotaSummary): QuotaIndicator | null => {
+  if (summary.status === 'loading') return { status: 'loading' };
+  const tight = tightestWindow(summary);
+  return tight ? { status: 'ready', left: tight.left, window: tight.window } : null;
+};
+
+const clampPercent = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
+
+/**
+ * Any provider's cached quota state, read generically: every object in it that says how much of
+ * a window is used or left (`usedPercent`, `remainingPercent`, `remainingFraction`) counts, and
+ * the one closest to its limit wins. Windows whose reset time has passed are ignored.
+ */
+export const genericQuotaIndicator = (
+  state: unknown,
+  now: number = Date.now()
+): QuotaIndicator | null => {
+  if (!state || typeof state !== 'object') return null;
+  const status = (state as { status?: unknown }).status;
+  if (status === 'loading') return { status: 'loading' };
+  if (status !== 'success') return null;
+  let lowest: number | null = null;
+  const visit = (node: unknown, depth: number) => {
+    if (!node || typeof node !== 'object' || depth > 5) return;
+    if (Array.isArray(node)) {
+      node.forEach((child) => visit(child, depth + 1));
+      return;
+    }
+    const record = node as Record<string, unknown>;
+    const reset = record.resetAtMs ?? record.resetAt;
+    const over = typeof reset === 'number' && reset > 0 && reset <= now;
+    let left: number | null = null;
+    if (typeof record.usedPercent === 'number') left = 100 - record.usedPercent;
+    else if (typeof record.remainingPercent === 'number') left = record.remainingPercent;
+    else if (typeof record.remainingFraction === 'number') left = record.remainingFraction * 100;
+    if (left !== null && Number.isFinite(left) && !over) {
+      lowest = lowest === null ? clampPercent(left) : Math.min(lowest, clampPercent(left));
+    }
+    Object.values(record).forEach((child) => visit(child, depth + 1));
+  };
+  visit(state, 0);
+  return lowest === null ? null : { status: 'ready', left: lowest, window: 'limit' };
+};

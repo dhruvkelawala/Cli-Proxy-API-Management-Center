@@ -508,7 +508,9 @@
       "more_summary": "Bộ lọc, sắp xếp, kiểu xem, chọn và quy tắc mô hình",
       "selecting": "Đang chọn",
       "model_rules": "Quy tắc mô hình",
-      "model_rules_hint": "Ẩn hoặc đổi tên mô hình cho mọi tài khoản của một nhà cung cấp."
+      "model_rules_hint": "Ẩn hoặc đổi tên mô hình cho mọi tài khoản của một nhà cung cấp.",
+      "quota_limit": "{{percent}}% · giới hạn gần nhất",
+      "quota_generic_label": "{{account}}: hạn mức còn lại ở cửa sổ gần giới hạn nhất"
     }
   },
   "antigravity_subscription": {
