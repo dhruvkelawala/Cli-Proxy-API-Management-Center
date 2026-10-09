@@ -10,6 +10,13 @@ export interface QuotaSummary {
   sessionResetAt: number | null;
   weekLeft: number | null;
   weekResetAt: number | null;
+  /**
+   * The raw used percent reached 100: the window is really out. `sessionLeft` rounds, so 99.5%
+   * used shows as 0% left without being out yet. Undefined (older callers) falls back to
+   * "0% left".
+   */
+  sessionExhausted?: boolean;
+  weekExhausted?: boolean;
 }
 
 export const NO_QUOTA: QuotaSummary = {
@@ -29,6 +36,9 @@ export interface WindowedQuotaState {
     periodHours?: number | null;
   }>;
 }
+
+const exhausted = (used: number | null | undefined) =>
+  typeof used === 'number' && Number.isFinite(used) && used >= 100;
 
 const percentLeft = (used: number | null | undefined) =>
   typeof used === 'number' && Number.isFinite(used)
@@ -59,8 +69,18 @@ export const summarizeQuota = (
     sessionResetAt: session?.resetAtMs ?? null,
     weekLeft: percentLeft(week?.usedPercent),
     weekResetAt: week?.resetAtMs ?? null,
+    sessionExhausted: exhausted(session?.usedPercent),
+    weekExhausted: exhausted(week?.usedPercent),
   };
 };
+
+/** A window that is out: the raw used percent reached 100 (or, without that fact, 0% left). */
+export const windowOut = (left: number | null, isExhausted: boolean | undefined): boolean =>
+  isExhausted ?? left === 0;
+
+/** Shows 0% left (rounded) but the backend has not run out yet. */
+export const windowNearlyOut = (left: number | null, isExhausted: boolean | undefined): boolean =>
+  left === 0 && isExhausted === false;
 
 /** The tighter of the two windows (what runs out first), for one-rail summaries. */
 export const tightestWindow = (

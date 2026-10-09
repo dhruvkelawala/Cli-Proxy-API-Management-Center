@@ -15,7 +15,13 @@ import {
 } from '@/features/authFiles/accountPresentation';
 import { deriveAccountTitle } from '@/features/authFiles/identity';
 import type { AuthFileItem, ClaudeQuotaState } from '@/types';
-import { NO_QUOTA, summarizeQuota, type QuotaSummary } from '@/features/quota/quotaSummary';
+import {
+  NO_QUOTA,
+  summarizeQuota,
+  windowNearlyOut,
+  windowOut,
+  type QuotaSummary,
+} from '@/features/quota/quotaSummary';
 import type { RoutingStrategy } from '@/types/visualConfig';
 import {
   CLIENT_PROFILE_PROVIDERS,
@@ -61,6 +67,8 @@ export interface OrderAccount {
   retryAt: number | null;
   /** Previewed as out of room; nothing was changed. */
   simulatedOut: boolean;
+  /** Shows 0% left in a window but has not run out yet (raw used percent below 100). */
+  nearlyOut: boolean;
   /** Weighted round robin with weight <= 0: the backend never picks it. */
   weightExcluded: boolean;
   priority: number;
@@ -156,12 +164,18 @@ export const buildOrder = ({
       let health = healthOf(file);
       let retryAt = readRetryAt(file);
       const quota = quotaFor(file);
-      // Quota says "at its limit" even when the account itself looks healthy.
+      // Quota says "at its limit" even when the account itself looks healthy, but only once the
+      // raw used percent reaches 100: 99.5% rounds to 0% left while the backend still serves.
+      let nearlyOut = false;
       if (isUsable(health) && quota.status === 'ready') {
-        const weekOut = quota.weekLeft === 0;
-        if (weekOut || quota.sessionLeft === 0) {
+        const weekOut = windowOut(quota.weekLeft, quota.weekExhausted);
+        if (weekOut || windowOut(quota.sessionLeft, quota.sessionExhausted)) {
           health = 'limit';
           retryAt = weekOut ? quota.weekResetAt : quota.sessionResetAt;
+        } else {
+          nearlyOut =
+            windowNearlyOut(quota.weekLeft, quota.weekExhausted) ||
+            windowNearlyOut(quota.sessionLeft, quota.sessionExhausted);
         }
       }
       return {
@@ -173,6 +187,7 @@ export const buildOrder = ({
         health,
         retryAt,
         simulatedOut: simulateOut === id && health !== 'disabled',
+        nearlyOut,
         priority: priorityOverrides[id] ?? savedPriorityOf(file),
         quota,
       };
@@ -437,6 +452,7 @@ export const rankKey = (account: OrderAccount, place: number, shared: boolean): 
 export const healthCopy = (account: OrderAccount, formatWhen: FormatWhen): Copy => {
   if (account.simulatedOut) return { key: `${R}.health.preview_out` };
   if (account.weightExcluded) return { key: `${R}.health.weight_excluded` };
+  if (account.nearlyOut && account.health !== 'disabled') return { key: `${R}.health.nearly_out` };
   switch (account.health) {
     case 'available':
       return { key: `${R}.health.available` };
@@ -460,6 +476,7 @@ export const healthCopy = (account: OrderAccount, formatWhen: FormatWhen): Copy 
 export const healthTone = (account: OrderAccount): 'ok' | 'warn' | 'bad' | 'off' | 'unknown' => {
   if (account.simulatedOut) return 'warn';
   if (account.weightExcluded) return 'off';
+  if (account.nearlyOut && account.health !== 'disabled') return 'warn';
   switch (account.health) {
     case 'available':
     case 'attention':

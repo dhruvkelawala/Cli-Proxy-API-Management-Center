@@ -342,6 +342,19 @@ export const describeOverview = ({
     .filter((situation) => situation !== headline)
     .forEach((situation) => subtitle.push(otherLine(situation, label(situation), join)));
 
+  const nearlyOut = situations.flatMap((situation) =>
+    situation.group.model.order
+      .filter((account) => account.nearlyOut && account.role !== 'off')
+      .map((account) => account.label)
+  );
+  if (nearlyOut.length > 0) {
+    if (tone === 'ok') tone = 'warn';
+    subtitle.push({
+      key: nearlyOut.length === 1 ? `${O}.hero.nearly_out_one` : `${O}.hero.nearly_out_many`,
+      values: { names: join(nearlyOut) },
+    });
+  }
+
   if (attention.length > 0) {
     subtitle.push({
       key: attention.length === 1 ? `${O}.hero.attention_one` : `${O}.hero.attention_many`,
@@ -422,6 +435,7 @@ export const accountStatusCopy = (
   formatWhen: FormatWhen
 ): { tone: 'ok' | 'warn' | 'bad' | 'off' | 'unknown'; copy: Copy } => {
   if (account.role === 'active') {
+    if (account.nearlyOut) return { tone: 'warn', copy: { key: `${O}.state.serving_nearly_out` } };
     return account.health === 'attention'
       ? { tone: 'ok', copy: { key: `${O}.state.serving_errors` } }
       : { tone: 'ok', copy: { key: `${O}.state.serving` } };

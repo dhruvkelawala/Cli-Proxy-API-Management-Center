@@ -2712,7 +2712,8 @@
       "disabled": "已關閉",
       "unknown": "狀態未知",
       "preview_out": "額度用完（預覽）",
-      "weight_excluded": "未使用：權重為 0"
+      "weight_excluded": "未使用：權重為 0",
+      "nearly_out": "即將用完"
     },
     "quota": {
       "week_left": "本週剩餘 {{percent}}%",
@@ -2827,7 +2828,9 @@
       "on": "{{provider}} 正在使用 {{account}}。",
       "backup": "如果 {{account}} 用完，{{provider}} 會切換到 {{backup}}。",
       "attention_one": "{{names}} 需要查看。",
-      "attention_many": "{{names}} 需要查看。"
+      "attention_many": "{{names}} 需要查看。",
+      "nearly_out_one": "{{names}} 即將用完。",
+      "nearly_out_many": "{{names}} 即將用完。"
     },
     "line": {
       "none": "{{provider}} 沒有可用的帳號。",
@@ -2848,7 +2851,8 @@
     "state": {
       "serving": "正在服務",
       "serving_errors": "正在服務，近期有少量錯誤",
-      "standby": "待命"
+      "standby": "待命",
+      "serving_nearly_out": "正在服務，即將用完"
     },
     "flow": {
       "section": "即時流量",

@@ -2699,7 +2699,8 @@
       "disabled": "Turned off",
       "unknown": "Status unknown",
       "preview_out": "Out of room (preview)",
-      "weight_excluded": "Not used: weight is 0"
+      "weight_excluded": "Not used: weight is 0",
+      "nearly_out": "About to run out"
     },
     "quota": {
       "week_left": "{{percent}}% left this week",
@@ -2815,7 +2816,9 @@
       "on": "{{provider}} is on {{account}}.",
       "backup": "If {{account}} runs out, {{provider}} switches to {{backup}}.",
       "attention_one": "{{names}} needs a look.",
-      "attention_many": "{{names}} need a look."
+      "attention_many": "{{names}} need a look.",
+      "nearly_out_one": "{{names}} is about to run out.",
+      "nearly_out_many": "{{names}} are about to run out."
     },
     "line": {
       "none": "{{provider}} has no account that can serve.",
@@ -2836,7 +2839,8 @@
     "state": {
       "serving": "Serving now",
       "serving_errors": "Serving, a few recent errors",
-      "standby": "Standing by"
+      "standby": "Standing by",
+      "serving_nearly_out": "Serving, about to run out"
     },
     "flow": {
       "section": "Live traffic",

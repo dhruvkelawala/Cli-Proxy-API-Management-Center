@@ -2686,7 +2686,8 @@
       "disabled": "已关闭",
       "unknown": "状态未知",
       "preview_out": "额度用完（预览）",
-      "weight_excluded": "未使用：权重为 0"
+      "weight_excluded": "未使用：权重为 0",
+      "nearly_out": "即将用完"
     },
     "quota": {
       "week_left": "本周剩余 {{percent}}%",
@@ -2801,7 +2802,9 @@
       "on": "{{provider}} 正在使用 {{account}}。",
       "backup": "如果 {{account}} 用完，{{provider}} 会切换到 {{backup}}。",
       "attention_one": "{{names}} 需要查看。",
-      "attention_many": "{{names}} 需要查看。"
+      "attention_many": "{{names}} 需要查看。",
+      "nearly_out_one": "{{names}} 即将用完。",
+      "nearly_out_many": "{{names}} 即将用完。"
     },
     "line": {
       "none": "{{provider}} 没有可用的账号。",
@@ -2822,7 +2825,8 @@
     "state": {
       "serving": "正在服务",
       "serving_errors": "正在服务，近期有少量错误",
-      "standby": "待命"
+      "standby": "待命",
+      "serving_nearly_out": "正在服务，即将用完"
     },
     "flow": {
       "section": "实时流量",

@@ -2705,7 +2705,8 @@
       "disabled": "Đã tắt",
       "unknown": "Không rõ trạng thái",
       "preview_out": "Hết hạn mức (xem trước)",
-      "weight_excluded": "Không dùng: trọng số bằng 0"
+      "weight_excluded": "Không dùng: trọng số bằng 0",
+      "nearly_out": "Sắp hết hạn mức"
     },
     "quota": {
       "week_left": "Còn {{percent}}% tuần này",
@@ -2821,7 +2822,9 @@
       "on": "{{provider}} đang dùng {{account}}.",
       "backup": "Nếu {{account}} hết hạn mức, {{provider}} sẽ chuyển sang {{backup}}.",
       "attention_one": "{{names}} cần được xem.",
-      "attention_many": "{{names}} cần được xem."
+      "attention_many": "{{names}} cần được xem.",
+      "nearly_out_one": "{{names}} sắp hết hạn mức.",
+      "nearly_out_many": "{{names}} sắp hết hạn mức."
     },
     "line": {
       "none": "{{provider}} không có tài khoản nào phục vụ được.",
@@ -2842,7 +2845,8 @@
     "state": {
       "serving": "Đang phục vụ",
       "serving_errors": "Đang phục vụ, có vài lỗi gần đây",
-      "standby": "Đang chờ"
+      "standby": "Đang chờ",
+      "serving_nearly_out": "Đang phục vụ, sắp hết hạn mức"
     },
     "flow": {
       "section": "Lưu lượng trực tiếp",
