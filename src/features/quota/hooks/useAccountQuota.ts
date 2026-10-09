@@ -1,11 +1,18 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { apiClient } from '@/services/api';
 import { useQuotaStore } from '@/stores';
 import { useNow } from '@/hooks/useNow';
+import { useInterval } from '@/hooks/useInterval';
 import type { AuthFileItem } from '@/types';
 import { getQuotaCacheKey } from '@/utils/quota/identity';
 import { accountProviderKey } from '@/features/authFiles/accountPresentation';
-import { settleQuotaReads, takeStaleQuotaTargets } from '../quotaFreshness';
+import {
+  QUOTA_MAX_AGE_MS,
+  quotaWindowPassed,
+  releaseQuotaTargets,
+  settleQuotaReads,
+  takeStaleQuotaTargets,
+} from '../quotaFreshness';
 import {
   NO_QUOTA,
   summarizeQuota,
@@ -28,7 +35,8 @@ export const windowedQuotaProviderOf = (file: AuthFileItem): WindowedQuotaProvid
 /**
  * Five-hour and weekly room left for Claude and Codex accounts, from the Quota page's cache and
  * loader. When the page opens, anything not read successfully in the last five minutes is read
- * once (see quotaFreshness). `files` null means the list is not loaded yet.
+ * (see quotaFreshness); while it stays open, quota is re-read every five minutes and as soon as a
+ * window's reset time passes. `files` null means the list is not loaded yet.
  */
 export function useAccountQuota(files: readonly AuthFileItem[] | null) {
   const claudeQuota = useQuotaStore((state) => state.claudeQuota);
@@ -53,25 +61,39 @@ export function useAccountQuota(files: readonly AuthFileItem[] | null) {
   );
 
   const attempted = useRef(new Set<string>());
+  // Every five minutes this visit may ask again (also retries reads that failed).
+  const [round, setRound] = useState(0);
+  useInterval(() => {
+    attempted.current.clear();
+    setRound((value) => value + 1);
+  }, QUOTA_MAX_AGE_MS);
+
   useEffect(() => {
     const connection = apiClient.getConnectionRevision();
-    settleQuotaReads(quotaFiles, connection, Date.now(), stateFor);
+    const at = Date.now();
+    settleQuotaReads(quotaFiles, connection, at, stateFor);
     const stale = takeStaleQuotaTargets(
       quotaFiles,
       connection,
-      Date.now(),
+      at,
       attempted.current,
-      stateFor
+      stateFor,
+      undefined,
+      // A window that reset since it was read is over: read the new one now.
+      (file) => quotaWindowPassed(stateFor(file), at)
     );
-    if (stale.length) {
-      void loadQuota(
-        stale.map((file) => ({
-          file,
-          type: windowedQuotaProviderOf(file) as WindowedQuotaProvider,
-        }))
-      );
-    }
-  }, [loadQuota, quotaFiles, stateFor]);
+    if (stale.length === 0) return;
+    void loadQuota(
+      stale.map((file) => ({
+        file,
+        type: windowedQuotaProviderOf(file) as WindowedQuotaProvider,
+      }))
+    ).then((started) => {
+      // Busy with another batch: nothing was read, so these must not stay pending forever.
+      if (!started) releaseQuotaTargets(stale, connection, attempted.current);
+    });
+    // `now` (minute clock) re-checks reset times; `round` is the five-minute re-read.
+  }, [loadQuota, quotaFiles, stateFor, now, round]);
 
   const quotaFor = useCallback(
     (file: AuthFileItem): QuotaSummary =>

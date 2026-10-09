@@ -5,7 +5,11 @@ import { useConfigStore, useNotificationStore, useQuotaStore } from '@/stores';
 import { useClientProfilesStore } from '@/stores/useClientProfilesStore';
 import { notifyAuthFilesChanged } from '@/features/authFiles/authFilesEvents';
 import { accountProviderKey } from '@/features/authFiles/accountPresentation';
-import { settleQuotaReads, takeStaleQuotaTargets } from '@/features/quota/quotaFreshness';
+import {
+  releaseQuotaTargets,
+  settleQuotaReads,
+  takeStaleQuotaTargets,
+} from '@/features/quota/quotaFreshness';
 import { useQuotaBatchLoader } from '@/features/quota/hooks/useQuotaBatchLoader';
 import { getQuotaCacheKey } from '@/utils/quota/identity';
 import type { AuthFileItem } from '@/types';
@@ -127,7 +131,11 @@ export function useRoutingOrder() {
       attemptedQuota.current,
       stateFor
     );
-    if (stale.length) void loadQuota(stale.map((file) => ({ file, type: PROVIDER })));
+    if (stale.length) {
+      void loadQuota(stale.map((file) => ({ file, type: PROVIDER }))).then((started) => {
+        if (!started) releaseQuotaTargets(stale, connection, attemptedQuota.current);
+      });
+    }
   }, [providerFiles, claudeQuota, loadQuota]);
 
   const sessionAffinity = config?.routingSessionAffinity === true;

@@ -8,7 +8,7 @@ import { isAccountDisabled } from '@/features/authFiles/accountPresentation';
 import { getQuotaCacheKey } from '@/utils/quota/identity';
 import type { AuthFileItem } from '@/types';
 
-/** Quota older than this is re-read when a page opens. */
+/** Quota older than this is re-read when a page opens, and again on this timer while it is open. */
 export const QUOTA_MAX_AGE_MS = 5 * 60_000;
 
 /**
@@ -37,14 +37,16 @@ export const takeStaleQuotaTargets = (
   now: number,
   attempted: Set<string>,
   stateFor: (file: AuthFileItem) => unknown,
-  fresh: QuotaFreshness = quotaFreshness
+  fresh: QuotaFreshness = quotaFreshness,
+  /** Read now even if fresh (e.g. a window's reset time has passed). */
+  isDue: (file: AuthFileItem) => boolean = () => false
 ): AuthFileItem[] =>
   files.filter((file) => {
     if (isAccountDisabled(file)) return false;
     const marker = quotaMarker(connection, file);
     if (fresh.pending.has(marker) || attempted.has(marker)) return false;
     const last = fresh.readAt.get(marker);
-    if (last !== undefined && now - last < QUOTA_MAX_AGE_MS) return false;
+    if (last !== undefined && now - last < QUOTA_MAX_AGE_MS && !isDue(file)) return false;
     attempted.add(marker);
     fresh.pending.set(marker, stateFor(file));
     return true;
@@ -70,3 +72,31 @@ export const settleQuotaReads = (
     fresh.pending.delete(marker);
   });
 };
+
+/**
+ * Undo takeStaleQuotaTargets for reads that never started (the loader was busy): the accounts
+ * are no longer pending and can be taken again on the next pass.
+ */
+export const releaseQuotaTargets = (
+  files: readonly AuthFileItem[],
+  connection: number,
+  attempted: Set<string>,
+  fresh: QuotaFreshness = quotaFreshness
+): void => {
+  files.forEach((file) => {
+    const marker = quotaMarker(connection, file);
+    fresh.pending.delete(marker);
+    attempted.delete(marker);
+  });
+};
+
+/** A window in this cached state has reset since it was read: what it says is over. */
+export const quotaWindowPassed = (
+  state: { windows?: ReadonlyArray<{ resetAtMs?: number | null }> } | undefined,
+  now: number
+): boolean =>
+  Boolean(
+    state?.windows?.some(
+      (window) => typeof window.resetAtMs === 'number' && window.resetAtMs <= now
+    )
+  );
