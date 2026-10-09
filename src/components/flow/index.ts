@@ -11,3 +11,11 @@ export { StatusDot, type StatusTone } from './StatusDot';
 export { MoreDisclosure, type MoreDisclosureProps } from './MoreDisclosure';
 export { DeviceGlyph } from './DeviceGlyph';
 export { moveItem } from './flowLayout';
+export {
+  TrafficFlow,
+  type TrafficAccountNode,
+  type TrafficFlowProps,
+  type TrafficNodeState,
+  type TrafficProviderNode,
+} from './TrafficFlow';
+export { ActionMenu, type ActionMenuItem, type ActionMenuProps } from './ActionMenu';

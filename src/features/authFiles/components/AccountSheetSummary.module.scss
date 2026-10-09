@@ -1,0 +1,114 @@
+// Top of the account details sheet (Flow): quiet lines, colour only for state.
+
+.summary {
+  display: grid;
+  gap: 14px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.statusLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  margin: 0;
+}
+
+.pool {
+  font-size: 13px;
+  color: var(--text-operational-muted);
+}
+
+.warning {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-operational-danger);
+  overflow-wrap: anywhere;
+}
+
+.quota {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.window {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.windowName {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-operational-muted);
+}
+
+.requests {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+
+  p {
+    margin: 0;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.textButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--hairline);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition:
+    color 200ms var(--ease-out-strong),
+    text-decoration-color 200ms var(--ease-out-strong);
+
+  &:hover:not(:disabled) {
+    color: var(--text-primary);
+    text-decoration-color: currentColor;
+  }
+
+  &[data-tone='danger'] {
+    color: var(--text-operational-danger);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-indigo);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+
+  &:disabled {
+    cursor: default;
+    text-decoration: none;
+    color: var(--text-operational-muted);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .textButton {
+    transition: none;
+  }
+}

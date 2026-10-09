@@ -16,6 +16,26 @@
   cursor: not-allowed;
 }
 
+.busy {
+  cursor: progress;
+}
+
+/* Saving: dim the track and thumb (not the label text) and pulse gently. */
+.busy .track {
+  background: color-mix(in srgb, var(--border-color) 60%, transparent);
+  animation: toggle-busy 1.2s ease-in-out infinite;
+}
+
+.busy input:checked + .track {
+  background: color-mix(in srgb, var(--primary-color) 55%, var(--bg-primary));
+}
+
+@keyframes toggle-busy {
+  50% {
+    filter: brightness(0.85);
+  }
+}
+
 .root input {
   width: 0;
   height: 0;
@@ -71,5 +91,9 @@
   .track,
   .thumb {
     transition: none;
+  }
+
+  .busy .track {
+    animation: none;
   }
 }

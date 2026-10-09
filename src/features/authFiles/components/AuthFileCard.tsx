@@ -385,11 +385,9 @@ export function AuthFileCard(props: AuthFileCardProps) {
               // Fixed name; the switch's checked state (and the visible label) carry on/off.
               ariaLabel={accountName}
               checked={enabled}
-              disabled={
-                disableControls ||
-                statusUpdating[getAuthFileRefreshKey(file)] === true ||
-                isManualRefreshing
-              }
+              disabled={disableControls}
+              // Saving or refreshing: stays focusable, announced busy, ignores input.
+              busy={statusUpdating[getAuthFileRefreshKey(file)] === true || isManualRefreshing}
               onChange={(value) => onToggleStatus(file, value)}
             />
           </div>

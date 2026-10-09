@@ -1,10 +1,5 @@
 export const AUTH_FILES_SORT_MODES = ['default', 'az', 'priority'] as const;
-export const AUTH_FILES_STATUS_FILTER_MODES = [
-  'all',
-  'enabled',
-  'disabled',
-  'problem',
-] as const;
+export const AUTH_FILES_STATUS_FILTER_MODES = ['all', 'enabled', 'disabled', 'problem'] as const;
 
 export type AuthFilesSortMode = (typeof AUTH_FILES_SORT_MODES)[number];
 export type AuthFilesStatusFilterMode = (typeof AUTH_FILES_STATUS_FILTER_MODES)[number];
@@ -21,7 +16,12 @@ export type AuthFilesUiState = {
   regularPageSize?: number;
   compactPageSize?: number;
   sortMode?: AuthFilesSortMode;
+  /** Accounts main view: the list (default) or the card grid. */
+  viewMode?: 'list' | 'cards';
 };
+
+export const isAccountsViewMode = (value: unknown): value is 'list' | 'cards' =>
+  value === 'list' || value === 'cards';
 
 const AUTH_FILES_UI_STATE_KEY = 'authFilesPage.uiState';
 const AUTH_FILES_COMPACT_MODE_KEY = 'authFilesPage.compactMode';

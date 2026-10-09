@@ -455,6 +455,8 @@ describe('quota and time formatting', () => {
       sessionResetAt: 1,
       weekLeft: 54,
       weekResetAt: 2,
+      sessionExhausted: false,
+      weekExhausted: false,
     });
     expect(summarizeClaudeQuota({ status: 'loading', windows: [] }).status).toBe('loading');
     expect(summarizeClaudeQuota(undefined).status).toBe('none');

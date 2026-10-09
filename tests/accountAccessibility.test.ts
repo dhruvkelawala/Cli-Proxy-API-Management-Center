@@ -224,8 +224,8 @@ describe('operational status colours', () => {
       'AuthFileQuota',
       'AuthFilesToolbar',
       'ProviderTabs',
-      'VaultHeader',
-      'VaultPulse',
+      'AccountList',
+      'AccountSheetSummary',
       'AuthFileDetailsSheet',
     ]) {
       const css = read(`${dir}/${file}.module.scss`);

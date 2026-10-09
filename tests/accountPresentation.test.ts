@@ -302,7 +302,6 @@ describe('account presentation locales', () => {
     'auth_files.meta_unknown',
     'auth_files.pool_attention',
     'auth_files.details_routing_scope',
-    'dashboard.stat_credentials_hint_unknown',
     'auth_files.gateway_context',
     'auth_files.gateway_context_unknown',
     'auth_files.status_toggle_enabled',
@@ -314,9 +313,6 @@ describe('account presentation locales', () => {
     'auth_files.details_advanced_title',
     'auth_files.details_advanced_hint',
     'auth_files.prefix_hint',
-    'dashboard.health_available',
-    'dashboard.health_attention',
-    'dashboard.health_unknown',
     'sidebar.gateway',
   ];
   const lookup = (messages: Record<string, unknown>, path: string): unknown =>

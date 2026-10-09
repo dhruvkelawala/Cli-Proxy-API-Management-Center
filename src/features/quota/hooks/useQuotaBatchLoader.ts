@@ -34,9 +34,10 @@ export function useQuotaBatchLoader() {
   const requestIdRef = useRef(0);
 
   const loadQuota = useCallback(
-    async (targets: QuotaFileEntry[]) => {
-      if (loadingRef.current) return;
-      if (targets.length === 0) return;
+    /** Resolves false when nothing started (busy with another batch, or no targets). */
+    async (targets: QuotaFileEntry[]): Promise<boolean> => {
+      if (loadingRef.current) return false;
+      if (targets.length === 0) return false;
       loadingRef.current = true;
       const requestId = ++requestIdRef.current;
       const cacheGeneration = captureQuotaCacheGeneration();
@@ -121,6 +122,7 @@ export function useQuotaBatchLoader() {
           loadingRef.current = false;
         }
       }
+      return true;
     },
     [t]
   );

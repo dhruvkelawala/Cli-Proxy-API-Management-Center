@@ -12,9 +12,9 @@
   flex-direction: column;
   gap: 11px;
   padding: 15px 16px;
-  border-radius: 14px;
-  border: 1px solid var(--border-color);
-  background: color-mix(in srgb, var(--bg-primary) 82%, transparent);
+  border-radius: 12px;
+  border: 1px solid var(--hairline);
+  background: color-mix(in srgb, var(--bg-primary) 55%, var(--bg-secondary));
   transition:
     transform var(--dur-hover, 200ms) var(--ease-out-strong, ease-out),
     border-color var(--dur-hover, 200ms) var(--ease-out-strong, ease-out),
@@ -23,9 +23,7 @@
 
 @media (hover: hover) and (pointer: fine) {
   .card:hover {
-    transform: translateY(-2px);
-    border-color: var(--border-hover);
-    box-shadow: 0 12px 26px -14px rgb(0 0 0 / 0.16);
+    border-color: color-mix(in srgb, var(--text-tertiary) 40%, var(--hairline));
   }
 }
 

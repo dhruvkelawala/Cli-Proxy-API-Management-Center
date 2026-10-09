@@ -1,4 +1,4 @@
-import { useCallback, useId, useMemo, type MouseEvent } from 'react';
+import { useCallback, useId, useMemo, type MouseEvent, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
 import { Sheet } from '@/components/ui/Sheet';
@@ -43,6 +43,10 @@ export type AuthFileDetailsSheetProps = {
   accountLabel?: string;
   /** Email/project shown under a note title. */
   accountDetail?: string;
+  /** Sheet eyebrow (e.g. the provider); defaults to "Account details". */
+  eyebrow?: string;
+  /** How the account is doing and its one-off actions, shown above the settings. */
+  summary?: ReactNode;
   updatedText: string;
   dirty: boolean;
   onClose: () => void;
@@ -63,6 +67,8 @@ export function AuthFileDetailsSheet(props: AuthFileDetailsSheetProps) {
     editor,
     accountLabel,
     accountDetail,
+    eyebrow,
+    summary,
     updatedText,
     dirty,
     onClose,
@@ -143,7 +149,7 @@ export function AuthFileDetailsSheet(props: AuthFileDetailsSheetProps) {
       confirmClose={confirmClose}
       size="md"
       closeDisabled={editor?.saving === true}
-      eyebrow={t('auth_files.prefix_proxy_button')}
+      eyebrow={eyebrow || t('auth_files.prefix_proxy_button')}
       title={accountLabel || editor?.fileName || ''}
       description={
         accountLabel && editor?.fileName
@@ -189,6 +195,7 @@ export function AuthFileDetailsSheet(props: AuthFileDetailsSheetProps) {
     >
       {editor && (
         <div className={styles.editor}>
+          {summary}
           {editor.loading ? (
             <div className={styles.loading}>
               <LoadingSpinner size={14} />

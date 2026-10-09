@@ -146,3 +146,15 @@ export function paginate<T>(items: T[], page: number, pageSize: number): QuotaPa
     totalPages,
   };
 }
+
+/**
+ * Provider tabs worth showing: "all", every provider that has accounts, and the active tab
+ * (so a remembered choice never disappears from under the user).
+ */
+export function visibleQuotaTabs(
+  tabIds: readonly string[],
+  counts: Record<string, number>,
+  active: string
+): string[] {
+  return tabIds.filter((id) => id === 'all' || id === active || (counts[id] ?? 0) > 0);
+}

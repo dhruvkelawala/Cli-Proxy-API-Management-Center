@@ -1,4 +1,5 @@
 import { useQuotaStore } from '@/stores/useQuotaStore';
+import { forgetQuotaReads } from '@/features/quota/quotaFreshness';
 
 type ModelsInvalidator = (names?: string[]) => void;
 
@@ -9,4 +10,6 @@ export const invalidateAuthFileDerivedCaches = (
 ): void => {
   invalidateModels(names);
   useQuotaStore.getState().clearQuotaCache(names);
+  // The pages that read quota by themselves must read these accounts again at once.
+  forgetQuotaReads(names);
 };

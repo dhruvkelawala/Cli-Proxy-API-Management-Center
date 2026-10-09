@@ -60,3 +60,11 @@
     animation: none;
   }
 }
+
+// Narrow screens: actions move under the sentence instead of squeezing it.
+@media (max-width: 560px) {
+  .header:has(.actions) {
+    flex-direction: column;
+    gap: 18px;
+  }
+}

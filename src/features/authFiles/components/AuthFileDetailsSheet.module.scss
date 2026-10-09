@@ -96,17 +96,16 @@
 }
 
 .section + .section {
-  padding-top: 18px;
-  border-top: 1px solid color-mix(in srgb, var(--border-color) 70%, transparent);
+  padding-top: 20px;
+  border-top: 1px solid var(--hairline);
 }
 
-/* 与抽屉 eyebrow 同语汇：分组标签退后，字段标签保持主层级 */
+/* Flow eyebrow: quiet uppercase label; field labels keep the main hierarchy. */
 .sectionTitle {
   margin: 0;
-  font-family: $font-mono;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   line-height: 1.4;
   text-transform: uppercase;
   color: var(--text-secondary);

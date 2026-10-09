@@ -7,6 +7,11 @@ interface ToggleSwitchProps {
   label?: ReactNode;
   ariaLabel?: string;
   disabled?: boolean;
+  /**
+   * A change is saving. The switch stays focusable (disabling it would drop keyboard focus),
+   * says so to assistive technology (aria-busy, aria-disabled), looks dimmed and ignores input.
+   */
+  busy?: boolean;
   labelPosition?: 'left' | 'right';
 }
 
@@ -16,9 +21,11 @@ export function ToggleSwitch({
   label,
   ariaLabel,
   disabled = false,
+  busy = false,
   labelPosition = 'right',
 }: ToggleSwitchProps) {
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (busy) return;
     onChange(event.target.checked);
   };
 
@@ -26,6 +33,7 @@ export function ToggleSwitch({
     styles.root,
     labelPosition === 'left' ? styles.labelLeft : '',
     disabled ? styles.disabled : '',
+    busy ? styles.busy : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -38,6 +46,8 @@ export function ToggleSwitch({
         checked={checked}
         onChange={handleChange}
         disabled={disabled}
+        aria-busy={busy ? true : undefined}
+        aria-disabled={busy && !disabled ? true : undefined}
         aria-label={ariaLabel}
       />
       <span className={styles.track}>
