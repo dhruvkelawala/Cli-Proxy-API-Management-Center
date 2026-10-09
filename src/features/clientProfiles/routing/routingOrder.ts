@@ -15,6 +15,7 @@ import {
 } from '@/features/authFiles/accountPresentation';
 import { deriveAccountTitle } from '@/features/authFiles/identity';
 import type { AuthFileItem, ClaudeQuotaState } from '@/types';
+import { NO_QUOTA, summarizeQuota, type QuotaSummary } from '@/features/quota/quotaSummary';
 import type { RoutingStrategy } from '@/types/visualConfig';
 import {
   CLIENT_PROFILE_PROVIDERS,
@@ -45,22 +46,7 @@ export type AccountHealth =
  */
 export type AccountRole = 'active' | 'next' | 'backup' | 'resting' | 'off';
 
-export interface QuotaSummary {
-  status: 'loading' | 'ready' | 'none';
-  /** Percent left, 0-100. */
-  sessionLeft: number | null;
-  sessionResetAt: number | null;
-  weekLeft: number | null;
-  weekResetAt: number | null;
-}
-
-export const NO_QUOTA: QuotaSummary = {
-  status: 'none',
-  sessionLeft: null,
-  sessionResetAt: null,
-  weekLeft: null,
-  weekResetAt: null,
-};
+export { NO_QUOTA, type QuotaSummary } from '@/features/quota/quotaSummary';
 
 export interface OrderAccount {
   /** Routing ID (auth ID, else file name); the backend breaks ties by it. */
@@ -82,38 +68,11 @@ export interface OrderAccount {
   quota: QuotaSummary;
 }
 
-const percentLeft = (used: number | null | undefined) =>
-  typeof used === 'number' && Number.isFinite(used)
-    ? Math.max(0, Math.min(100, Math.round(100 - used)))
-    : null;
-
-/**
- * Weekly and five-hour room left from the Quota page's cached Claude state. A window whose
- * reset time has already passed describes a period that is over, so it is ignored (unknown)
- * rather than shown as current.
- */
+/** Weekly and five-hour room left from the Quota page's cached Claude state. */
 export const summarizeClaudeQuota = (
   state: ClaudeQuotaState | undefined,
   now: number = Date.now()
-): QuotaSummary => {
-  if (!state || state.status === 'idle' || state.status === 'error') return NO_QUOTA;
-  if (state.status === 'loading') return { ...NO_QUOTA, status: 'loading' };
-  const current = <T extends { resetAtMs?: number | null }>(window: T | undefined): T | null =>
-    window && !(typeof window.resetAtMs === 'number' && window.resetAtMs <= now) ? window : null;
-  const sessionWindow = state.windows.find((window) => window.periodHours === 5);
-  const session = current(sessionWindow);
-  const week = current(
-    state.windows.find((window) => window !== sessionWindow && window.periodHours === 168)
-  );
-  if (!session && !week) return NO_QUOTA;
-  return {
-    status: 'ready',
-    sessionLeft: percentLeft(session?.usedPercent),
-    sessionResetAt: session?.resetAtMs ?? null,
-    weekLeft: percentLeft(week?.usedPercent),
-    weekResetAt: week?.resetAtMs ?? null,
-  };
-};
+): QuotaSummary => summarizeQuota(state, now);
 
 const readRetryAt = (file: AuthFileItem): number | null => {
   const raw = file['next_retry_after'];
