@@ -53,7 +53,11 @@ export interface DescribeSystemInput {
   latest: LatestCheck | null;
 }
 
-const displayVersion = (version: string) => `v${version.trim().replace(/^[vV]+/, '')}`;
+/** "8.1.0" → "v8.1.0"; "v8.1.0" stays; a name such as "dev" is shown as it is. */
+export const displayVersion = (version: string) => {
+  const trimmed = version.trim();
+  return /^\d/.test(trimmed) ? `v${trimmed}` : trimmed;
+};
 
 export function describeSystem({
   connection,

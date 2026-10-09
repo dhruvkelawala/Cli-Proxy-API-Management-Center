@@ -17,7 +17,6 @@ import { configApi, versionApi } from '@/services/api';
 import { useApiKeysForModels } from '@/hooks/useApiKeysForModels';
 import { formatDateTimeValue } from '@/utils/format';
 import { classifyModels } from '@/utils/models';
-import { STORAGE_KEY_AUTH } from '@/utils/constants';
 import iconGemini from '@/assets/icons/gemini.svg';
 import iconClaude from '@/assets/icons/claude.svg';
 import iconMeta from '@/assets/icons/meta.svg';
@@ -33,6 +32,7 @@ import iconGrok from '@/assets/icons/grok.svg';
 import iconGrokDark from '@/assets/icons/grok-dark.svg';
 import iconDeepseek from '@/assets/icons/deepseek.svg';
 import iconMinimax from '@/assets/icons/minimax.svg';
+import { requestClearLoginData } from './clearLoginData';
 import { compareVersions, describeSystem, type LatestCheck } from './systemHeadline';
 import styles from './SystemPage.module.scss';
 
@@ -136,21 +136,14 @@ export function SystemPage() {
     }
   };
 
-  const handleClearLoginStorage = () => {
-    showConfirmation({
-      title: t('system_info.clear_login_title', { defaultValue: 'Clear Login Storage' }),
-      message: t('system_info.clear_login_confirm'),
-      variant: 'danger',
-      confirmText: t('common.confirm'),
-      onConfirm: () => {
-        auth.logout();
-        if (typeof localStorage === 'undefined') return;
-        const keysToRemove = [STORAGE_KEY_AUTH, 'isLoggedIn', 'apiBase', 'apiUrl', 'managementKey'];
-        keysToRemove.forEach((key) => localStorage.removeItem(key));
-        showNotification(t('notification.login_storage_cleared'), 'success');
-      },
+  const handleClearLoginStorage = () =>
+    requestClearLoginData({
+      t,
+      confirm: showConfirmation,
+      logout: auth.logout,
+      storage: typeof localStorage === 'undefined' ? undefined : localStorage,
+      notify: showNotification,
     });
-  };
 
   const openRequestLogModal = useCallback(() => {
     setRequestLogTouched(false);
@@ -211,10 +204,20 @@ export function SystemPage() {
     }
   };
 
+  // An update-check result belongs to the connection it was made on.
+  useEffect(() => {
+    setLatestCheck(null);
+  }, [auth.apiBase, auth.managementKey]);
+
   const handleVersionCheck = useCallback(async () => {
+    const session = { apiBase: auth.apiBase, managementKey: auth.managementKey };
     setCheckingVersion(true);
     try {
       const data = await versionApi.checkLatest();
+      const current = useAuthStore.getState();
+      if (current.apiBase !== session.apiBase || current.managementKey !== session.managementKey) {
+        return;
+      }
       const latestRaw = data?.['latest-version'] ?? data?.latest_version ?? data?.latest ?? '';
       const latest = typeof latestRaw === 'string' ? latestRaw : String(latestRaw ?? '');
       const comparison = compareVersions(latest, auth.serverVersion);
@@ -243,7 +246,7 @@ export function SystemPage() {
     } finally {
       setCheckingVersion(false);
     }
-  }, [auth.serverVersion, showNotification, t]);
+  }, [auth.apiBase, auth.managementKey, auth.serverVersion, showNotification, t]);
 
   useEffect(() => {
     fetchConfig().catch(() => {
