@@ -89,7 +89,7 @@ export function useRoutingOrder() {
   const data = useClientRoutesData();
   const { files, strategy, reloadFiles } = data;
   const claudeQuota = useQuotaStore((state) => state.claudeQuota);
-  const { loadQuota } = useQuotaBatchLoader();
+  const { batchLoading, loadQuota } = useQuotaBatchLoader();
 
   const [overrides, setOverrides] = useState<Record<string, number> | null>(null);
   const [saving, setSaving] = useState(false);
@@ -123,7 +123,7 @@ export function useRoutingOrder() {
   useEffect(() => {
     const connection = apiClient.getConnectionRevision();
     const stateFor = (file: AuthFileItem) => claudeQuota[getQuotaCacheKey(file)];
-    settleQuotaReads(providerFiles, connection, Date.now(), stateFor);
+    settleQuotaReads(providerFiles, connection, Date.now(), stateFor, undefined, batchLoading);
     const stale = takeStaleQuotaTargets(
       providerFiles,
       connection,
@@ -136,7 +136,7 @@ export function useRoutingOrder() {
         if (!started) releaseQuotaTargets(stale, connection, attemptedQuota.current);
       });
     }
-  }, [providerFiles, claudeQuota, loadQuota]);
+  }, [providerFiles, claudeQuota, loadQuota, batchLoading]);
 
   const sessionAffinity = config?.routingSessionAffinity === true;
   const buildFrom = useCallback(

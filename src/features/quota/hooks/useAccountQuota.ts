@@ -41,7 +41,7 @@ export const windowedQuotaProviderOf = (file: AuthFileItem): WindowedQuotaProvid
 export function useAccountQuota(files: readonly AuthFileItem[] | null) {
   const claudeQuota = useQuotaStore((state) => state.claudeQuota);
   const codexQuota = useQuotaStore((state) => state.codexQuota);
-  const { loadQuota } = useQuotaBatchLoader();
+  const { batchLoading, loadQuota } = useQuotaBatchLoader();
   // Minute clock: windows that reset while the page is open drop out on the next tick.
   const now = useNow();
 
@@ -71,7 +71,7 @@ export function useAccountQuota(files: readonly AuthFileItem[] | null) {
   useEffect(() => {
     const connection = apiClient.getConnectionRevision();
     const at = Date.now();
-    settleQuotaReads(quotaFiles, connection, at, stateFor);
+    settleQuotaReads(quotaFiles, connection, at, stateFor, undefined, batchLoading);
     const stale = takeStaleQuotaTargets(
       quotaFiles,
       connection,
@@ -93,7 +93,7 @@ export function useAccountQuota(files: readonly AuthFileItem[] | null) {
       if (!started) releaseQuotaTargets(stale, connection, attempted.current);
     });
     // `now` (minute clock) re-checks reset times; `round` is the five-minute re-read.
-  }, [loadQuota, quotaFiles, stateFor, now, round]);
+  }, [batchLoading, loadQuota, quotaFiles, stateFor, now, round]);
 
   const quotaFor = useCallback(
     (file: AuthFileItem): QuotaSummary =>
