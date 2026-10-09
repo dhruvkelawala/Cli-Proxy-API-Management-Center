@@ -143,8 +143,11 @@ describe('row switch while its update is in flight', () => {
         })
       );
     const switchTag = (markup: string) => markup.match(/<input[^>]*role="switch"[^>]*>/)?.[0] ?? '';
-    expect(switchTag(render(true, false))).not.toContain('disabled');
-    expect(switchTag(render(false, true))).toContain('disabled');
+    const busy = switchTag(render(true, false));
+    expect(busy).not.toMatch(/\sdisabled=""/);
+    expect(busy).toContain('aria-busy="true"');
+    expect(busy).toContain('aria-disabled="true"');
+    expect(switchTag(render(false, true))).toMatch(/\sdisabled=""/);
   });
 });
 

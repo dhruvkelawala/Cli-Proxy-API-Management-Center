@@ -144,9 +144,8 @@ export function AccountRow({
             ariaLabel={accountName}
             checked={enabled}
             disabled={toggleDisabled}
-            onChange={(value) => {
-              if (!toggleBusy) onToggleStatus(file, value);
-            }}
+            busy={toggleBusy}
+            onChange={(value) => onToggleStatus(file, value)}
           />
         )}
       </span>
