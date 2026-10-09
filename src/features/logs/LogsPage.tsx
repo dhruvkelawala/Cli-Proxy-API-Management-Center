@@ -16,12 +16,14 @@ import {
   IconCode,
   IconEye,
   IconEyeOff,
+  IconDownload,
   IconMaximize2,
   IconMinimize2,
   IconRefreshCw,
   IconSearch,
   IconSlidersHorizontal,
   IconTimer,
+  IconTrash2,
   IconX,
 } from '@/components/ui/icons';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
@@ -45,7 +47,7 @@ import { HTTP_METHODS, STATUS_GROUPS, type LogState } from './model/logTypes';
 import { createLogRequestGuard } from './model/logRequests';
 import { errorLogViewerReducer } from './model/errorLogViewer';
 import { describeLogs } from './model/logsHeadline';
-import { shouldExitLogFullscreen } from './model/logFullscreen';
+import { inertOutside, shouldExitLogFullscreen } from './model/logFullscreen';
 import { useLogFilters } from './hooks/useLogFilters';
 import { isNearBottom, useLogScroller } from './hooks/useLogScroller';
 import styles from './LogsPage.module.scss';
@@ -60,6 +62,9 @@ export function LogsPage() {
   const managementKey = useAuthStore((state) => state.managementKey);
   const config = useConfigStore((state) => state.config);
   const requestLogEnabled = config?.requestLog ?? false;
+  const fetchConfig = useConfigStore((state) => state.fetchConfig);
+  /** Until the configuration is read, "logging to file is off" is not known yet. */
+  const [settingStatus, setSettingStatus] = useState<'checking' | 'failed'>('checking');
 
   /** More holds the error request logs; they are read only while it is open. */
   const [moreOpen, setMoreOpen] = useState(false);
@@ -112,6 +117,18 @@ export function LogsPage() {
   });
 
   const disableControls = connectionStatus !== 'connected';
+
+  useEffect(() => {
+    if (config || connectionStatus !== 'connected') return;
+    let cancelled = false;
+    setSettingStatus('checking');
+    fetchConfig().catch(() => {
+      if (!cancelled) setSettingStatus('failed');
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [config, connectionStatus, fetchConfig]);
   const refreshDisabled = disableControls || loading || clearingLogs || cpaNeedsFileLogging;
   const autoRefreshDisabled = disableControls || showFileLoggingRequired;
   const clearDisabled = disableControls || clearingLogs || showFileLoggingRequired;
@@ -149,6 +166,10 @@ export function LogsPage() {
   };
 
   useHeaderRefresh(async () => {
+    if (!useConfigStore.getState().config) {
+      setSettingStatus('checking');
+      await fetchConfig().catch(() => setSettingStatus('failed'));
+    }
     await loadLogs(false);
     if (moreOpen) await loadErrorLogs();
   });
@@ -386,6 +407,9 @@ export function LogsPage() {
 
     document.body.classList.add('logs-fullscreen-active');
     lockScroll();
+    // Everything behind the fullscreen viewer is inert, as behind a dialog.
+    const overlay = document.querySelector<HTMLElement>(`.${styles.logCardFullscreen}`);
+    const restoreInert = overlay ? inertOutside(overlay) : () => undefined;
 
     const handleEscape = (event: KeyboardEvent) => {
       if (!shouldExitLogFullscreen(event, !!document.querySelector('.modal-overlay'))) return;
@@ -396,6 +420,7 @@ export function LogsPage() {
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
+      restoreInert();
       document.body.classList.remove('logs-fullscreen-active');
       unlockScroll();
     };
@@ -404,7 +429,10 @@ export function LogsPage() {
   const headline = describeLogs({
     connected: !disableControls,
     fileLoggingOff: showFileLoggingRequired,
+    fileOffReason: cpaNeedsFileLogging ? 'config' : 'server',
+    setting: config ? 'known' : settingStatus,
     failed: Boolean(error),
+    errorMessage: error || undefined,
     loading,
     live: autoRefresh,
     lineCount: logBuffer.buffer.length,
@@ -420,7 +448,8 @@ export function LogsPage() {
           subtitle={
             headline.subtitle ? t(headline.subtitle.key, headline.subtitle.values) : undefined
           }
-          live
+          // Counts and times change every read; announcing them each time would be noise.
+          live={false}
         />
         {headline.linkToSetting && (
           <p className={flow.actions}>
@@ -434,13 +463,15 @@ export function LogsPage() {
         )}
       </header>
 
-      <div className={styles.content}>
+      {/* With logging to file off there is nothing to read: the sentence above says so once. */}
+      <div className={styles.content} hidden={showFileLoggingRequired}>
         <Card
           className={[styles.logCard, fullscreenLogs ? styles.logCardFullscreen : '']
             .filter(Boolean)
             .join(' ')}
         >
-          {error && (
+          {/* The read error is the page's subtitle; fullscreen hides that, so repeat it here only then. */}
+          {error && fullscreenLogs && (
             <div className="error-box" role="alert">
               {error}
             </div>
@@ -709,6 +740,33 @@ export function LogsPage() {
               >
                 <IconTimer size={16} />
               </Button>
+              {fullscreenLogs ? (
+                <>
+                  {/* More is behind the fullscreen viewer, so its actions come along. */}
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={downloadLogs}
+                    disabled={logBuffer.buffer.length === 0}
+                    className={styles.actionButton}
+                    title={t('logs.download_cached')}
+                    aria-label={t('logs.download_cached')}
+                  >
+                    <IconDownload size={16} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearLogs}
+                    disabled={clearDisabled}
+                    className={styles.actionButton}
+                    title={t('logs.clear_button')}
+                    aria-label={t('logs.clear_button')}
+                  >
+                    <IconTrash2 size={16} />
+                  </Button>
+                </>
+              ) : null}
               <Button
                 variant="secondary"
                 size="sm"
@@ -898,19 +956,6 @@ export function LogsPage() {
               <EmptyState
                 title={t('logs.search_empty_title')}
                 description={t('logs.search_empty_desc')}
-              />
-            ) : showFileLoggingRequired ? (
-              <EmptyState
-                title={t(
-                  cpaNeedsFileLogging
-                    ? 'logs.cpa_file_logging_required_title'
-                    : 'logs.file_logging_required_title'
-                )}
-                description={t(
-                  cpaNeedsFileLogging
-                    ? 'logs.cpa_file_logging_required_desc'
-                    : 'logs.file_logging_required_desc'
-                )}
               />
             ) : (
               <EmptyState title={t('logs.empty_title')} description={t('logs.empty_desc')} />
