@@ -10,7 +10,7 @@ import type {
   ClientProfilesSnapshot,
 } from '@/types/clientProfiles';
 import { accountDisplayLabel, matrixCellId } from '../model';
-import type { ClientRoute } from './routingOrder';
+import { describeClientRoutes, type ClientRoute } from './routingOrder';
 import styles from './RoutingPage.module.scss';
 
 export interface RoutingMoreProps {
@@ -20,8 +20,6 @@ export interface RoutingMoreProps {
   routes: ClientRoute[] | null;
   snapshot: ClientProfilesSnapshot | null;
   files: AuthFileItem[] | null;
-  /** Shown above the clients (enforcement / unsupported notices). */
-  notices?: ReactNode;
   onEditRule: (profileRef: string, provider: ClientProfileProvider) => void;
   onOpenProfile: (profileRef: string | null) => void;
 }
@@ -42,28 +40,31 @@ export function RoutingMore({
   routes,
   snapshot,
   files,
-  notices,
   onEditRule,
   onOpenProfile,
 }: RoutingMoreProps) {
   const { t } = useTranslation();
 
-  const codexRule = (profile: ClientProfile): string => {
-    const policy = profile.policies.codex;
-    if (policy.mode === 'automatic') return t('routing.rule.automatic');
+  /** "only Work" from the gateway inventory, so it reads right even without the order. */
+  const ruleLabel = (profile: ClientProfile, provider: ClientProfileProvider): string => {
+    const policy = profile.policies[provider];
+    if (policy.mode === 'automatic') {
+      return t(provider === 'claude' ? 'routing.rule.follows' : 'routing.rule.automatic');
+    }
     if (policy.mode !== 'only') return t('routing.rule.unknown');
     const matches = (snapshot?.accounts ?? []).filter((a) => a.accountRef === policy.accountRef);
     return matches.length === 1
       ? t('routing.rule.only', { account: accountDisplayLabel(matches[0], files) })
       : t('routing.rule.only_missing');
   };
-  const claudeRule = (route: ClientRoute): string => {
-    if (!route.locked) return t('routing.rule.follows');
-    if (route.profile.policies.claude.mode !== 'only') return t('routing.rule.unknown');
-    return route.target
-      ? t('routing.rule.only', { account: route.target.label })
-      : t('routing.rule.only_missing');
-  };
+  // Codex Only rules resolved the same way as Claude's, for their will-fail warning.
+  const codexBroken = new Set(
+    snapshot
+      ? describeClientRoutes(snapshot, 'codex', [])
+          .filter((route) => route.locked && route.broken)
+          .map((route) => route.profile.profileRef)
+      : []
+  );
   const keyCount = (profileRef: string) =>
     (snapshot?.keys ?? []).filter((key) => key.profileRef === profileRef).length;
 
@@ -72,14 +73,11 @@ export function RoutingMore({
       {/* The shared band carries its own heading ("Shared pool"). */}
       <div className={styles.moreSection}>{band}</div>
 
-      {!(routes && routes.length > 0) && notices}
-
       {routes && routes.length > 0 && (
         <Section
           title={t('routing.more_sections.locks')}
           note={t('routing.more_sections.locks_note')}
         >
-          {notices}
           <ul className={styles.rows}>
             {routes.map((route) => (
               <li key={route.profile.profileRef} className={styles.row}>
@@ -89,19 +87,26 @@ export function RoutingMore({
                 </span>
                 <span className={styles.rowRules}>
                   <span className={styles.rowRule} data-locked={route.locked}>
-                    {t('routing.rule.claude', { rule: claudeRule(route) })}
+                    {t('routing.rule.claude', { rule: ruleLabel(route.profile, 'claude') })}
                   </span>
                   <span className={styles.rowRuleQuiet}>
-                    {t('routing.rule.codex', { rule: codexRule(route.profile) })}
+                    {t('routing.rule.codex', { rule: ruleLabel(route.profile, 'codex') })}
                   </span>
+                  {codexBroken.has(route.profile.profileRef) && (
+                    <span className={styles.rowWarn} data-broken="true">
+                      {t('routing.rule.codex_will_fail', { client: route.shortName })}
+                    </span>
+                  )}
                   {route.locked && (
                     <span className={styles.rowWarn} data-broken={route.broken}>
                       {route.broken
                         ? t('routing.rule.broken', { client: route.shortName })
-                        : t('routing.rule.strict_warning', {
-                            client: route.shortName,
-                            account: route.target?.label ?? '',
-                          })}
+                        : route.target
+                          ? t('routing.rule.strict_warning', {
+                              client: route.shortName,
+                              account: route.target.label,
+                            })
+                          : t('routing.rule.strict_warning_generic', { client: route.shortName })}
                     </span>
                   )}
                 </span>

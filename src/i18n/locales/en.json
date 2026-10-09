@@ -2699,7 +2699,9 @@
       "many": "{{names}} all use this order.",
       "locked": "{{client}} is locked to {{account}} (see More).",
       "locked_broken": "{{client}} is locked to {{account}}, which can’t serve right now, so its requests fail.",
-      "locked_missing": "{{client}} is locked to an account that can’t be used, so its requests fail."
+      "locked_missing": "{{client}} is locked to an account that can’t be used, so its requests fail.",
+      "refused": "{{client}} has a locked rule this gateway doesn’t enforce yet, so its requests are refused.",
+      "locked_other": "{{client}} is locked to one account (see More)."
     },
     "codex": {
       "one": "Codex uses its one account automatically. Nothing to choose.",
@@ -2726,7 +2728,9 @@
       "change_aria": "Change: Claude rule for {{client}}",
       "change_codex": "Codex rule",
       "change_codex_aria": "Codex rule for {{client}}",
-      "automatic": "automatic"
+      "automatic": "automatic",
+      "codex_will_fail": "{{client}}’s Codex account can’t serve right now, so its Codex requests fail.",
+      "strict_warning_generic": "If its account runs out, {{client}} stops working instead of falling back."
     },
     "keys": {
       "none": "No client keys linked",
@@ -2735,6 +2739,15 @@
       "manage": "Keys",
       "manage_aria": "Keys and profile for {{client}}",
       "new_client": "New client"
-    }
+    },
+    "follow_tie": "{{accounts}} have the same priority, so {{account}} wins the tie. Move one to the top to set a clear order.",
+    "title_all_off": "Every Claude account is turned off.",
+    "follow_all_off": "Turn one on under Accounts and new conversations will go to it.",
+    "off_list_label": "Turned-off Claude accounts",
+    "save_partial": "Only part of the new order was saved ({{message}}). {{account}} goes first now.",
+    "save_partial_unknown": "Only part of the new order was saved ({{message}}). Refresh to see what the gateway has now.",
+    "undo": "Undo",
+    "profiles_incompatible": "This gateway uses a client profile API version this panel doesn’t understand, so locks and client keys are hidden. The order above still works.",
+    "accounts_failed": "Couldn’t load the accounts, so the order can’t be shown."
   }
 }

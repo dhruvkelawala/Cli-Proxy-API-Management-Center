@@ -2690,7 +2690,9 @@
       "many": "{{names}} 都使用这个顺序。",
       "locked": "{{client}} 已锁定为 {{account}}（见「更多」）。",
       "locked_broken": "{{client}} 已锁定为 {{account}}，但它目前无法服务，因此请求会失败。",
-      "locked_missing": "{{client}} 锁定的账号无法使用，因此请求会失败。"
+      "locked_missing": "{{client}} 锁定的账号无法使用，因此请求会失败。",
+      "refused": "{{client}} 有一条锁定规则，但此网关尚未执行锁定，因此它的请求会被拒绝。",
+      "locked_other": "{{client}} 已锁定到一个账号（见「更多」）。"
     },
     "codex": {
       "one": "Codex 自动使用它唯一的账号，无需选择。",
@@ -2717,7 +2719,9 @@
       "change_aria": "更改：{{client}} 的 Claude 规则",
       "change_codex": "Codex 规则",
       "change_codex_aria": "Codex 规则：{{client}}",
-      "automatic": "自动"
+      "automatic": "自动",
+      "codex_will_fail": "{{client}} 的 Codex 账号目前无法服务，因此其 Codex 请求会失败。",
+      "strict_warning_generic": "如果它的账号用完，{{client}} 会停止工作，不会切换到备用。"
     },
     "keys": {
       "none": "未关联客户端密钥",
@@ -2725,6 +2729,15 @@
       "manage": "密钥",
       "manage_aria": "密钥（{{client}}）",
       "new_client": "新建客户端"
-    }
+    },
+    "follow_tie": "{{accounts}} 的优先级相同，因此由 {{account}} 胜出。把其中一个移到最上面即可设定明确的顺序。",
+    "title_all_off": "所有 Claude 账号都已关闭。",
+    "follow_all_off": "在「账号」中开启一个，新对话就会使用它。",
+    "off_list_label": "已关闭的 Claude 账号",
+    "save_partial": "新顺序只保存了一部分（{{message}}）。现在优先使用 {{account}}。",
+    "save_partial_unknown": "新顺序只保存了一部分（{{message}}）。请刷新查看网关当前的设置。",
+    "undo": "撤销",
+    "profiles_incompatible": "此网关使用本面板无法识别的客户端配置 API 版本，因此已隐藏锁定和客户端密钥。上面的顺序仍然有效。",
+    "accounts_failed": "无法加载账号，因此无法显示顺序。"
   }
 }

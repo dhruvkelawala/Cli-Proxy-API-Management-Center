@@ -2716,7 +2716,9 @@
       "many": "{{names}} 都使用這個順序。",
       "locked": "{{client}} 已鎖定為 {{account}}（見「更多」）。",
       "locked_broken": "{{client}} 已鎖定為 {{account}}，但它目前無法服務，因此請求會失敗。",
-      "locked_missing": "{{client}} 鎖定的帳號無法使用，因此請求會失敗。"
+      "locked_missing": "{{client}} 鎖定的帳號無法使用，因此請求會失敗。",
+      "refused": "{{client}} 有一條鎖定規則，但此閘道尚未執行鎖定，因此它的請求會被拒絕。",
+      "locked_other": "{{client}} 已鎖定到一個帳號（見「更多」）。"
     },
     "codex": {
       "one": "Codex 自動使用它唯一的帳號，無需選擇。",
@@ -2743,7 +2745,9 @@
       "change_aria": "變更：{{client}} 的 Claude 規則",
       "change_codex": "Codex 規則",
       "change_codex_aria": "Codex 規則：{{client}}",
-      "automatic": "自動"
+      "automatic": "自動",
+      "codex_will_fail": "{{client}} 的 Codex 帳號目前無法服務，因此其 Codex 請求會失敗。",
+      "strict_warning_generic": "如果它的帳號用完，{{client}} 會停止運作，不會切換到備用。"
     },
     "keys": {
       "none": "未連結用戶端金鑰",
@@ -2751,6 +2755,15 @@
       "manage": "金鑰",
       "manage_aria": "金鑰（{{client}}）",
       "new_client": "新增用戶端"
-    }
+    },
+    "follow_tie": "{{accounts}} 的優先順序相同，因此由 {{account}} 勝出。把其中一個移到最上面即可設定明確的順序。",
+    "title_all_off": "所有 Claude 帳號都已關閉。",
+    "follow_all_off": "在「帳號」中開啟一個，新對話就會使用它。",
+    "off_list_label": "已關閉的 Claude 帳號",
+    "save_partial": "新順序只儲存了一部分（{{message}}）。現在優先使用 {{account}}。",
+    "save_partial_unknown": "新順序只儲存了一部分（{{message}}）。請重新整理查看閘道目前的設定。",
+    "undo": "復原",
+    "profiles_incompatible": "此閘道使用本面板無法辨識的用戶端設定檔 API 版本，因此已隱藏鎖定與用戶端金鑰。上面的順序仍然有效。",
+    "accounts_failed": "無法載入帳號，因此無法顯示順序。"
   }
 }

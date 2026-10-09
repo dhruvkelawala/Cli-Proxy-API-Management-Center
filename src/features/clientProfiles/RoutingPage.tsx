@@ -12,7 +12,7 @@ import {
   SharedRoutingBand,
   type SharedRoutingBandState,
 } from '@/features/config/routing/SharedRoutingBand';
-import type { ClientProfileProvider } from '@/types/clientProfiles';
+import { CLIENT_PROFILE_PROVIDERS, type ClientProfileProvider } from '@/types/clientProfiles';
 import {
   readConnectionContexts,
   saveConnectionContext,
@@ -25,12 +25,17 @@ import {
   sharedBandSaveFinished,
   sharedBandSummaryParts,
 } from './sharedBand';
-import { EnforcementNotice, FailureNotice, Notice } from './components/Notices';
+import { FailureNotice } from './components/Notices';
+import { QuietNotice } from './routing/QuietNotice';
 import { PolicySheet } from './components/PolicySheet';
 import { ProfileSheet } from './components/ProfileSheet';
 import { RoutingHero } from './routing/RoutingHero';
 import { RoutingMore } from './routing/RoutingMore';
-import { describeClientRoutes, otherProviderLine } from './routing/routingOrder';
+import {
+  describeClientRoutes,
+  otherProviderLine,
+  profilesSupportNoticeKey,
+} from './routing/routingOrder';
 import { useRoutingOrder } from './routing/useRoutingOrder';
 import styles from './routing/RoutingPage.module.scss';
 
@@ -61,7 +66,8 @@ export function RoutingPage() {
   const load = useClientProfilesStore((state) => state.load);
   const apiBase = useAuthStore((state) => state.apiBase);
   const routing = useRoutingOrder();
-  const { files, strategy, apiKeys, wsAuth, refresh, model } = routing;
+  const { files, strategy, apiKeys, wsAuth, refresh, model, filesFailed, reloadFiles } = routing;
+  const unsupportedReason = useClientProfilesStore((state) => state.unsupportedReason);
 
   const [contextVersion, setContextVersion] = useState(0);
   const contexts = useMemo(
@@ -118,12 +124,24 @@ export function RoutingPage() {
   useHeaderRefresh(refresh, isCurrentLayer);
 
   const profilesReady = status === 'ready' && snapshot !== null && capabilities !== null;
+  const enforced = capabilities ? capabilities.enforcement : null;
+  // Resolved even when the Accounts list failed: More's clients and keys must stay usable.
   const routes = useMemo(
     () =>
-      profilesReady && snapshot && model
-        ? describeClientRoutes(snapshot, 'claude', model.order)
+      profilesReady && snapshot
+        ? describeClientRoutes(
+            snapshot,
+            'claude',
+            model ? [...model.order, ...model.off] : [],
+            enforced
+          )
         : null,
-    [model, profilesReady, snapshot]
+    [enforced, model, profilesReady, snapshot]
+  );
+  const hasLockedRule = Boolean(
+    snapshot?.profiles.some((profile) =>
+      CLIENT_PROFILE_PROVIDERS.some((provider) => profile.policies[provider].mode !== 'automatic')
+    )
   );
   const otherLine = useMemo(() => (files ? otherProviderLine(files, 'codex') : null), [files]);
 
@@ -152,13 +170,19 @@ export function RoutingPage() {
     ? sharedBandSummaryParts(t, bandState).slice(1).join(' · ')
     : undefined;
 
+  const supportNotice = profilesSupportNoticeKey(status, unsupportedReason);
+  // Main-view notices, kept quiet: problems and the not-enforced warning when it matters.
   const notices = (
     <>
-      {status === 'unsupported' && (
-        <Notice title={t(`${CR}.unsupported.title`)}>
-          <p>{t('routing.profiles_unsupported')}</p>
-        </Notice>
+      {filesFailed && (
+        <QuietNotice tone="danger">
+          <span>{t('routing.accounts_failed')}</span>
+          <button type="button" className={styles.textButton} onClick={() => void reloadFiles()}>
+            {t(`${CR}.retry`)}
+          </button>
+        </QuietNotice>
       )}
+      {supportNotice && <QuietNotice>{t(supportNotice)}</QuietNotice>}
       {status === 'error' && loadFailure && (
         <div className={styles.errorBlock}>
           <FailureNotice failure={loadFailure} title={t(`${CR}.load_error_title`)} />
@@ -175,7 +199,11 @@ export function RoutingPage() {
           reloading={refreshing}
         />
       )}
-      {profilesReady && capabilities && <EnforcementNotice capabilities={capabilities} />}
+      {profilesReady && enforced === false && (
+        <QuietNotice tone={hasLockedRule ? 'warn' : 'info'}>
+          {t(`${CR}.enforcement.short`)}
+        </QuietNotice>
+      )}
     </>
   );
 
@@ -183,6 +211,7 @@ export function RoutingPage() {
     <div className={styles.page}>
       {model ? (
         <RoutingHero
+          notices={notices}
           model={model}
           routes={routes}
           otherLine={otherLine}
@@ -195,10 +224,15 @@ export function RoutingPage() {
           onPreview={routing.setSimulateOut}
         />
       ) : (
-        <div className={styles.loading} role="status">
-          <LoadingSpinner size={18} />
-          <span>{t('routing.loading')}</span>
-        </div>
+        <>
+          {!filesFailed && (
+            <div className={styles.loading} role="status">
+              <LoadingSpinner size={18} />
+              <span>{t('routing.loading')}</span>
+            </div>
+          )}
+          <div className={styles.notices}>{notices}</div>
+        </>
       )}
 
       <div className={styles.moreWrap}>
@@ -218,7 +252,6 @@ export function RoutingPage() {
             routes={profilesReady ? (routes ?? []) : null}
             snapshot={snapshot}
             files={files}
-            notices={notices}
             onEditRule={openRule}
             onOpenProfile={openProfile}
           />

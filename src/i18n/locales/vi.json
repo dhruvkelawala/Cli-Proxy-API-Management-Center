@@ -2705,7 +2705,9 @@
       "many": "{{names}} đều dùng thứ tự này.",
       "locked": "{{client}} bị khóa vào {{account}} (xem Thêm).",
       "locked_broken": "{{client}} bị khóa vào {{account}}, nhưng tài khoản này hiện không phục vụ được nên yêu cầu sẽ lỗi.",
-      "locked_missing": "{{client}} bị khóa vào một tài khoản không dùng được nên yêu cầu sẽ lỗi."
+      "locked_missing": "{{client}} bị khóa vào một tài khoản không dùng được nên yêu cầu sẽ lỗi.",
+      "refused": "{{client}} có quy tắc khóa mà cổng này chưa áp dụng, nên yêu cầu của nó bị từ chối.",
+      "locked_other": "{{client}} bị khóa vào một tài khoản (xem Thêm)."
     },
     "codex": {
       "one": "Codex tự dùng tài khoản duy nhất của nó. Không cần chọn gì.",
@@ -2732,7 +2734,9 @@
       "change_aria": "Đổi: quy tắc Claude cho {{client}}",
       "change_codex": "Quy tắc Codex",
       "change_codex_aria": "Quy tắc Codex cho {{client}}",
-      "automatic": "tự động"
+      "automatic": "tự động",
+      "codex_will_fail": "Tài khoản Codex của {{client}} hiện không phục vụ được nên yêu cầu Codex của nó sẽ lỗi.",
+      "strict_warning_generic": "Nếu tài khoản của nó hết, {{client}} sẽ ngừng hoạt động thay vì chuyển sang dự phòng."
     },
     "keys": {
       "none": "Chưa liên kết khóa máy khách",
@@ -2741,6 +2745,15 @@
       "manage": "Khóa",
       "manage_aria": "Khóa và hồ sơ của {{client}}",
       "new_client": "Máy khách mới"
-    }
+    },
+    "follow_tie": "{{accounts}} có cùng mức ưu tiên nên {{account}} thắng. Đưa một tài khoản lên đầu để đặt thứ tự rõ ràng.",
+    "title_all_off": "Mọi tài khoản Claude đều đã tắt.",
+    "follow_all_off": "Bật một tài khoản trong mục Tài khoản và cuộc trò chuyện mới sẽ dùng nó.",
+    "off_list_label": "Các tài khoản Claude đã tắt",
+    "save_partial": "Chỉ lưu được một phần thứ tự mới ({{message}}). Giờ {{account}} được dùng trước.",
+    "save_partial_unknown": "Chỉ lưu được một phần thứ tự mới ({{message}}). Hãy làm mới để xem cổng hiện có gì.",
+    "undo": "Hoàn tác",
+    "profiles_incompatible": "Cổng này dùng phiên bản API hồ sơ máy khách mà bảng điều khiển không hiểu, nên khóa và khóa máy khách bị ẩn. Thứ tự ở trên vẫn hoạt động.",
+    "accounts_failed": "Không tải được tài khoản nên không thể hiển thị thứ tự."
   }
 }

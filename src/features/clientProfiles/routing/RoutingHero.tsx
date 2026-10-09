@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   DeviceGlyph,
@@ -40,6 +41,8 @@ export interface RoutingHeroProps {
   joinNames: JoinNames;
   onReorder: (ids: string[]) => void;
   onPreview: (accountId: string | null) => void;
+  /** Quiet notices shown in the main view (enforcement, load problems). */
+  notices?: ReactNode;
 }
 
 type Card = FlowDestination & { account: OrderAccount };
@@ -66,6 +69,7 @@ export function RoutingHero({
   joinNames,
   onReorder,
   onPreview,
+  notices,
 }: RoutingHeroProps) {
   const { t } = useTranslation();
   const text = (copy: Copy) => t(copy.key, copy.values);
@@ -80,8 +84,10 @@ export function RoutingHero({
           id: route.profile.profileRef,
           label: route.shortName,
           icon: <DeviceGlyph />,
-          lockedTo: route.locked ? (route.target?.id ?? null) : null,
-          problem: route.broken,
+          // Off accounts are not in the diagram: a lock to one shows as a broken path.
+          lockedTo:
+            route.locked && route.target && route.target.role !== 'off' ? route.target.id : null,
+          problem: route.refused || (route.locked && route.broken),
         }))
       : [{ id: 'all', label: t('routing.all_clients'), icon: <DeviceGlyph /> }];
 
@@ -118,7 +124,7 @@ export function RoutingHero({
             reorderDisabled={saving}
             destinationLabel={(card, place) =>
               t('routing.card_label', {
-                rank: t(rankKey(card.account, place, model.sameLevel)),
+                rank: t(rankKey(card.account, place, model.shared)),
                 account: card.account.label,
                 status: [statusText(card.account), quotaText(card.account)]
                   .filter(Boolean)
@@ -129,9 +135,9 @@ export function RoutingHero({
               <>
                 <span
                   className={styles.rank}
-                  data-first={place === 0 && !model.sameLevel && card.account.role === 'active'}
+                  data-first={place === 0 && !model.shared && card.account.role === 'active'}
                 >
-                  {t(rankKey(card.account, place, model.sameLevel))}
+                  {t(rankKey(card.account, place, model.shared))}
                 </span>
                 <span className={styles.accountName}>{card.account.label}</span>
                 <StatusDot tone={healthTone(card.account)} label={statusText(card.account)} />
@@ -148,6 +154,18 @@ export function RoutingHero({
             )}
           />
         </div>
+      )}
+
+      {model.off.length > 0 && (
+        <ul className={styles.offList} aria-label={t('routing.off_list_label')}>
+          {model.off.map((account) => (
+            <li key={account.id}>
+              <span className={styles.offRank}>{t('routing.rank.off')}</span>
+              <span className={styles.offName}>{account.label}</span>
+              <StatusDot tone="off" label={t('routing.health.disabled')} />
+            </li>
+          ))}
+        </ul>
       )}
 
       {cards.length > 0 && (
@@ -207,6 +225,8 @@ export function RoutingHero({
           </p>
         )}
       </div>
+
+      {notices ? <div className={styles.notices}>{notices}</div> : null}
     </>
   );
 }

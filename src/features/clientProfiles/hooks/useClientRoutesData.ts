@@ -20,16 +20,26 @@ export function useClientRoutesData() {
   const [files, setFiles] = useState<AuthFileItem[] | null>(null);
   const filesRequestRef = useRef(0);
 
-  const loadFiles = useCallback(async () => {
+  /** True after the latest Accounts list read failed (files is then null). */
+  const [filesFailed, setFilesFailed] = useState(false);
+
+  /** Resolves to the list it applied, or null when the read failed or was superseded. */
+  const loadFiles = useCallback(async (): Promise<AuthFileItem[] | null> => {
     const request = (filesRequestRef.current += 1);
     const connection = apiClient.getConnectionRevision();
     try {
       const response = await authFilesApi.list();
-      if (request !== filesRequestRef.current) return;
-      if (connection !== apiClient.getConnectionRevision()) return;
+      if (request !== filesRequestRef.current) return null;
+      if (connection !== apiClient.getConnectionRevision()) return null;
       setFiles(response.files);
+      setFilesFailed(false);
+      return response.files;
     } catch {
-      if (request === filesRequestRef.current) setFiles(null);
+      if (request === filesRequestRef.current) {
+        setFiles(null);
+        setFilesFailed(true);
+      }
+      return null;
     }
   }, []);
 
@@ -64,5 +74,6 @@ export function useClientRoutesData() {
     wsAuth: config ? config.wsAuth !== false : null,
     refresh,
     reloadFiles: loadFiles,
+    filesFailed,
   };
 }

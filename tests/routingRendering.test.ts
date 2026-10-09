@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
+import { readFileSync } from 'node:fs';
 import { createElement, type ReactElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter, RouterProvider, createMemoryRouter } from 'react-router-dom';
@@ -16,6 +17,7 @@ import { RoutingPage } from '@/features/clientProfiles/RoutingPage';
 import {
   buildOrder,
   describeClientRoutes,
+  profilesSupportNoticeKey,
   type QuotaSummary,
 } from '@/features/clientProfiles/routing/routingOrder';
 import { credentialRefForAuthFile } from '@/features/clientProfiles/model';
@@ -332,5 +334,86 @@ describe('sidebar navigation rendering', () => {
   test('in the collapsed rail the toggle is named by aria-label', () => {
     expect(group(false, null, false)).toContain(`aria-label="${t('nav.more')}"`);
     expect(group(false, null, true)).not.toContain('aria-label=');
+  });
+});
+
+describe('review fixes: rendering', () => {
+  test('turned-off accounts show below as Off and are not reorderable cards', () => {
+    const m = buildOrder({
+      files: [
+        work,
+        personal,
+        { ...personal, id: 'old.json', name: 'old.json', note: 'Old', disabled: true },
+      ],
+      provider: 'claude',
+      strategy: 'fill-first',
+      sessionAffinity: true,
+    });
+    const markup = hero({ model: m });
+    expect(markup.match(/role="listitem"/g)).toHaveLength(2);
+    expect(markup).toContain(`aria-label="${t('routing.off_list_label')}"`);
+    expect(markup).toMatch(/Off<\/span><span[^>]*>Old<\/span>/);
+  });
+
+  test('a fill-first tie is labelled First/Backup with the tie explained', () => {
+    const m = buildOrder({
+      files: [{ ...work, priority: 0 }, personal],
+      provider: 'claude',
+      strategy: 'fill-first',
+      sessionAffinity: true,
+    });
+    const markup = hero({ model: m });
+    expect(markup).not.toContain(`>${t('routing.rank.shared')}<`);
+    expect(markup).toContain(
+      t('routing.follow_tie', { accounts: 'Personal and Work', account: 'Personal' })
+    );
+  });
+
+  test('notices render in the main view (hero), not only inside More', () => {
+    const markup = hero({ notices: createElement('p', null, 'QUIET NOTICE') });
+    expect(markup).toContain('QUIET NOTICE');
+  });
+
+  test('More flags a Codex Only rule that will fail', () => {
+    const withCodexLock: ClientProfilesSnapshot = {
+      ...snapshot,
+      profiles: [
+        {
+          ...snapshot.profiles[0],
+          policies: { claude: { mode: 'automatic' }, codex: { mode: 'only', accountRef: 'gone' } },
+        },
+      ],
+      targetStates: { 'p-mini': { codex: 'target_removed' } },
+    };
+    const markup = render(
+      createElement(RoutingMore, {
+        band: null,
+        routes: describeClientRoutes(withCodexLock, 'claude', []),
+        snapshot: withCodexLock,
+        files: null,
+        onEditRule: noop,
+        onOpenProfile: noop,
+      })
+    );
+    expect(markup).toContain(t('routing.rule.codex_will_fail', { client: 'Mini' }));
+    // Clients and keys stay available even without the Accounts list.
+    expect(markup).toContain(t('routing.keys.new_client'));
+  });
+
+  test('unsupported and incompatible gateways get their own notices in the main view', () => {
+    expect(profilesSupportNoticeKey('ready', null)).toBeNull();
+    expect(profilesSupportNoticeKey('unsupported', 'not_found')).toBe(
+      'routing.profiles_unsupported'
+    );
+    expect(profilesSupportNoticeKey('unsupported', 'incompatible_contract')).toBe(
+      'routing.profiles_incompatible'
+    );
+    const page = readFileSync(
+      new URL('../src/features/clientProfiles/RoutingPage.tsx', import.meta.url),
+      'utf8'
+    );
+    // Notices go to the hero (main view); More no longer takes a notices prop.
+    expect(page).toContain('notices={notices}');
+    expect(page.slice(page.indexOf('<RoutingMore'))).not.toContain('notices=');
   });
 });

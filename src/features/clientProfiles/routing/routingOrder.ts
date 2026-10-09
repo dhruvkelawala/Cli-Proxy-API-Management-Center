@@ -16,11 +16,12 @@ import {
 import { deriveAccountTitle } from '@/features/authFiles/identity';
 import type { AuthFileItem, ClaudeQuotaState } from '@/types';
 import type { RoutingStrategy } from '@/types/visualConfig';
-import type {
-  ClientProfile,
-  ClientProfileAccount,
-  ClientProfileProvider,
-  ClientProfilesSnapshot,
+import {
+  CLIENT_PROFILE_PROVIDERS,
+  type ClientProfile,
+  type ClientProfileAccount,
+  type ClientProfileProvider,
+  type ClientProfilesSnapshot,
 } from '@/types/clientProfiles';
 import { credentialRefForAuthFile, isFailingTargetState, resolveTargetState } from '../model';
 
@@ -86,13 +87,24 @@ const percentLeft = (used: number | null | undefined) =>
     ? Math.max(0, Math.min(100, Math.round(100 - used)))
     : null;
 
-/** Weekly and five-hour room left from the Quota page's cached Claude state. */
-export const summarizeClaudeQuota = (state: ClaudeQuotaState | undefined): QuotaSummary => {
+/**
+ * Weekly and five-hour room left from the Quota page's cached Claude state. A window whose
+ * reset time has already passed describes a period that is over, so it is ignored (unknown)
+ * rather than shown as current.
+ */
+export const summarizeClaudeQuota = (
+  state: ClaudeQuotaState | undefined,
+  now: number = Date.now()
+): QuotaSummary => {
   if (!state || state.status === 'idle' || state.status === 'error') return NO_QUOTA;
   if (state.status === 'loading') return { ...NO_QUOTA, status: 'loading' };
-  const session = state.windows.find((window) => window.periodHours === 5) ?? null;
-  const week =
-    state.windows.find((window) => window !== session && window.periodHours === 168) ?? null;
+  const current = <T extends { resetAtMs?: number | null }>(window: T | undefined): T | null =>
+    window && !(typeof window.resetAtMs === 'number' && window.resetAtMs <= now) ? window : null;
+  const sessionWindow = state.windows.find((window) => window.periodHours === 5);
+  const session = current(sessionWindow);
+  const week = current(
+    state.windows.find((window) => window !== sessionWindow && window.periodHours === 168)
+  );
   if (!session && !week) return NO_QUOTA;
   return {
     status: 'ready',
@@ -145,12 +157,21 @@ export interface BuildOrderInput {
 }
 
 export interface OrderModel {
-  /** First → last. */
+  /** Enabled accounts, first → last. Only these can be reordered or written. */
   order: OrderAccount[];
+  /** Turned-off accounts: shown below the order, never moved or written. */
+  off: OrderAccount[];
   /** Accounts receiving new conversations now. */
   serving: OrderAccount[];
   /** Every enabled account shares one priority: the strategy decides, not the order. */
   sameLevel: boolean;
+  /** Same level and the strategy spreads new conversations over several accounts. */
+  shared: boolean;
+  /**
+   * Same level, but only one account gets new conversations (fill-first breaks the tie by
+   * ID): the order shown is the tie-break, not a choice.
+   */
+  tie: boolean;
 }
 
 const byOrder = (a: OrderAccount, b: OrderAccount) =>
@@ -215,7 +236,7 @@ export const buildOrder = ({
     new Set(base.filter((a) => a.health !== 'disabled').map((a) => a.priority))
   ).sort((a, b) => b - a);
 
-  const order = base
+  const all = base
     .map((account, index): OrderAccount => {
       const item = presentation.accounts[index];
       const share = item?.sharePercent ?? null;
@@ -228,11 +249,20 @@ export const buildOrder = ({
       return { ...account, role, rank: Math.max(0, levels.indexOf(account.priority)) };
     })
     .sort(byOrder);
-
+  const order = all.filter((account) => account.role !== 'off');
+  const off = all
+    .filter((account) => account.role === 'off')
+    .sort((a, b) => a.label.localeCompare(b.label));
+  const serving = order.filter((account) => account.role === 'active');
+  const sameLevel = levels.length <= 1;
+  const usable = order.filter((account) => isUsable(account.health) && !account.simulatedOut);
   return {
     order,
-    serving: order.filter((account) => account.role === 'active'),
-    sameLevel: levels.length <= 1,
+    off,
+    serving,
+    sameLevel,
+    shared: sameLevel && serving.length > 1,
+    tie: sameLevel && serving.length === 1 && usable.length > 1,
   };
 };
 
@@ -241,12 +271,61 @@ export const buildOrder = ({
 /* ------------------------------------------------------------------ */
 
 export const FIRST_PRIORITY_STEP = 10;
+/** A demotion never goes below this; below it the mover is raised instead. */
+export const PRIORITY_FLOOR = 0;
+
+export interface PriorityChange {
+  id: string;
+  name: string;
+  from: number;
+  to: number;
+}
+
+type Ranked = Pick<OrderAccount, 'id' | 'name' | 'priority'>;
+
+/** True when `nextIds` only moves one account to the front and keeps the rest in order. */
+export const movedToFirst = (currentIds: readonly string[], nextIds: readonly string[]) => {
+  const [first] = nextIds;
+  if (!first || nextIds.length !== currentIds.length || currentIds[0] === first) return null;
+  const rest = currentIds.filter((id) => id !== first);
+  return rest.length === nextIds.length - 1 && rest.every((id, i) => nextIds[i + 1] === id)
+    ? first
+    : null;
+};
 
 /**
- * Priorities for a new order (first → last). Existing distinct priorities are kept and handed
- * out again in the new order (an already-ordered list writes nothing; a swap swaps values).
- * Otherwise (ties, e.g. everything on 0) the last gets 0 and each earlier one 10 more:
- * two accounts become 10 (first) and 0 (backup).
+ * "Make X first" as ONE write, so a failure can never leave a half-applied order:
+ * - X is already strictly highest: nothing to write.
+ * - Exactly one account Y is at or above X, and Y can drop to X − 10 while staying above the
+ *   rest and not below PRIORITY_FLOOR (0): write Y := X − 10.
+ * - Otherwise: write X := (highest other priority) + 10.
+ * With two accounts at 10/0 this cycles 10/0 → 10/20 → 10/0 …: one write per flip and values
+ * that stay within [lowest, highest + 20]. With three or more, values only grow by 10 when a
+ * demotion is impossible.
+ */
+export const planMoveToFirst = (order: readonly Ranked[], id: string): PriorityChange[] => {
+  const mover = order.find((account) => account.id === id);
+  if (!mover) return [];
+  const others = order.filter((account) => account.id !== id);
+  const blockers = others.filter((account) => account.priority >= mover.priority);
+  if (blockers.length === 0) return [];
+  if (blockers.length === 1) {
+    const [blocker] = blockers;
+    const below = mover.priority - FIRST_PRIORITY_STEP;
+    const rest = others.filter((account) => account !== blocker);
+    const restTop = rest.length ? Math.max(...rest.map((account) => account.priority)) : -Infinity;
+    if (below >= PRIORITY_FLOOR && below > restTop) {
+      return [{ id: blocker.id, name: blocker.name, from: blocker.priority, to: below }];
+    }
+  }
+  const top = Math.max(...others.map((account) => account.priority));
+  return [{ id: mover.id, name: mover.name, from: mover.priority, to: top + FIRST_PRIORITY_STEP }];
+};
+
+/**
+ * Priorities for an arbitrary new order (first → last), used when a reorder is more than
+ * "move one to the front" (three or more accounts). Existing distinct priorities are reused in
+ * the new order; with ties the last gets 0 and each earlier one 10 more.
  */
 export const planOrderPriorities = (
   current: ReadonlyArray<Pick<OrderAccount, 'id' | 'priority'>>,
@@ -261,31 +340,40 @@ export const planOrderPriorities = (
   return plan;
 };
 
-export interface PriorityChange {
-  id: string;
-  name: string;
-  from: number;
-  to: number;
-}
-
 /**
- * Only accounts whose priority actually changes, demotions first: if a later write fails, no
- * account has been raised above where it stood, so the gateway never ends up with an order the
- * user did not ask for (at worst two accounts share a level).
+ * The accounts whose priority changes under `plan`, in write order: true demotions (value goes
+ * down) first, then promotions. Each group runs from the lowest target up.
  */
 export const priorityChanges = (
-  current: ReadonlyArray<Pick<OrderAccount, 'id' | 'name' | 'priority'>>,
+  current: readonly Ranked[],
   plan: Record<string, number>
-): PriorityChange[] =>
-  current
+): PriorityChange[] => {
+  const changes = current
     .filter((account) => plan[account.id] !== undefined && plan[account.id] !== account.priority)
     .map((account) => ({
       id: account.id,
       name: account.name,
       from: account.priority,
       to: plan[account.id],
-    }))
-    .sort((a, b) => a.to - b.to);
+    }));
+  const byTarget = (a: PriorityChange, b: PriorityChange) => a.to - b.to;
+  return [
+    ...changes.filter((change) => change.to < change.from).sort(byTarget),
+    ...changes.filter((change) => change.to > change.from).sort(byTarget),
+  ];
+};
+
+/**
+ * The writes for a new order of the enabled accounts. Moving one account to the front is a
+ * single write (planMoveToFirst); any other reorder rewrites what changed, demotions first.
+ */
+export const planReorder = (order: readonly Ranked[], nextIds: readonly string[]) => {
+  const currentIds = order.map((account) => account.id);
+  if (currentIds.join('\n') === nextIds.join('\n')) return [];
+  const first = movedToFirst(currentIds, nextIds);
+  if (first) return planMoveToFirst(order, first);
+  return priorityChanges(order, planOrderPriorities(order, nextIds));
+};
 
 /** Move one account to the front, keeping the rest in order. */
 export const orderWithFirst = (order: ReadonlyArray<Pick<OrderAccount, 'id'>>, id: string) => [
@@ -315,20 +403,31 @@ export const describeServing = (
   join: JoinNames,
   formatWhen: FormatWhen
 ): { title: Copy; follow: Copy } => {
-  const { order, serving, sameLevel } = model;
+  const { order, serving } = model;
   if (order.length === 0) {
-    return { title: { key: `${R}.title_empty` }, follow: { key: `${R}.follow_empty` } };
+    return model.off.length > 0
+      ? { title: { key: `${R}.title_all_off` }, follow: { key: `${R}.follow_all_off` } }
+      : { title: { key: `${R}.title_empty` }, follow: { key: `${R}.follow_empty` } };
   }
   if (serving.length === 0) {
     return { title: { key: `${R}.title_none` }, follow: { key: `${R}.follow_none` } };
   }
-  if (sameLevel && serving.length > 1) {
+  if (model.shared) {
     return {
       title: { key: `${R}.title_shared`, values: { accounts: join(serving.map((a) => a.label)) } },
       follow: { key: `${R}.follow_shared` },
     };
   }
   const [now] = serving;
+  if (model.tie) {
+    return {
+      title: { key: `${R}.title_first`, values: { account: now.label } },
+      follow: {
+        key: `${R}.follow_tie`,
+        values: { accounts: join(order.map((a) => a.label)), account: now.label },
+      },
+    };
+  }
   const out = order.find((account) => account.rank < now.rank && account.role === 'resting');
   if (out) {
     const previewing = out.simulatedOut;
@@ -353,10 +452,13 @@ export const describeServing = (
   };
 };
 
-/** Short label of a card's position: First, Backup, Shared or Off. */
-export const rankKey = (account: OrderAccount, place: number, sameLevel: boolean): string => {
+/**
+ * Short label of a card's position: First or Backup; Shared only when the strategy really
+ * spreads new conversations over several accounts; Off for turned-off accounts.
+ */
+export const rankKey = (account: OrderAccount, place: number, shared: boolean): string => {
   if (account.role === 'off') return `${R}.rank.off`;
-  if (sameLevel) return `${R}.rank.shared`;
+  if (shared) return `${R}.rank.shared`;
   return place === 0 ? `${R}.rank.first` : `${R}.rank.backup`;
 };
 
@@ -418,33 +520,55 @@ export const quotaCopy = (account: OrderAccount, formatWhen: FormatWhen): Copy |
 const RESET_SLACK_MS = 30 * 60_000;
 
 /**
- * "Use the one that resets sooner first": weekly room left is lost at the reset, so the account
- * resetting sooner should go first. `account` is set when acting on the hint helps.
+ * "Use the one that resets sooner first": weekly room left is lost at the reset, so the
+ * account resetting soonest should go first. Only enabled accounts that can serve right now and
+ * have room left are compared, across all of them. `account` is set when acting on the hint
+ * (making it first) helps.
  */
 export const resetHint = (
   model: OrderModel,
   formatWhen: FormatWhen
 ): { copy: Copy; account: OrderAccount | null } | null => {
-  const [first, second] = model.order;
-  if (!first || !second || model.sameLevel || first.role === 'resting' || first.simulatedOut) {
-    return null;
-  }
-  const a = first.quota.weekResetAt;
-  const b = second.quota.weekResetAt;
-  if (!a || !b || !isUsable(second.health)) return null;
-  if (b < a - RESET_SLACK_MS && (second.quota.weekLeft ?? 0) > 0) {
+  if (model.shared) return null;
+  const [current] = model.serving;
+  if (!current) return null;
+  const candidates = model.order.filter(
+    (account) =>
+      isUsable(account.health) &&
+      !account.simulatedOut &&
+      account.quota.status === 'ready' &&
+      account.quota.weekResetAt !== null &&
+      (account.quota.weekLeft ?? 0) > 0
+  );
+  if (candidates.length < 2 || !candidates.includes(current)) return null;
+  const resetOf = (account: OrderAccount) => account.quota.weekResetAt as number;
+  const soonest = candidates.reduce((best, account) =>
+    resetOf(account) < resetOf(best) ? account : best
+  );
+  if (soonest !== current && resetOf(soonest) < resetOf(current) - RESET_SLACK_MS) {
     return {
-      account: second,
+      account: soonest,
       copy: {
         key: `${R}.hint.sooner_bad`,
-        values: { account: second.label, when: formatWhen(b), percent: second.quota.weekLeft ?? 0 },
+        values: {
+          account: soonest.label,
+          when: formatWhen(resetOf(soonest)),
+          percent: soonest.quota.weekLeft ?? 0,
+        },
       },
     };
   }
-  if (a < b - RESET_SLACK_MS) {
+  const later = candidates.filter((account) => account !== current);
+  if (
+    soonest === current &&
+    later.every((account) => resetOf(account) > resetOf(current) + RESET_SLACK_MS)
+  ) {
     return {
       account: null,
-      copy: { key: `${R}.hint.sooner_good`, values: { account: first.label, when: formatWhen(a) } },
+      copy: {
+        key: `${R}.hint.sooner_good`,
+        values: { account: current.label, when: formatWhen(resetOf(current)) },
+      },
     };
   }
   return null;
@@ -462,28 +586,40 @@ export interface ClientRoute {
   shortName: string;
   /** Locked to one account (Only), or an unreadable rule. */
   locked: boolean;
-  /** The Only target in the order, when it can be matched. */
+  /** The Only target among the provider's accounts (in order or off), when it can be matched. */
   target: OrderAccount | null;
   /** Requests with this rule fail (target unavailable, removed, unknown mode, …). */
   broken: boolean;
+  /**
+   * The gateway does not enforce Only rules yet and this profile has one (for any provider):
+   * every request made with its keys is refused (HTTP 503), so it does not use the order.
+   */
+  refused: boolean;
 }
 
-/** Each profile's rule for one provider, resolved against the order. */
+/**
+ * Each profile's rule for one provider, resolved against that provider's accounts.
+ * `enforced` is the gateway's enforcement capability (null when unknown).
+ */
 export const describeClientRoutes = (
   snapshot: Pick<ClientProfilesSnapshot, 'profiles' | 'accounts' | 'targetStates'>,
   provider: ClientProfileProvider,
-  order: OrderAccount[]
+  accounts: readonly OrderAccount[],
+  enforced: boolean | null = true
 ): ClientRoute[] =>
   snapshot.profiles.map((profile) => {
     const policy = profile.policies[provider];
     const shortName = shortClientName(profile.label);
+    const refused =
+      enforced === false &&
+      CLIENT_PROFILE_PROVIDERS.some((item) => profile.policies[item].mode !== 'automatic');
     if (policy.mode === 'automatic') {
-      return { profile, shortName, locked: false, target: null, broken: false };
+      return { profile, shortName, locked: false, target: null, broken: false, refused };
     }
     if (policy.mode !== 'only') {
-      return { profile, shortName, locked: true, target: null, broken: true };
+      return { profile, shortName, locked: true, target: null, broken: true, refused };
     }
-    const target = order.find((account) => account.inventory?.accountRef === policy.accountRef);
+    const target = accounts.find((account) => account.inventory?.accountRef === policy.accountRef);
     const reported = snapshot.targetStates[profile.profileRef]?.[provider];
     const state =
       reported && reported !== 'unknown'
@@ -496,34 +632,59 @@ export const describeClientRoutes = (
       locked: true,
       target: target ?? null,
       broken: isFailingTargetState(state) || previewOut,
+      refused,
     };
   });
 
-/** The quiet line under the diagram: who follows the order, and who is locked. */
+/**
+ * The quiet line under the diagram: who follows the order, who is locked (and whether that
+ * works or fails), and who is refused because locks are not enforced yet.
+ */
 export const describeClientsLine = (
   routes: ClientRoute[],
   join: JoinNames
 ): { copies: Copy[]; problem: boolean } => {
   if (routes.length === 0) return { copies: [{ key: `${R}.clients.none` }], problem: false };
-  const following = routes.filter((route) => !route.locked);
-  const locked = routes.filter((route) => route.locked);
+  const following = routes.filter((route) => !route.locked && !route.refused);
   const copies: Copy[] = [];
   if (following.length > 0) {
     const names = join(following.map((route) => route.shortName));
     const key = following.length === 1 ? 'one' : following.length === 2 ? 'two' : 'many';
     copies.push({ key: `${R}.clients.${key}`, values: { names } });
   }
-  locked.forEach((route) => {
-    if (!route.target) {
-      copies.push({ key: `${R}.clients.locked_missing`, values: { client: route.shortName } });
-    } else {
-      copies.push({
-        key: route.broken ? `${R}.clients.locked_broken` : `${R}.clients.locked`,
-        values: { client: route.shortName, account: route.target.label },
-      });
-    }
-  });
-  return { copies, problem: locked.some((route) => route.broken) };
+  routes
+    .filter((route) => route.locked || route.refused)
+    .forEach((route) => {
+      const client = route.shortName;
+      if (route.refused) {
+        copies.push({ key: `${R}.clients.refused`, values: { client } });
+      } else if (!route.target) {
+        copies.push({
+          key: route.broken ? `${R}.clients.locked_missing` : `${R}.clients.locked_other`,
+          values: { client },
+        });
+      } else {
+        copies.push({
+          key: route.broken ? `${R}.clients.locked_broken` : `${R}.clients.locked`,
+          values: { client, account: route.target.label },
+        });
+      }
+    });
+  return {
+    copies,
+    problem: routes.some((route) => route.refused || (route.locked && route.broken)),
+  };
+};
+
+/** Main-view notice when the gateway cannot do client profiles (null when it can). */
+export const profilesSupportNoticeKey = (
+  status: string,
+  unsupportedReason: string | null
+): string | null => {
+  if (status !== 'unsupported') return null;
+  return unsupportedReason === 'incompatible_contract'
+    ? `${R}.profiles_incompatible`
+    : `${R}.profiles_unsupported`;
 };
 
 /** Accounts of another provider, for the one quiet line (e.g. Codex). */

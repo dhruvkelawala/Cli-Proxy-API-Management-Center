@@ -7,7 +7,9 @@ import {
   healthCopy,
   orderWithFirst,
   otherProviderLine,
+  planMoveToFirst,
   planOrderPriorities,
+  planReorder,
   priorityChanges,
   quotaCopy,
   rankKey,
@@ -18,9 +20,11 @@ import {
   type QuotaSummary,
 } from '@/features/clientProfiles/routing/routingOrder';
 import {
+  QUOTA_MAX_AGE_MS,
   buildWhenFormatter,
-  saveOrderChanges,
+  takeStaleQuotaTargets,
 } from '@/features/clientProfiles/routing/useRoutingOrder';
+import { saveOrderChanges } from '@/features/clientProfiles/routing/reorderFlow';
 import type { RoutingSaveDeps } from '@/features/config/routing/routingSettingsState';
 import { credentialRefForAuthFile } from '@/features/clientProfiles/model';
 import { buildAccountTuningPatch } from '@/features/config/routing/routingSettingsState';
@@ -111,14 +115,40 @@ describe('order and who goes first', () => {
     expect(whoIsFirst(model)?.map((a) => a.label)).toEqual(['Personal']);
   });
 
-  test('equal priorities share one level and the sentence says so', () => {
+  test('equal priorities with a spreading strategy are shared, and the cards say so', () => {
     const model = build([{ ...work, priority: 0 }, personal], { strategy: 'round-robin' });
     expect(model.sameLevel).toBe(true);
+    expect(model.shared).toBe(true);
     expect(describeServing(model, join, when).title).toEqual({
       key: 'routing.title_shared',
       values: { accounts: 'Personal and Work' },
     });
-    expect(rankKey(model.order[0], 0, true)).toBe('routing.rank.shared');
+    expect(rankKey(model.order[0], 0, model.shared)).toBe('routing.rank.shared');
+  });
+
+  test('fill-first with equal priorities is an honest tie, not "Shared"', () => {
+    const model = build([{ ...work, priority: 0 }, personal]);
+    expect(model.shared).toBe(false);
+    expect(model.tie).toBe(true);
+    expect(model.serving.map((a) => a.label)).toEqual(['Personal']);
+    expect(describeServing(model, join, when)).toEqual({
+      title: { key: 'routing.title_first', values: { account: 'Personal' } },
+      follow: {
+        key: 'routing.follow_tie',
+        values: { accounts: 'Personal and Work', account: 'Personal' },
+      },
+    });
+    expect(model.order.map((a, i) => rankKey(a, i, model.shared))).toEqual([
+      'routing.rank.first',
+      'routing.rank.backup',
+    ]);
+  });
+
+  test('turned-off accounts are listed apart, never ordered or written', () => {
+    const model = build([work, { ...personal, disabled: true, priority: 99 }]);
+    expect(model.order.map((a) => a.label)).toEqual(['Work']);
+    expect(model.off.map((a) => [a.label, a.role])).toEqual([['Personal', 'off']]);
+    expect(planReorder(model.order, ['claude-personal.json', 'claude-work.json'])).toEqual([]);
   });
 
   test('no Claude accounts and none with room have their own sentences', () => {
@@ -127,7 +157,17 @@ describe('order and who goes first', () => {
       { ...work, disabled: true },
       { ...personal, disabled: true },
     ]);
-    expect(describeServing(off, join, when).title.key).toBe('routing.title_none');
+    expect(describeServing(off, join, when).title.key).toBe('routing.title_all_off');
+    const cooling = {
+      unavailable: true,
+      status: 'error',
+      next_retry_after: new Date(NOW + HOUR).toISOString(),
+    };
+    const none = build([
+      { ...work, ...cooling },
+      { ...personal, ...cooling },
+    ]);
+    expect(describeServing(none, join, when).title.key).toBe('routing.title_none');
   });
 });
 
@@ -156,52 +196,92 @@ describe('fallback description and preview', () => {
   });
 });
 
-describe('order → priorities', () => {
-  test('swapping two ordered accounts swaps their values (first gets the higher one)', () => {
+describe('order → priorities (write plan)', () => {
+  type Row = { id: string; name: string; priority: number };
+  const row = (id: string, priority: number): Row => ({ id, name: `${id}.json`, priority });
+  const apply = (rows: Row[], changes: { id: string; to: number }[]) =>
+    rows
+      .map((r) => ({ ...r, priority: changes.find((c) => c.id === r.id)?.to ?? r.priority }))
+      .sort((x, y) => y.priority - x.priority);
+
+  test('"make first" with two accounts is exactly one write', () => {
     const model = build([work, personal]);
-    const plan = planOrderPriorities(model.order, ['claude-personal.json', 'claude-work.json']);
-    expect(plan).toEqual({ 'claude-personal.json': 10, 'claude-work.json': 0 });
-  });
-
-  test('an already-ordered list keeps its values and writes nothing', () => {
-    const model = build([
-      { ...work, priority: 50 },
-      { ...personal, priority: 5 },
-    ]);
-    const ids = model.order.map((a) => a.id);
-    const plan = planOrderPriorities(model.order, ids);
-    expect(plan).toEqual({ 'claude-work.json': 50, 'claude-personal.json': 5 });
-    expect(priorityChanges(model.order, plan)).toEqual([]);
-  });
-
-  test('tied priorities become 10 for the first and 0 for the backup', () => {
-    const model = build([{ ...work, priority: 0 }, personal]);
-    const plan = planOrderPriorities(model.order, ['claude-work.json', 'claude-personal.json']);
-    expect(plan).toEqual({ 'claude-work.json': 10, 'claude-personal.json': 0 });
-    // Only the account that changes is written.
-    expect(priorityChanges(model.order, plan)).toEqual([
-      { id: 'claude-work.json', name: 'claude-work.json', from: 0, to: 10 },
+    const ids = orderWithFirst(model.order, 'claude-personal.json');
+    expect(ids).toEqual(['claude-personal.json', 'claude-work.json']);
+    expect(planReorder(model.order, ids)).toEqual([
+      { id: 'claude-personal.json', name: 'claude-personal.json', from: 0, to: 20 },
     ]);
   });
 
-  test('changes write demotions first and map to the same field patch as the Accounts page', () => {
-    const model = build([work, personal]);
-    const changes = priorityChanges(
-      model.order,
-      planOrderPriorities(model.order, orderWithFirst(model.order, 'claude-personal.json'))
-    );
-    expect(changes.map((c) => [c.name, c.to])).toEqual([
-      ['claude-work.json', 0],
-      ['claude-personal.json', 10],
+  test('flipping back demotes instead of inflating, so values cycle 10/0 and 10/20', () => {
+    let rows = [row('work', 10), row('personal', 0)];
+    const seen = new Set<number>();
+    for (let flip = 0; flip < 12; flip += 1) {
+      const backup = rows[1].id;
+      const changes = planMoveToFirst(rows, backup);
+      expect(changes).toHaveLength(1);
+      rows = apply(rows, changes);
+      expect(rows[0].id).toBe(backup);
+      rows.forEach((r) => seen.add(r.priority));
+    }
+    expect([...seen].sort((x, y) => x - y)).toEqual([0, 10, 20]);
+  });
+
+  test('odd starting values stay bounded too', () => {
+    let rows = [row('work', 55), row('personal', 3)];
+    for (let flip = 0; flip < 40; flip += 1) {
+      const changes = planMoveToFirst(rows, rows[1].id);
+      expect(changes).toHaveLength(1);
+      rows = apply(rows, changes);
+    }
+    rows.forEach((r) => {
+      expect(r.priority).toBeGreaterThanOrEqual(0);
+      expect(r.priority).toBeLessThanOrEqual(75);
+    });
+  });
+
+  test('already strictly first writes nothing; a tie at 0 raises the mover to 10', () => {
+    expect(planMoveToFirst([row('a', 10), row('b', 0)], 'a')).toEqual([]);
+    expect(planMoveToFirst([row('a', 0), row('b', 0)], 'b')).toEqual([
+      { id: 'b', name: 'b.json', from: 0, to: 10 },
     ]);
-    expect(
-      changes.map((c) => buildAccountTuningPatch({ priority: c.from }, { priority: String(c.to) }))
-    ).toEqual([{ priority: 0 }, { priority: 10 }]);
+  });
+
+  test('three accounts: "make first" is still one write', () => {
+    const rows = [row('a', 20), row('b', 10), row('c', 0)];
+    // Several accounts above: the mover is raised.
+    expect(planReorder(rows, ['c', 'a', 'b'])).toEqual([
+      { id: 'c', name: 'c.json', from: 0, to: 30 },
+    ]);
+    // One account above, but dropping it to 0 would tie with c: raise instead.
+    expect(planReorder(rows, ['b', 'a', 'c'])).toEqual([
+      { id: 'b', name: 'b.json', from: 10, to: 30 },
+    ]);
+    // One account above with room below it: that account drops.
+    expect(planReorder([row('a', 30), row('b', 20), row('c', 0)], ['b', 'a', 'c'])).toEqual([
+      { id: 'a', name: 'a.json', from: 30, to: 10 },
+    ]);
+  });
+
+  test('a general reorder writes true demotions first, then promotions', () => {
+    const rows = [row('a', 20), row('b', 10), row('c', 0)];
+    const changes = planReorder(rows, ['b', 'c', 'a']);
+    expect(changes.map((c) => [c.id, c.from, c.to])).toEqual([
+      ['a', 20, 0],
+      ['c', 0, 10],
+      ['b', 10, 20],
+    ]);
+    expect(priorityChanges(rows, planOrderPriorities(rows, ['a', 'b', 'c']))).toEqual([]);
+  });
+
+  test('each write is the same field patch the Accounts page sends', () => {
+    expect(buildAccountTuningPatch({ priority: 0 }, { priority: '20' })).toEqual({ priority: 20 });
+    expect(buildAccountTuningPatch({ priority: 20 }, { priority: '0' })).toEqual({ priority: 0 });
   });
 
   test('optimistic overrides reorder immediately', () => {
     const model = build([work, personal], {
-      priorityOverrides: { 'claude-personal.json': 10, 'claude-work.json': 0 },
+      priorityOverrides: { 'claude-personal.json': 20 },
     });
     expect(model.order.map((a) => a.label)).toEqual(['Personal', 'Work']);
   });
@@ -350,13 +430,23 @@ describe('clients and locks', () => {
 describe('quota and time formatting', () => {
   test('weekly and session windows are read from the Quota cache state', () => {
     expect(
-      summarizeClaudeQuota({
-        status: 'success',
-        windows: [
-          { id: 's', label: '5h', usedPercent: 31, resetLabel: '', resetAtMs: 1, periodHours: 5 },
-          { id: 'w', label: '7d', usedPercent: 46, resetLabel: '', resetAtMs: 2, periodHours: 168 },
-        ],
-      })
+      summarizeClaudeQuota(
+        {
+          status: 'success',
+          windows: [
+            { id: 's', label: '5h', usedPercent: 31, resetLabel: '', resetAtMs: 1, periodHours: 5 },
+            {
+              id: 'w',
+              label: '7d',
+              usedPercent: 46,
+              resetLabel: '',
+              resetAtMs: 2,
+              periodHours: 168,
+            },
+          ],
+        },
+        0
+      )
     ).toEqual({
       status: 'ready',
       sessionLeft: 69,
@@ -426,5 +516,177 @@ describe('saving a new order', () => {
     };
     expect(await saveOrderChanges(deps, swap)).toEqual({ kind: 'stale' });
     expect(calls).toHaveLength(1);
+  });
+});
+
+describe('review fixes: hint, locks, quota freshness', () => {
+  const third: AuthFileItem = {
+    id: 'claude-third.json',
+    name: 'claude-third.json',
+    type: 'claude',
+    status: 'active',
+    note: 'Third',
+    priority: 5,
+  };
+
+  test('the reset hint compares every usable account, not just the top two', () => {
+    const model = build([work, third, personal], {
+      quotaFor: (file) =>
+        file === work ? quota(50, 100) : file === third ? quota(40, 80) : quota(70, 20),
+    });
+    expect(model.order.map((a) => a.label)).toEqual(['Work', 'Third', 'Personal']);
+    expect(resetHint(model, when)?.account?.label).toBe('Personal');
+  });
+
+  test('turned-off or unusable accounts never drive the hint', () => {
+    const cooling = {
+      unavailable: true,
+      status: 'error',
+      next_retry_after: '2099-01-01T00:00:00Z',
+    };
+    const model = build([work, { ...personal, ...cooling }, { ...third, disabled: true }], {
+      quotaFor: (file) => (file === work ? quota(50, 100) : quota(70, 20)),
+    });
+    expect(resetHint(model, when)).toBeNull();
+  });
+
+  const WORK_REF = 'acct-work';
+  const inventory: ClientProfileAccount[] = [
+    {
+      credentialRef: credentialRefForAuthFile(work) as string,
+      accountRef: WORK_REF,
+      provider: 'claude',
+      label: 'claude',
+      available: true,
+      state: 'available',
+      enrollmentSupported: true,
+      targetSupported: true,
+    },
+  ];
+  const snap = (
+    profiles: ClientProfilesSnapshot['profiles'],
+    targetStates: ClientProfilesSnapshot['targetStates'] = {}
+  ): ClientProfilesSnapshot => ({
+    revision: '"r"',
+    profiles,
+    keys: [],
+    accounts: inventory,
+    targetStates,
+  });
+  const profile = (
+    ref: string,
+    label: string,
+    claude: 'auto' | 'work',
+    codex: 'auto' | 'work' = 'auto'
+  ) => ({
+    profileRef: ref,
+    label,
+    revision: 1,
+    policies: {
+      claude:
+        claude === 'auto'
+          ? ({ mode: 'automatic' } as const)
+          : ({ mode: 'only', accountRef: WORK_REF } as const),
+      codex:
+        codex === 'auto'
+          ? ({ mode: 'automatic' } as const)
+          : ({ mode: 'only', accountRef: 'x' } as const),
+    },
+  });
+
+  test('enforcement off: a client with any Only rule is refused, not "using the order"', () => {
+    const model = build([work, personal], { inventory });
+    const routes = describeClientRoutes(
+      snap([
+        profile('p1', 'Mini · Claude', 'auto'),
+        profile('p2', 'MacBook · Claude', 'auto', 'work'),
+      ]),
+      'claude',
+      model.order,
+      false
+    );
+    expect(routes.map((r) => [r.shortName, r.refused])).toEqual([
+      ['Mini', false],
+      ['MacBook', true],
+    ]);
+    expect(describeClientsLine(routes, join)).toEqual({
+      copies: [
+        { key: 'routing.clients.one', values: { names: 'Mini' } },
+        { key: 'routing.clients.refused', values: { client: 'MacBook' } },
+      ],
+      problem: true,
+    });
+  });
+
+  test('a working lock to an account outside the order says it works, not that it fails', () => {
+    const model = build([personal], { inventory });
+    const routes = describeClientRoutes(
+      snap([profile('p1', 'Mini · Claude', 'work')], { p1: { claude: 'available' } }),
+      'claude',
+      model.order
+    );
+    expect(routes[0]).toMatchObject({ locked: true, broken: false, target: null });
+    expect(describeClientsLine(routes, join).copies).toEqual([
+      { key: 'routing.clients.locked_other', values: { client: 'Mini' } },
+    ]);
+  });
+
+  test('quota windows whose reset already passed are ignored', () => {
+    const now = 1_000_000;
+    const summary = summarizeClaudeQuota(
+      {
+        status: 'success',
+        windows: [
+          {
+            id: 's',
+            label: '5h',
+            usedPercent: 90,
+            resetLabel: '',
+            resetAtMs: now - 1,
+            periodHours: 5,
+          },
+          {
+            id: 'w',
+            label: '7d',
+            usedPercent: 40,
+            resetLabel: '',
+            resetAtMs: now + 5,
+            periodHours: 168,
+          },
+        ],
+      },
+      now
+    );
+    expect(summary).toMatchObject({ sessionLeft: null, sessionResetAt: null, weekLeft: 60 });
+    const allPast = summarizeClaudeQuota(
+      {
+        status: 'success',
+        windows: [
+          {
+            id: 'w',
+            label: '7d',
+            usedPercent: 100,
+            resetLabel: '',
+            resetAtMs: now,
+            periodHours: 168,
+          },
+        ],
+      },
+      now
+    );
+    expect(allPast.status).toBe('none');
+  });
+
+  test('quota is re-read on open when this page has not read it in five minutes', () => {
+    const seen = new Map<string, number>();
+    const files = [work, personal, { ...third, disabled: true }];
+    expect(takeStaleQuotaTargets(files, 1, 0, seen).map((f) => f.name)).toEqual([
+      'claude-work.json',
+      'claude-personal.json',
+    ]);
+    expect(takeStaleQuotaTargets(files, 1, QUOTA_MAX_AGE_MS - 1, seen)).toEqual([]);
+    expect(takeStaleQuotaTargets(files, 1, QUOTA_MAX_AGE_MS + 1, seen)).toHaveLength(2);
+    // A different connection never reuses another session's freshness.
+    expect(takeStaleQuotaTargets(files, 2, QUOTA_MAX_AGE_MS + 2, seen)).toHaveLength(2);
   });
 });
