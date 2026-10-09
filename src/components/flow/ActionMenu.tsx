@@ -1,6 +1,28 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import styles from './ActionMenu.module.scss';
 
+/** Where focus lands when the menu opens: ↑ on the button opens on the last item. */
+export const openingIndex = (
+  enabledIndexes: readonly number[],
+  from: 'first' | 'last'
+): number | undefined =>
+  from === 'last' ? enabledIndexes[enabledIndexes.length - 1] : enabledIndexes[0];
+
+/** The item a key moves to inside the open menu (wrapping); undefined for other keys. */
+export const menuKeyTarget = (
+  enabledIndexes: readonly number[],
+  current: number,
+  key: string
+): number | undefined => {
+  const position = enabledIndexes.indexOf(current);
+  const last = enabledIndexes.length - 1;
+  if (key === 'ArrowDown') return enabledIndexes[position >= last ? 0 : position + 1];
+  if (key === 'ArrowUp') return enabledIndexes[position <= 0 ? last : position - 1];
+  if (key === 'Home') return enabledIndexes[0];
+  if (key === 'End') return enabledIndexes[last];
+  return undefined;
+};
+
 export interface ActionMenuItem {
   id: string;
   label: string;
@@ -34,6 +56,7 @@ export function ActionMenu({
   disabled = false,
 }: ActionMenuProps) {
   const [open, setOpen] = useState(false);
+  const openFrom = useRef<'first' | 'last'>('first');
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -55,12 +78,14 @@ export function ActionMenu({
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
     };
     document.addEventListener('mousedown', onPointerDown);
-    const frame = requestAnimationFrame(() => focusItem(enabledIndexes[0]));
+    const frame = requestAnimationFrame(() =>
+      focusItem(openingIndex(enabledIndexes, openFrom.current))
+    );
     return () => {
       document.removeEventListener('mousedown', onPointerDown);
       cancelAnimationFrame(frame);
     };
-    // Focus the first item once, when the menu opens.
+    // Focus the first (or, after ↑, the last) item once, when the menu opens.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
@@ -72,29 +97,26 @@ export function ActionMenu({
   const onButtonKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
+      openFrom.current = event.key === 'ArrowUp' ? 'last' : 'first';
       setOpen(true);
     }
   };
 
   const onMenuKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const current = itemRefs.current.findIndex((item) => item === document.activeElement);
-    const position = enabledIndexes.indexOf(current);
-    const last = enabledIndexes.length - 1;
-    let next: number | undefined;
-    if (event.key === 'ArrowDown') next = enabledIndexes[position >= last ? 0 : position + 1];
-    else if (event.key === 'ArrowUp') next = enabledIndexes[position <= 0 ? last : position - 1];
-    else if (event.key === 'Home') next = enabledIndexes[0];
-    else if (event.key === 'End') next = enabledIndexes[last];
-    else if (event.key === 'Escape') {
+    const next = menuKeyTarget(enabledIndexes, current, event.key);
+    if (next !== undefined) {
+      event.preventDefault();
+      focusItem(next);
+      return;
+    }
+    if (event.key === 'Escape') {
       event.preventDefault();
       close(true);
       return;
     } else if (event.key === 'Tab') {
       close(false);
-      return;
-    } else return;
-    event.preventDefault();
-    focusItem(next);
+    }
   };
 
   return (
@@ -110,7 +132,10 @@ export function ActionMenu({
         aria-controls={open ? menuId : undefined}
         aria-label={ariaLabel}
         disabled={disabled}
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => {
+          openFrom.current = 'first';
+          setOpen((value) => !value);
+        }}
         onKeyDown={onButtonKeyDown}
       >
         {children}
