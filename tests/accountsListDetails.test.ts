@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
+import { readFileSync } from 'node:fs';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import i18n from '@/i18n';
@@ -187,5 +188,15 @@ describe('restored detail', () => {
     expect(markup).toContain('12 requests succeeded · 1 failed');
     // The status bar's success rate over its recent blocks (12 of 13).
     expect(markup).toContain('92.3%');
+  });
+});
+
+describe('Accounts page quota subscription', () => {
+  test('selects only the provider maps it reads, never the whole quota store', () => {
+    const page = readFileSync('src/features/authFiles/AuthFilesPage.tsx', 'utf8');
+    expect(page).not.toMatch(/useQuotaStore\(\s*\)/);
+    for (const map of ['antigravityQuota', 'devinQuota', 'kimiQuota', 'metaQuota', 'xaiQuota']) {
+      expect(page).toContain(`useQuotaStore((state) => state.${map})`);
+    }
   });
 });

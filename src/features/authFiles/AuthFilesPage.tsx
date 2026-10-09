@@ -625,22 +625,26 @@ export function AuthFilesPage() {
 
   const { quotaFor, now } = useAccountQuota(files);
   // Other providers' quota (click-to-load on the Quota page): shown when it is in the cache.
-  const quotaStore = useQuotaStore();
+  const antigravityQuota = useQuotaStore((state) => state.antigravityQuota);
+  const devinQuota = useQuotaStore((state) => state.devinQuota);
+  const kimiQuota = useQuotaStore((state) => state.kimiQuota);
+  const metaQuota = useQuotaStore((state) => state.metaQuota);
+  const xaiQuota = useQuotaStore((state) => state.xaiQuota);
   const indicatorFor = useCallback(
     (file: (typeof files)[number]) => {
       if (windowedQuotaProviderOf(file)) return indicatorFromSummary(quotaFor(file));
       const type = resolveAuthFileQuotaType(file, 'all');
       if (!type) return null;
       const byType: Record<string, Record<string, unknown>> = {
-        antigravity: quotaStore.antigravityQuota,
-        devin: quotaStore.devinQuota,
-        kimi: quotaStore.kimiQuota,
-        meta: quotaStore.metaQuota,
-        xai: quotaStore.xaiQuota,
+        antigravity: antigravityQuota,
+        devin: devinQuota,
+        kimi: kimiQuota,
+        meta: metaQuota,
+        xai: xaiQuota,
       };
       return genericQuotaIndicator(byType[type]?.[getQuotaCacheKey(file)], now);
     },
-    [now, quotaFor, quotaStore]
+    [antigravityQuota, devinQuota, kimiQuota, metaQuota, now, quotaFor, xaiQuota]
   );
   const language = i18n.language || 'en';
   const headline = useMemo(() => {
