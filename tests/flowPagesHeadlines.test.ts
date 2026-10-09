@@ -8,7 +8,7 @@ import {
 import { describeConfig } from '@/features/config/configHeadline';
 import { resolveStatus, type ConfigStatusInput } from '@/features/config/uiState';
 import { describeLogs } from '@/features/logs/model/logsHeadline';
-import { attemptNeedsUser, describeOAuth, splitOAuthProviders, stepOf } from '@/pages/oauthFlow';
+import { attemptPending, describeOAuth, splitOAuthProviders, stepOf } from '@/pages/oauthFlow';
 import { compareVersions, describeSystem } from '@/pages/systemHeadline';
 import { describePlugins, describeStore } from '@/features/plugins/pluginsHeadline';
 import {
@@ -225,16 +225,31 @@ describe('OAuth sentence and steps', () => {
     ).toBe('Finish signing in to Claude in your browser.');
   });
 
-  test('with several sign-ins, the decisive one is described', () => {
-    const sentence = describeOAuth(
+  test('a sign-in under way, or the latest one, wins over an older result', () => {
+    const active = describeOAuth(
       {
-        codex: { url: 'u', status: 'waiting' },
-        anthropic: { status: 'success' },
+        anthropic: { status: 'success', startedAt: 5 },
+        codex: { url: 'u', status: 'waiting', startedAt: 2 },
       },
       nameOfProvider
     );
-    expect(en(sentence.title)).toBe('Claude account added.');
-    expect(sentence.provider).toBe('anthropic');
+    expect(en(active.title)).toBe('Finish signing in to Codex in your browser.');
+    const latest = describeOAuth(
+      {
+        codex: { status: 'error', startedAt: 1 },
+        anthropic: { status: 'success', startedAt: 2 },
+      },
+      nameOfProvider
+    );
+    expect(en(latest.title)).toBe('Claude account added.');
+    const newerFailure = describeOAuth(
+      {
+        anthropic: { status: 'success', startedAt: 1 },
+        codex: { status: 'error', startedAt: 3 },
+      },
+      nameOfProvider
+    );
+    expect(en(newerFailure.title)).toBe("Signing in to Codex didn't finish.");
   });
 
   test('Claude, Codex and Antigravity are up front; the rest are under More', () => {
@@ -261,13 +276,13 @@ describe('OAuth sentence and steps', () => {
     ]);
   });
 
-  test('More stays open while a sign-in under it needs the user', () => {
-    expect(attemptNeedsUser(undefined)).toBe(false);
-    expect(attemptNeedsUser({ status: 'idle' })).toBe(false);
-    expect(attemptNeedsUser({ status: 'success' })).toBe(false);
-    expect(attemptNeedsUser({ url: 'u' })).toBe(true);
-    expect(attemptNeedsUser({ status: 'error' })).toBe(true);
-    expect(attemptNeedsUser({ polling: true })).toBe(true);
+  test('only a sign-in under way holds More open, not an error or a finished one', () => {
+    expect(attemptPending(undefined)).toBe(false);
+    expect(attemptPending({ status: 'idle' })).toBe(false);
+    expect(attemptPending({ status: 'success' })).toBe(false);
+    expect(attemptPending({ status: 'error', url: 'u' })).toBe(false);
+    expect(attemptPending({ polling: true })).toBe(true);
+    expect(attemptPending({ url: 'u', status: 'waiting' })).toBe(true);
   });
 });
 

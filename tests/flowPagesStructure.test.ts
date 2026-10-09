@@ -76,18 +76,17 @@ describe('OAuth page structure', () => {
     expect(markup).toContain('Sign in a new account.');
     expect(markup).toContain('aria-label="Sign-in steps"');
     const { before, after } = splitAtMore(markup, 'More providers');
-    for (const label of ['Start Anthropic Login', 'Start Codex Login', 'Start Antigravity Login']) {
-      expect(before).toContain(label);
+    for (const name of ['Claude', 'Codex', 'Antigravity']) {
+      expect(before).toContain(`aria-label="Sign in with ${name}"`);
     }
-    for (const label of [
-      'Start Devin Login',
-      'Start xAI Login',
-      'Log in with Muse',
-      'Import Vertex Credential',
-    ]) {
-      expect(after).toContain(label);
-      expect(before).not.toContain(label);
+    for (const name of ['Devin', 'xAI', 'Muse (Meta)', 'Kimi China']) {
+      expect(after).toContain(`aria-label="Sign in with ${name}"`);
+      expect(before).not.toContain(`aria-label="Sign in with ${name}"`);
     }
+    expect(after).toContain('Import Vertex Credential');
+    // One short line per row; the long OAuth description is only a tooltip.
+    expect(before).toContain('Sign in with your Claude account.');
+    expect(markup).not.toMatch(/>Login to Anthropic \(Claude\) service/);
     // Collapsed by default: the region is inert until opened.
     expect(after).toMatch(/role="region"[^>]*inert=""/);
   });
@@ -115,10 +114,9 @@ describe('Management Center page structure', () => {
     expect(before).not.toContain('Clear login data');
   });
 
-  test('clearing login data still asks first', () => {
-    const source = read('src/pages/SystemPage.tsx');
-    const handler = source.slice(source.indexOf('const handleClearLoginStorage'));
-    expect(handler.slice(0, 400)).toContain('showConfirmation({');
+  test('clearing login data goes through the confirming helper', () => {
+    // Behaviour is covered in flowPagesReviewFixes; this pins the page to that helper.
+    expect(read('src/pages/SystemPage.tsx')).toContain('requestClearLoginData({');
   });
 });
 
@@ -212,16 +210,20 @@ describe('What each page keeps behind More', () => {
     expect(source).toContain('if (!moreOpen) return;');
   });
 
-  test('Plugins and Plugin Store: the list up front; search and runtime facts under More', () => {
-    for (const path of [
-      'src/features/plugins/PluginsPage.tsx',
-      'src/features/plugins/PluginStorePage.tsx',
-    ]) {
+  test('Plugins and Plugin Store: search comes before the list; runtime facts under More', () => {
+    for (const [path, list] of [
+      ['src/features/plugins/PluginsPage.tsx', 'styles.pluginList'],
+      ['src/features/plugins/PluginStorePage.tsx', 'styles.cardGrid}'],
+    ] as const) {
       const source = read(path);
-      const search = path.endsWith('PluginsPage.tsx') ? '{toolbar}' : 'type="search"';
-      expect(afterMore(source, search)).toBe(true);
-      // A search that filters the list keeps More open so the filter is never hidden.
-      expect(source).toContain('forcedOpen={searching}');
+      const render = source.slice(source.lastIndexOf('return (\n    <div'));
+      const search = render.indexOf(
+        path.endsWith('PluginsPage.tsx') ? '{toolbar}' : 'type="search"'
+      );
+      expect(search).toBeGreaterThan(-1);
+      expect(search).toBeLessThan(render.indexOf(list));
+      expect(afterMore(source, 'styles.statusPathValue')).toBe(true);
+      expect(source).not.toContain('forcedOpen={searching}');
     }
   });
 });
