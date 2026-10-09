@@ -87,7 +87,14 @@
     "error_legacy_backend": "This backend accepts v0 Management API but does not provide v8. Upgrade CLIProxyAPI to v8 or later to use this management page.",
     "error_server": "Backend failed while handling the management request, check the server logs",
     "error_cors": "Cross-origin request blocked, please check server configuration",
-    "error_ssl": "SSL/TLS certificate verification failed"
+    "error_ssl": "SSL/TLS certificate verification failed",
+    "flow": {
+      "eyebrow": "Management Center",
+      "title": "Sign in to your gateway.",
+      "subtitle": "Connecting to {{url}}. Enter its management key to continue.",
+      "more": "Connection",
+      "more_forced": "Open until a custom address is entered."
+    }
   },
   "header": {
     "refresh_all": "Refresh All",
@@ -708,7 +715,16 @@
     "provider_required": "Please enter a provider first",
     "upgrade_required": "Current CPA version does not support OAuth model disablement. Please upgrade.",
     "upgrade_required_title": "Please upgrade CLI Proxy API",
-    "upgrade_required_desc": "The current server version does not support fetching OAuth model disablement. Please upgrade to the latest CPA (CLI Proxy API) version and try again."
+    "upgrade_required_desc": "The current server version does not support fetching OAuth model disablement. Please upgrade to the latest CPA (CLI Proxy API) version and try again.",
+    "flow": {
+      "title_pick": "Choose a provider to hide models from.",
+      "subtitle_pick": "Hidden models are left out of the model list and refused for every account of that provider.",
+      "title_none": "No models hidden from {{provider}} yet.",
+      "title_some_one": "1 model hidden from {{provider}}.",
+      "title_some_other": "{{count}} models hidden from {{provider}}.",
+      "subtitle_saved": "Every {{provider}} account follows this list.",
+      "subtitle_dirty": "Unsaved changes. Save to apply them to every {{provider}} account."
+    }
   },
   "excluded_models": {
     "trigger_summary": "{{excluded}} excluded · {{available}} available",
@@ -807,7 +823,16 @@
     "provider_required": "Please enter a provider first",
     "upgrade_required": "This feature requires a newer CLI Proxy API (CPA) version. Please upgrade.",
     "upgrade_required_title": "Please upgrade CLI Proxy API",
-    "upgrade_required_desc": "The current server does not support the OAuth model aliases API. Please upgrade to the latest CLI Proxy API (CPA) version."
+    "upgrade_required_desc": "The current server does not support the OAuth model aliases API. Please upgrade to the latest CLI Proxy API (CPA) version.",
+    "flow": {
+      "title_pick": "Choose a provider to rename models for.",
+      "subtitle_pick": "An alias gives a provider's model a name your clients can ask for.",
+      "title_none": "No aliases for {{provider}} yet.",
+      "title_some_one": "1 alias for {{provider}} models.",
+      "title_some_other": "{{count}} aliases for {{provider}} models.",
+      "subtitle_saved": "Clients ask for the alias; the gateway sends the original model name.",
+      "subtitle_dirty": "Unsaved changes. Save to apply them to every {{provider}} account."
+    }
   },
   "auth_login": {
     "devin_oauth_cancel": "Cancel Devin Login",
@@ -951,7 +976,39 @@
     "iflow_oauth_status_error": "Authentication failed:",
     "iflow_oauth_start_error": "Failed to start iFlow OAuth:",
     "iflow_oauth_polling_error": "Failed to check authentication status:",
-    "remote_access_disabled": "This login method is not available for remote access. Please access from localhost."
+    "remote_access_disabled": "This login method is not available for remote access. Please access from localhost.",
+    "flow": {
+      "eyebrow": "Accounts",
+      "title_idle": "Sign in a new account.",
+      "subtitle_idle": "Pick a provider. Your browser opens to sign in, and the account is added to Accounts when you finish.",
+      "title_browser": "Opening the sign-in for {{name}}…",
+      "subtitle_browser": "The gateway is preparing a sign-in link.",
+      "title_signin": "Finish signing in to {{name}} in your browser.",
+      "subtitle_signin": "This page notices when you're done. If the browser can't reach the gateway, paste the address it lands on below.",
+      "title_added": "{{name}} account added.",
+      "subtitle_added": "It's ready under Accounts. Sign in again to add another.",
+      "title_failed": "Signing in to {{name}} didn't finish.",
+      "subtitle_failed": "The reason is under {{name}}. Start the sign-in again to retry.",
+      "steps_label": "Sign-in steps",
+      "step_browser": "Browser",
+      "step_signin": "Sign in",
+      "step_added": "Account added",
+      "providers": "Providers",
+      "more": "More providers",
+      "more_forced": "Open while a sign-in or import here is under way.",
+      "other_providers": "Other providers",
+      "vertex_short": "Vertex JSON",
+      "names": {
+        "meta": "Muse (Meta)",
+        "kimi": "Kimi China",
+        "kimi_ai": "Kimi International",
+        "codex": "Codex",
+        "anthropic": "Claude",
+        "antigravity": "Antigravity",
+        "xai": "xAI",
+        "devin": "Devin"
+      }
+    }
   },
   "stats": {
     "success": "Success",
@@ -1047,7 +1104,30 @@
     "search_empty_desc": "Try a different keyword or clear the filters.",
     "double_click_copy_hint": "Double-click to copy raw log line",
     "copy_success": "Log copied to clipboard",
-    "copy_failed": "Copy failed"
+    "copy_failed": "Copy failed",
+    "flow": {
+      "eyebrow": "Logs",
+      "title_disconnected": "Not connected to the gateway.",
+      "title_file_off": "Logging to file is off.",
+      "subtitle_file_off": "The gateway only shows logs it writes to a file. Turn on “Log to file”, then come back.",
+      "open_setting": "Open the Log to file setting",
+      "title_failed": "The logs couldn't be read.",
+      "subtitle_failed": "Reading retries on its own; refresh to try now.",
+      "title_loading": "Reading the logs…",
+      "title_live": "Logs are coming in live.",
+      "subtitle_live_read_one": "1 line loaded · last read at {{time}}.",
+      "subtitle_live_read_other": "{{count}} lines loaded · last read at {{time}}.",
+      "subtitle_live_unread_one": "1 line loaded.",
+      "subtitle_live_unread_other": "{{count}} lines loaded.",
+      "title_paused": "Log reading is paused.",
+      "subtitle_paused_read_one": "1 line loaded, read at {{time}}. Turn on live reading to follow new lines.",
+      "subtitle_paused_read_other": "{{count}} lines loaded, read at {{time}}. Turn on live reading to follow new lines.",
+      "subtitle_paused_unread_one": "1 line loaded. Turn on live reading to follow new lines.",
+      "subtitle_paused_unread_other": "{{count}} lines loaded. Turn on live reading to follow new lines.",
+      "more": "More",
+      "more_summary": "Error request logs · download · clear",
+      "loaded_title": "Loaded lines"
+    }
   },
   "config_management": {
     "title": "Config Panel",
@@ -1689,6 +1769,39 @@
       "muted_on": "Conversations stay on their account for {{ttl}}. Clients set to Only one account ignore these settings.",
       "muted_off": "Each request is assigned on its own. Clients set to Only one account ignore these settings.",
       "how_title": "How this works"
+    },
+    "flow": {
+      "eyebrow": "Configuration",
+      "title_disconnected": "Not connected to the gateway.",
+      "subtitle_disconnected": "Settings appear here once the connection is back.",
+      "title_loading": "Reading your gateway settings…",
+      "title_load_failed": "Your gateway settings couldn't be read.",
+      "subtitle_load_failed": "Reload to try again.",
+      "title_yaml_error": "The YAML has an error, so only the source editor is open.",
+      "subtitle_yaml_error": "Fix it in the source, then switch back to settings under More.",
+      "title_invalid_one": "1 setting needs attention before saving.",
+      "title_invalid_other": "{{count}} settings need attention before saving.",
+      "subtitle_invalid": "Sections with a problem are marked in the tabs.",
+      "title_saving": "Saving your changes…",
+      "title_dirty_one": "You have 1 unsaved change.",
+      "title_dirty_other": "You have {{count}} unsaved changes.",
+      "title_dirty_some": "You have unsaved changes.",
+      "title_source_dirty": "You have unsaved edits in the YAML source.",
+      "subtitle_dirty": "Review and save them from the bar at the bottom, or discard them.",
+      "title_recovery": "Your last save was only partly applied.",
+      "subtitle_recovery": "Reload the settings before changing anything else.",
+      "title_synced": "Your gateway settings are in sync.",
+      "subtitle_synced": "{{count}} settings in {{sections}} sections. Common ones are below; search finds any of them.",
+      "source_note": "You're editing the YAML source.",
+      "back_to_settings": "Back to settings",
+      "more": "More",
+      "more_summary_visual": "Edit the YAML source · reload",
+      "more_summary_source": "YAML source · reload",
+      "editor_title": "Editor",
+      "editor_hint": "Settings shows every option as a field. The YAML source is the whole file as the gateway reads it.",
+      "reload_title": "Reload",
+      "reload_hint": "Read the configuration from the gateway again. If you have unsaved changes, you are asked before they are dropped.",
+      "reloading": "Reloading…"
     }
   },
   "quota_management": {
@@ -1806,7 +1919,28 @@
     "invalid_json": "Enter valid JSON",
     "expected_array": "Enter a JSON array",
     "expected_object": "Enter a JSON object",
-    "invalid_enum": "Choose one of the declared enum values"
+    "invalid_enum": "Choose one of the declared enum values",
+    "flow": {
+      "title_loading": "Reading your plugins…",
+      "title_failed": "Your plugins couldn't be read.",
+      "title_off": "Plugins are turned off.",
+      "subtitle_off_one": "1 plugin is installed but none run until plugins are turned on in the gateway configuration.",
+      "subtitle_off_other": "{{count}} plugins are installed but none run until plugins are turned on in the gateway configuration.",
+      "title_none": "No plugins installed.",
+      "subtitle_none": "Plugins add features to the gateway. Find one in the Plugin Store.",
+      "title_all_one": "1 plugin is running.",
+      "title_all_other": "All {{count}} plugins are running.",
+      "subtitle_all": "Turn one off here, or change its settings.",
+      "title_some_one": "{{running}} of 1 plugin is running.",
+      "title_some_other": "{{running}} of {{count}} plugins are running.",
+      "subtitle_some": "A plugin runs once it's on and registered with the gateway.",
+      "open_store": "Plugin Store",
+      "more": "More",
+      "more_summary": "Search · folder {{dir}} · refresh",
+      "more_forced": "Open while a search filters the list.",
+      "find_title": "Search",
+      "runtime_title": "Runtime"
+    }
   },
   "plugin_store": {
     "title": "Plugin Store",
@@ -1903,7 +2037,28 @@
     "gate_step2_action": "I have read and understand these risks",
     "gate_step3_prompt": "To confirm, type \"{{token}}\" in the box below",
     "gate_step3_action": "Install this plugin",
-    "gate_step3_hint": "Enter the exact identifier shown above to enable installation."
+    "gate_step3_hint": "Enter the exact identifier shown above to enable installation.",
+    "flow": {
+      "title_loading": "Reading the plugin store…",
+      "title_failed": "The plugin store couldn't be read.",
+      "title_empty": "The plugin store is empty.",
+      "subtitle_empty": "No source offers a plugin for this gateway right now.",
+      "title_updates_one": "1 plugin update is ready.",
+      "title_updates_other": "{{count}} plugin updates are ready.",
+      "subtitle_counts_one": "1 plugin available, {{installed}} installed.",
+      "subtitle_counts_other": "{{count}} plugins available, {{installed}} installed.",
+      "title_available_one": "1 plugin available.",
+      "title_available_other": "{{count}} plugins available.",
+      "subtitle_installed_one": "1 of them is installed.",
+      "subtitle_installed_other": "{{count}} of them are installed.",
+      "subtitle_installed_zero": "None of them are installed yet.",
+      "open_installed": "Installed plugins",
+      "more": "More",
+      "more_summary": "Search · folder {{dir}} · refresh",
+      "more_forced": "Open while a search filters the list.",
+      "find_title": "Search",
+      "runtime_title": "Runtime"
+    }
   },
   "plugin_resource": {
     "page_count": "{{count}} pages",
@@ -1940,7 +2095,23 @@
     "clear_login_title": "Local Login Data",
     "clear_login_desc": "Clear locally saved login data and sign out.",
     "clear_login_button": "Clear login data",
-    "clear_login_confirm": "Clear local login data and sign out now?"
+    "clear_login_confirm": "Clear local login data and sign out now?",
+    "flow": {
+      "eyebrow": "Management Center",
+      "title_connecting": "Connecting to the gateway…",
+      "title_disconnected": "Not connected to the gateway.",
+      "title_connected_unknown": "Connected to the gateway.",
+      "title_connected": "Connected to CLI Proxy API {{current}}.",
+      "title_latest": "You're on the latest CLI Proxy API, {{current}}.",
+      "title_update": "CLI Proxy API {{latest}} is available.",
+      "subtitle_update": "You're running {{current}}. This Management UI is {{ui}}.",
+      "subtitle_ui": "This Management UI is {{ui}}.",
+      "checking": "Checking…",
+      "models_summary_one": "1 model available · {{groups}}",
+      "models_summary_other": "{{count}} models available · {{groups}}",
+      "more": "More",
+      "more_summary": "Models, links, clear login data"
+    }
   },
   "notification": {
     "trusted_proxies_restart_required": "Trusted proxy settings saved. Restart the backend to apply them.",
@@ -2366,6 +2537,44 @@
     },
     "modelCatalog": {
       "notLoaded": "Not loaded"
+    },
+    "flow": {
+      "eyebrow": "API keys",
+      "title_loading": "Reading your provider keys…",
+      "title_failed": "Your provider keys couldn't be read.",
+      "title_none": "No API keys yet.",
+      "subtitle_none": "Add a key from any provider to send requests through the gateway with it. Accounts you sign in to live under Accounts.",
+      "title_keys_one": "1 provider key configured.",
+      "title_keys_other": "{{count}} provider keys configured.",
+      "subtitle_all_on": "{{names}}. All of them are on.",
+      "subtitle_some_off_one": "{{names}}. 1 key is turned off.",
+      "subtitle_some_off_other": "{{names}}. {{count}} keys are turned off.",
+      "subtitle_all_off": "{{names}}. Every key is turned off, so none of them serve requests.",
+      "quick_title_none": "{{name}} isn't set up yet.",
+      "quick_subtitle_none": "Register, then paste your {{name}} key to use its models through the gateway.",
+      "quick_title_ready": "{{name}} is set up.",
+      "quick_subtitle_ready": "Its models are served through the gateway. Change the key or protocols below.",
+      "quick_title_off": "{{name}} is turned off.",
+      "quick_subtitle_off": "Its key is saved but it doesn't serve requests until you turn it back on.",
+      "add_key": "Add a key",
+      "add_another": "Add another",
+      "add_to": "Add another {{name}} key",
+      "open_key": "Open {{name}}",
+      "toggle_key": "Turn {{name}} on or off",
+      "key_actions": "Actions for {{name}}",
+      "models_one": "1 model",
+      "models_other": "{{count}} models",
+      "prefix": "prefix {{prefix}}",
+      "start_with": "Start with",
+      "more": "More",
+      "more_all": "All providers",
+      "more_summary_one": "{{count}} provider · search, sort and filter by model",
+      "more_summary_other": "{{count}} providers, {{empty}} without keys · search, sort and filter by model",
+      "browse_hint": "Every provider the gateway supports, with search, sort and a model filter.",
+      "sync_title": "Sync",
+      "sync_hint": "Keys are read from the gateway's configuration.",
+      "updated": "Read at {{time}}",
+      "more_summary_none": "{{count}} providers · search, sort and filter by model"
     }
   },
   "claude_reset": {

@@ -87,7 +87,14 @@
     "error_server": "Backend gặp lỗi khi xử lý yêu cầu quản lý, hãy kiểm tra log máy chủ",
     "error_cors": "Yêu cầu cross-origin bị chặn, vui lòng kiểm tra cấu hình máy chủ",
     "error_ssl": "Xác minh chứng chỉ SSL/TLS thất bại",
-    "error_legacy_backend": "Backend này chấp nhận Management API v0 nhưng không cung cấp v8. Vui lòng nâng cấp CLIProxyAPI lên v8 hoặc mới hơn để sử dụng trang quản lý này."
+    "error_legacy_backend": "Backend này chấp nhận Management API v0 nhưng không cung cấp v8. Vui lòng nâng cấp CLIProxyAPI lên v8 hoặc mới hơn để sử dụng trang quản lý này.",
+    "flow": {
+      "eyebrow": "Trung tâm quản lý",
+      "title": "Đăng nhập vào cổng của bạn.",
+      "subtitle": "Đang kết nối tới {{url}}. Nhập khóa quản lý của nó để tiếp tục.",
+      "more": "Kết nối",
+      "more_forced": "Luôn mở cho đến khi nhập địa chỉ tùy chỉnh."
+    }
   },
   "header": {
     "refresh_all": "Làm mới tất cả",
@@ -665,7 +672,16 @@
     "upgrade_required_title": "Vui lòng nâng cấp CLI Proxy API",
     "upgrade_required_desc": "Phiên bản máy chủ hiện tại không hỗ trợ lấy danh sách vô hiệu hóa model OAuth. Vui lòng nâng cấp lên phiên bản CPA (CLI Proxy API) mới nhất và thử lại.",
     "editor_description": "Chọn các model mà provider hiển thị bằng cách chọn riêng lẻ hoặc dùng quy tắc ký tự đại diện (wildcard).",
-    "models_hint": "Mở rộng danh sách để chọn model hoặc nhập quy tắc ký tự đại diện bên dưới."
+    "models_hint": "Mở rộng danh sách để chọn model hoặc nhập quy tắc ký tự đại diện bên dưới.",
+    "flow": {
+      "title_pick": "Chọn nhà cung cấp để ẩn mô hình.",
+      "subtitle_pick": "Mô hình bị ẩn không có trong danh sách mô hình và bị từ chối với mọi tài khoản của nhà cung cấp đó.",
+      "title_none": "{{provider}} chưa ẩn mô hình nào.",
+      "title_some_one": "Đã ẩn 1 mô hình của {{provider}}.",
+      "title_some_other": "Đã ẩn {{count}} mô hình của {{provider}}.",
+      "subtitle_saved": "Mọi tài khoản {{provider}} đều theo danh sách này.",
+      "subtitle_dirty": "Có thay đổi chưa lưu. Lưu để áp dụng cho mọi tài khoản {{provider}}."
+    }
   },
   "excluded_models": {
     "trigger_summary": "{{excluded}} bị loại trừ · {{available}} khả dụng",
@@ -764,7 +780,16 @@
     "edit_title": "Chỉnh sửa bí danh model cho {{provider}}",
     "mapping_hint": "Chọn model gốc, sau đó nhập bí danh mà client của bạn sẽ dùng.",
     "mapping_row": "Ánh xạ bí danh {{number}}",
-    "remove_mapping": "Xóa ánh xạ bí danh {{number}}"
+    "remove_mapping": "Xóa ánh xạ bí danh {{number}}",
+    "flow": {
+      "title_pick": "Chọn nhà cung cấp để đổi tên mô hình.",
+      "subtitle_pick": "Bí danh đặt cho mô hình của nhà cung cấp một tên mà client có thể yêu cầu.",
+      "title_none": "{{provider}} chưa có bí danh nào.",
+      "title_some_one": "1 bí danh cho mô hình {{provider}}.",
+      "title_some_other": "{{count}} bí danh cho mô hình {{provider}}.",
+      "subtitle_saved": "Client yêu cầu bí danh; cổng gửi tên mô hình gốc.",
+      "subtitle_dirty": "Có thay đổi chưa lưu. Lưu để áp dụng cho mọi tài khoản {{provider}}."
+    }
   },
   "auth_login": {
     "recommended_provider_section": "Provider đề xuất",
@@ -908,7 +933,39 @@
     "kimi_ai_oauth_status_success": "Xác thực thành công!",
     "kimi_ai_oauth_status_error": "Xác thực thất bại:",
     "kimi_ai_oauth_start_error": "Không thể bắt đầu đăng nhập Kimi quốc tế:",
-    "kimi_ai_oauth_polling_error": "Không thể kiểm tra trạng thái xác thực:"
+    "kimi_ai_oauth_polling_error": "Không thể kiểm tra trạng thái xác thực:",
+    "flow": {
+      "eyebrow": "Tài khoản",
+      "title_idle": "Đăng nhập một tài khoản mới.",
+      "subtitle_idle": "Chọn một nhà cung cấp. Trình duyệt mở trang đăng nhập, và tài khoản được thêm vào mục Tài khoản khi bạn hoàn tất.",
+      "title_browser": "Đang mở đăng nhập cho {{name}}…",
+      "subtitle_browser": "Cổng đang chuẩn bị liên kết đăng nhập.",
+      "title_signin": "Hoàn tất đăng nhập {{name}} trong trình duyệt.",
+      "subtitle_signin": "Trang này sẽ tự nhận biết khi bạn xong. Nếu trình duyệt không kết nối được với cổng, hãy dán địa chỉ cuối cùng nó mở vào bên dưới.",
+      "title_added": "Đã thêm tài khoản {{name}}.",
+      "subtitle_added": "Tài khoản đã sẵn sàng ở mục Tài khoản. Đăng nhập lại để thêm tài khoản khác.",
+      "title_failed": "Đăng nhập {{name}} chưa hoàn tất.",
+      "subtitle_failed": "Lý do hiển thị dưới {{name}}. Bắt đầu đăng nhập lại để thử lần nữa.",
+      "steps_label": "Các bước đăng nhập",
+      "step_browser": "Trình duyệt",
+      "step_signin": "Đăng nhập",
+      "step_added": "Đã thêm tài khoản",
+      "providers": "Nhà cung cấp",
+      "more": "Thêm nhà cung cấp",
+      "more_forced": "Luôn mở khi có đăng nhập hoặc nhập tệp đang diễn ra ở đây.",
+      "other_providers": "Nhà cung cấp khác",
+      "vertex_short": "Vertex JSON",
+      "names": {
+        "meta": "Muse (Meta)",
+        "kimi": "Kimi Trung Quốc",
+        "kimi_ai": "Kimi Quốc tế",
+        "codex": "Codex",
+        "anthropic": "Claude",
+        "antigravity": "Antigravity",
+        "xai": "xAI",
+        "devin": "Devin"
+      }
+    }
   },
   "stats": {
     "success": "Thành công",
@@ -1004,7 +1061,30 @@
     "clear_search": "Xóa tìm kiếm",
     "reading_enabled": "Đọc liên tục",
     "filter_load_more": "Hiển thị thêm log phù hợp",
-    "wrap_lines": "Tự động xuống dòng dài"
+    "wrap_lines": "Tự động xuống dòng dài",
+    "flow": {
+      "eyebrow": "Nhật ký",
+      "title_disconnected": "Chưa kết nối với cổng.",
+      "title_file_off": "Ghi nhật ký ra tệp đang tắt.",
+      "subtitle_file_off": "Cổng chỉ hiển thị nhật ký mà nó ghi ra tệp. Bật “Ghi nhật ký ra tệp” rồi quay lại.",
+      "open_setting": "Mở cài đặt Ghi nhật ký ra tệp",
+      "title_failed": "Không đọc được nhật ký.",
+      "subtitle_failed": "Việc đọc sẽ tự thử lại; làm mới để thử ngay.",
+      "title_loading": "Đang đọc nhật ký…",
+      "title_live": "Nhật ký đang cập nhật trực tiếp.",
+      "subtitle_live_read_one": "Đã tải 1 dòng · đọc gần nhất lúc {{time}}.",
+      "subtitle_live_read_other": "Đã tải {{count}} dòng · đọc gần nhất lúc {{time}}.",
+      "subtitle_live_unread_one": "Đã tải 1 dòng.",
+      "subtitle_live_unread_other": "Đã tải {{count}} dòng.",
+      "title_paused": "Việc đọc nhật ký đang tạm dừng.",
+      "subtitle_paused_read_one": "Đã tải 1 dòng, đọc lúc {{time}}. Bật đọc trực tiếp để theo dõi dòng mới.",
+      "subtitle_paused_read_other": "Đã tải {{count}} dòng, đọc lúc {{time}}. Bật đọc trực tiếp để theo dõi dòng mới.",
+      "subtitle_paused_unread_one": "Đã tải 1 dòng. Bật đọc trực tiếp để theo dõi dòng mới.",
+      "subtitle_paused_unread_other": "Đã tải {{count}} dòng. Bật đọc trực tiếp để theo dõi dòng mới.",
+      "more": "Thêm",
+      "more_summary": "Nhật ký yêu cầu lỗi · tải xuống · xóa",
+      "loaded_title": "Các dòng đã tải"
+    }
   },
   "config_management": {
     "title": "Bảng cấu hình",
@@ -1646,6 +1726,39 @@
       "muted_on": "Hội thoại ở lại tài khoản của nó trong {{ttl}}. Các client đặt ở chế độ Chỉ một tài khoản sẽ bỏ qua các cài đặt này.",
       "muted_off": "Mỗi yêu cầu được phân bổ riêng. Các client đặt ở chế độ Chỉ một tài khoản sẽ bỏ qua các cài đặt này.",
       "how_title": "Cách hoạt động"
+    },
+    "flow": {
+      "eyebrow": "Cấu hình",
+      "title_disconnected": "Chưa kết nối với cổng.",
+      "subtitle_disconnected": "Cài đặt sẽ hiện ở đây khi kết nối trở lại.",
+      "title_loading": "Đang đọc cài đặt của cổng…",
+      "title_load_failed": "Không đọc được cài đặt của cổng.",
+      "subtitle_load_failed": "Tải lại để thử lần nữa.",
+      "title_yaml_error": "YAML có lỗi nên chỉ mở được trình sửa mã nguồn.",
+      "subtitle_yaml_error": "Sửa lỗi trong mã nguồn, rồi chuyển lại cài đặt trong mục Thêm.",
+      "title_invalid_one": "Có 1 cài đặt cần xử lý trước khi lưu.",
+      "title_invalid_other": "Có {{count}} cài đặt cần xử lý trước khi lưu.",
+      "subtitle_invalid": "Các mục có vấn đề được đánh dấu trên thẻ.",
+      "title_saving": "Đang lưu thay đổi…",
+      "title_dirty_one": "Bạn có 1 thay đổi chưa lưu.",
+      "title_dirty_other": "Bạn có {{count}} thay đổi chưa lưu.",
+      "title_dirty_some": "Bạn có thay đổi chưa lưu.",
+      "title_source_dirty": "Có chỉnh sửa chưa lưu trong mã nguồn YAML.",
+      "subtitle_dirty": "Xem lại và lưu chúng ở thanh phía dưới, hoặc hủy bỏ.",
+      "title_recovery": "Lần lưu trước chỉ được áp dụng một phần.",
+      "subtitle_recovery": "Hãy tải lại cài đặt trước khi thay đổi gì khác.",
+      "title_synced": "Cài đặt của cổng đã đồng bộ.",
+      "subtitle_synced": "{{count}} cài đặt trong {{sections}} mục. Các mục thường dùng ở bên dưới; tìm kiếm sẽ thấy bất kỳ mục nào.",
+      "source_note": "Bạn đang sửa mã nguồn YAML.",
+      "back_to_settings": "Quay lại cài đặt",
+      "more": "Thêm",
+      "more_summary_visual": "Sửa mã nguồn YAML · tải lại",
+      "more_summary_source": "Mã nguồn YAML · tải lại",
+      "editor_title": "Trình chỉnh sửa",
+      "editor_hint": "Cài đặt hiển thị mỗi tùy chọn thành một trường. Mã nguồn YAML là toàn bộ tệp như cổng đọc nó.",
+      "reload_title": "Tải lại",
+      "reload_hint": "Đọc lại cấu hình từ cổng. Nếu có thay đổi chưa lưu, bạn sẽ được hỏi trước khi chúng bị bỏ.",
+      "reloading": "Đang tải lại…"
     }
   },
   "quota_management": {
@@ -1763,7 +1876,28 @@
     "invalid_json": "Nhập JSON hợp lệ",
     "expected_array": "Nhập mảng JSON",
     "expected_object": "Nhập đối tượng JSON",
-    "invalid_enum": "Chọn một trong các giá trị enum đã khai báo"
+    "invalid_enum": "Chọn một trong các giá trị enum đã khai báo",
+    "flow": {
+      "title_loading": "Đang đọc plugin…",
+      "title_failed": "Không đọc được plugin.",
+      "title_off": "Plugin đang tắt.",
+      "subtitle_off_one": "Đã cài 1 plugin nhưng sẽ không chạy cho đến khi bật plugin trong cấu hình cổng.",
+      "subtitle_off_other": "Đã cài {{count}} plugin nhưng sẽ không chạy cho đến khi bật plugin trong cấu hình cổng.",
+      "title_none": "Chưa cài plugin nào.",
+      "subtitle_none": "Plugin bổ sung tính năng cho cổng. Tìm plugin trong Cửa hàng plugin.",
+      "title_all_one": "1 plugin đang chạy.",
+      "title_all_other": "Cả {{count}} plugin đều đang chạy.",
+      "subtitle_all": "Tắt một plugin ở đây hoặc đổi cài đặt của nó.",
+      "title_some_one": "{{running}} trên 1 plugin đang chạy.",
+      "title_some_other": "{{running}} trên {{count}} plugin đang chạy.",
+      "subtitle_some": "Plugin chạy khi được bật và đã đăng ký với cổng.",
+      "open_store": "Cửa hàng plugin",
+      "more": "Thêm",
+      "more_summary": "Tìm kiếm · thư mục {{dir}} · làm mới",
+      "more_forced": "Luôn mở khi tìm kiếm đang lọc danh sách.",
+      "find_title": "Tìm kiếm",
+      "runtime_title": "Trạng thái chạy"
+    }
   },
   "plugin_store": {
     "title": "Cửa hàng Plugin",
@@ -1860,7 +1994,28 @@
     "gate_step2_action": "Tôi đã đọc và hiểu các rủi ro này",
     "gate_step3_prompt": "Để xác nhận, nhập \"{{token}}\" vào ô bên dưới",
     "gate_step3_action": "Cài đặt plugin này",
-    "gate_step3_hint": "Nhập chính xác mã định danh hiển thị ở trên để cho phép cài đặt."
+    "gate_step3_hint": "Nhập chính xác mã định danh hiển thị ở trên để cho phép cài đặt.",
+    "flow": {
+      "title_loading": "Đang đọc cửa hàng plugin…",
+      "title_failed": "Không đọc được cửa hàng plugin.",
+      "title_empty": "Cửa hàng plugin đang trống.",
+      "subtitle_empty": "Hiện không có nguồn nào cung cấp plugin cho cổng này.",
+      "title_updates_one": "Có 1 bản cập nhật plugin.",
+      "title_updates_other": "Có {{count}} bản cập nhật plugin.",
+      "subtitle_counts_one": "1 plugin khả dụng, đã cài {{installed}}.",
+      "subtitle_counts_other": "{{count}} plugin khả dụng, đã cài {{installed}}.",
+      "title_available_one": "1 plugin khả dụng.",
+      "title_available_other": "{{count}} plugin khả dụng.",
+      "subtitle_installed_one": "Đã cài 1 trong số đó.",
+      "subtitle_installed_other": "Đã cài {{count}} trong số đó.",
+      "subtitle_installed_zero": "Chưa cài cái nào.",
+      "open_installed": "Plugin đã cài",
+      "more": "Thêm",
+      "more_summary": "Tìm kiếm · thư mục {{dir}} · làm mới",
+      "more_forced": "Luôn mở khi tìm kiếm đang lọc danh sách.",
+      "find_title": "Tìm kiếm",
+      "runtime_title": "Trạng thái chạy"
+    }
   },
   "plugin_resource": {
     "page_count": "{{count}} trang",
@@ -1897,7 +2052,23 @@
     "clear_login_title": "Dữ liệu đăng nhập cục bộ",
     "clear_login_desc": "Xóa dữ liệu đăng nhập đã lưu cục bộ và đăng xuất.",
     "clear_login_button": "Xóa dữ liệu đăng nhập",
-    "clear_login_confirm": "Xóa dữ liệu đăng nhập cục bộ và đăng xuất ngay?"
+    "clear_login_confirm": "Xóa dữ liệu đăng nhập cục bộ và đăng xuất ngay?",
+    "flow": {
+      "eyebrow": "Trung tâm quản lý",
+      "title_connecting": "Đang kết nối với cổng…",
+      "title_disconnected": "Chưa kết nối với cổng.",
+      "title_connected_unknown": "Đã kết nối với cổng.",
+      "title_connected": "Đã kết nối với CLI Proxy API {{current}}.",
+      "title_latest": "Bạn đang dùng CLI Proxy API mới nhất, {{current}}.",
+      "title_update": "Đã có CLI Proxy API {{latest}}.",
+      "subtitle_update": "Bạn đang chạy {{current}}. Giao diện quản lý này là {{ui}}.",
+      "subtitle_ui": "Giao diện quản lý này là {{ui}}.",
+      "checking": "Đang kiểm tra…",
+      "models_summary_one": "1 mô hình khả dụng · {{groups}}",
+      "models_summary_other": "{{count}} mô hình khả dụng · {{groups}}",
+      "more": "Thêm",
+      "more_summary": "Mô hình, liên kết, xóa dữ liệu đăng nhập"
+    }
   },
   "notification": {
     "request_log_updated": "Đã cập nhật cài đặt ghi log yêu cầu",
@@ -2329,6 +2500,44 @@
         "continue": "Tiếp tục",
         "continue-and-cooldown": "Tiếp tục và cooldown"
       }
+    },
+    "flow": {
+      "eyebrow": "Khóa API",
+      "title_loading": "Đang đọc khóa nhà cung cấp…",
+      "title_failed": "Không đọc được khóa nhà cung cấp.",
+      "title_none": "Chưa có khóa API nào.",
+      "subtitle_none": "Thêm khóa của bất kỳ nhà cung cấp nào để gửi yêu cầu qua cổng với khóa đó. Tài khoản bạn đăng nhập nằm ở mục Tài khoản.",
+      "title_keys_one": "Đã cấu hình 1 khóa nhà cung cấp.",
+      "title_keys_other": "Đã cấu hình {{count}} khóa nhà cung cấp.",
+      "subtitle_all_on": "{{names}}. Tất cả đều đang bật.",
+      "subtitle_some_off_one": "{{names}}. 1 khóa đang tắt.",
+      "subtitle_some_off_other": "{{names}}. {{count}} khóa đang tắt.",
+      "subtitle_all_off": "{{names}}. Mọi khóa đều đang tắt nên không phục vụ yêu cầu nào.",
+      "quick_title_none": "{{name}} chưa được thiết lập.",
+      "quick_subtitle_none": "Đăng ký, rồi dán khóa {{name}} để dùng các mô hình của nó qua cổng.",
+      "quick_title_ready": "{{name}} đã được thiết lập.",
+      "quick_subtitle_ready": "Các mô hình của nó được phục vụ qua cổng. Đổi khóa hoặc giao thức ở bên dưới.",
+      "quick_title_off": "{{name}} đang tắt.",
+      "quick_subtitle_off": "Khóa đã được lưu nhưng sẽ không phục vụ yêu cầu cho đến khi bạn bật lại.",
+      "add_key": "Thêm khóa",
+      "add_another": "Thêm khóa khác",
+      "add_to": "Thêm một khóa {{name}} khác",
+      "open_key": "Mở {{name}}",
+      "toggle_key": "Bật hoặc tắt {{name}}",
+      "key_actions": "Thao tác cho {{name}}",
+      "models_one": "1 mô hình",
+      "models_other": "{{count}} mô hình",
+      "prefix": "tiền tố {{prefix}}",
+      "start_with": "Bắt đầu với",
+      "more": "Thêm",
+      "more_all": "Tất cả nhà cung cấp",
+      "more_summary_one": "{{count}} nhà cung cấp · tìm kiếm, sắp xếp, lọc theo mô hình",
+      "more_summary_other": "{{count}} nhà cung cấp, {{empty}} chưa có khóa · tìm kiếm, sắp xếp, lọc theo mô hình",
+      "more_summary_none": "{{count}} nhà cung cấp · tìm kiếm, sắp xếp, lọc theo mô hình",
+      "browse_hint": "Mọi nhà cung cấp mà cổng hỗ trợ, có tìm kiếm, sắp xếp và lọc theo mô hình.",
+      "sync_title": "Đồng bộ",
+      "sync_hint": "Khóa được đọc từ cấu hình của cổng.",
+      "updated": "Đọc lúc {{time}}"
     }
   },
   "devin_quota": {

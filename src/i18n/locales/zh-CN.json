@@ -87,7 +87,14 @@
     "error_legacy_backend": "当前后端可使用 v0 管理接口，但不支持 v8。请将 CLIProxyAPI 升级至 v8 或更高版本后再使用此管理页面。",
     "error_server": "后端处理管理接口时发生错误，请查看服务日志",
     "error_cors": "跨域请求被阻止，请检查服务器配置",
-    "error_ssl": "SSL/TLS 证书验证失败"
+    "error_ssl": "SSL/TLS 证书验证失败",
+    "flow": {
+      "eyebrow": "管理中心",
+      "title": "登录到你的网关。",
+      "subtitle": "正在连接 {{url}}。输入它的管理密钥以继续。",
+      "more": "连接",
+      "more_forced": "输入自定义地址前会保持展开。"
+    }
   },
   "header": {
     "refresh_all": "刷新全部",
@@ -701,7 +708,16 @@
     "provider_required": "请先填写提供商名称",
     "upgrade_required": "当前 CPA 版本不支持 OAuth 模型禁用，请升级 CPA 版本",
     "upgrade_required_title": "需要升级 CPA 版本",
-    "upgrade_required_desc": "当前服务器版本不支持获取 OAuth 模型禁用功能，请升级到最新版本的 CPA（CLI Proxy API）后重试。"
+    "upgrade_required_desc": "当前服务器版本不支持获取 OAuth 模型禁用功能，请升级到最新版本的 CPA（CLI Proxy API）后重试。",
+    "flow": {
+      "title_pick": "选择要隐藏模型的提供商。",
+      "subtitle_pick": "隐藏的模型不会出现在模型列表中，该提供商的所有账号都会拒绝它们。",
+      "title_none": "{{provider}} 还没有隐藏的模型。",
+      "title_some_one": "{{provider}} 隐藏了 1 个模型。",
+      "title_some_other": "{{provider}} 隐藏了 {{count}} 个模型。",
+      "subtitle_saved": "所有 {{provider}} 账号都遵循这份列表。",
+      "subtitle_dirty": "有未保存的更改。保存后将应用到所有 {{provider}} 账号。"
+    }
   },
   "excluded_models": {
     "trigger_summary": "已排除 {{excluded}} · {{available}} 可用",
@@ -800,7 +816,16 @@
     "provider_required": "请先填写提供商名称",
     "upgrade_required": "当前 CPA 版本不支持模型别名功能，请升级 CPA 版本",
     "upgrade_required_title": "需要升级 CPA 版本",
-    "upgrade_required_desc": "当前服务器版本不支持 OAuth 模型别名功能，请升级到最新版本的 CPA（CLI Proxy API）后重试。"
+    "upgrade_required_desc": "当前服务器版本不支持 OAuth 模型别名功能，请升级到最新版本的 CPA（CLI Proxy API）后重试。",
+    "flow": {
+      "title_pick": "选择要重命名模型的提供商。",
+      "subtitle_pick": "别名让提供商的模型拥有一个客户端可以请求的名字。",
+      "title_none": "{{provider}} 还没有别名。",
+      "title_some_one": "{{provider}} 的模型有 1 个别名。",
+      "title_some_other": "{{provider}} 的模型有 {{count}} 个别名。",
+      "subtitle_saved": "客户端请求别名，网关发送原始模型名。",
+      "subtitle_dirty": "有未保存的更改。保存后将应用到所有 {{provider}} 账号。"
+    }
   },
   "auth_login": {
     "devin_oauth_cancel": "取消 Devin 登录",
@@ -944,7 +969,39 @@
     "iflow_oauth_status_error": "认证失败:",
     "iflow_oauth_start_error": "启动 iFlow OAuth 失败:",
     "iflow_oauth_polling_error": "检查认证状态失败:",
-    "remote_access_disabled": "远程访问不支持此登录方式，请从本地 (localhost) 访问"
+    "remote_access_disabled": "远程访问不支持此登录方式，请从本地 (localhost) 访问",
+    "flow": {
+      "eyebrow": "账号",
+      "title_idle": "登录一个新账号。",
+      "subtitle_idle": "选择提供商。浏览器会打开登录页，完成后账号会加入“账号”页。",
+      "title_browser": "正在为 {{name}} 准备登录…",
+      "subtitle_browser": "网关正在生成登录链接。",
+      "title_signin": "请在浏览器中完成 {{name}} 的登录。",
+      "subtitle_signin": "完成后此页面会自动发现。如果浏览器无法访问网关，请把它最终跳转的地址粘贴到下方。",
+      "title_added": "已添加 {{name}} 账号。",
+      "subtitle_added": "它已在“账号”页就绪。再次登录可添加另一个。",
+      "title_failed": "{{name}} 登录未完成。",
+      "subtitle_failed": "原因显示在 {{name}} 下方。重新开始登录即可重试。",
+      "steps_label": "登录步骤",
+      "step_browser": "浏览器",
+      "step_signin": "登录",
+      "step_added": "账号已添加",
+      "providers": "提供商",
+      "more": "更多提供商",
+      "more_forced": "这里有登录或导入正在进行时会保持展开。",
+      "other_providers": "其他提供商",
+      "vertex_short": "Vertex JSON",
+      "names": {
+        "meta": "Muse (Meta)",
+        "kimi": "Kimi 国内版",
+        "kimi_ai": "Kimi 国际版",
+        "codex": "Codex",
+        "anthropic": "Claude",
+        "antigravity": "Antigravity",
+        "xai": "xAI",
+        "devin": "Devin"
+      }
+    }
   },
   "stats": {
     "success": "成功",
@@ -1040,7 +1097,30 @@
     "search_empty_desc": "尝试更换关键字或清空筛选条件。",
     "double_click_copy_hint": "双击复制日志原文",
     "copy_success": "已复制日志原文",
-    "copy_failed": "复制失败"
+    "copy_failed": "复制失败",
+    "flow": {
+      "eyebrow": "日志",
+      "title_disconnected": "未连接到网关。",
+      "title_file_off": "写入日志文件已关闭。",
+      "subtitle_file_off": "网关只显示写入文件的日志。打开“写入日志文件”后再回来。",
+      "open_setting": "打开“写入日志文件”设置",
+      "title_failed": "无法读取日志。",
+      "subtitle_failed": "会自动重试；也可以立即刷新。",
+      "title_loading": "正在读取日志…",
+      "title_live": "日志正在实时更新。",
+      "subtitle_live_read_one": "已加载 1 行 · 最近读取于 {{time}}。",
+      "subtitle_live_read_other": "已加载 {{count}} 行 · 最近读取于 {{time}}。",
+      "subtitle_live_unread_one": "已加载 1 行。",
+      "subtitle_live_unread_other": "已加载 {{count}} 行。",
+      "title_paused": "日志读取已暂停。",
+      "subtitle_paused_read_one": "已加载 1 行，读取于 {{time}}。打开实时读取以跟随新日志。",
+      "subtitle_paused_read_other": "已加载 {{count}} 行，读取于 {{time}}。打开实时读取以跟随新日志。",
+      "subtitle_paused_unread_one": "已加载 1 行。打开实时读取以跟随新日志。",
+      "subtitle_paused_unread_other": "已加载 {{count}} 行。打开实时读取以跟随新日志。",
+      "more": "更多",
+      "more_summary": "错误请求日志 · 下载 · 清空",
+      "loaded_title": "已加载的日志"
+    }
   },
   "config_management": {
     "title": "配置面板",
@@ -1682,6 +1762,39 @@
       "muted_on": "对话会在其账号上保持 {{ttl}}。设为“仅使用某个账号”的客户端会忽略这些设置。",
       "muted_off": "每个请求独立分配。设为“仅使用某个账号”的客户端会忽略这些设置。",
       "how_title": "工作原理"
+    },
+    "flow": {
+      "eyebrow": "配置",
+      "title_disconnected": "未连接到网关。",
+      "subtitle_disconnected": "连接恢复后，设置会显示在这里。",
+      "title_loading": "正在读取网关设置…",
+      "title_load_failed": "无法读取网关设置。",
+      "subtitle_load_failed": "重新加载即可重试。",
+      "title_yaml_error": "YAML 有错误，因此只能打开源码编辑器。",
+      "subtitle_yaml_error": "在源码中修正后，可在“更多”里切回设置。",
+      "title_invalid_one": "有 1 项设置需要处理后才能保存。",
+      "title_invalid_other": "有 {{count}} 项设置需要处理后才能保存。",
+      "subtitle_invalid": "有问题的分区已在标签上标出。",
+      "title_saving": "正在保存更改…",
+      "title_dirty_one": "有 1 项更改未保存。",
+      "title_dirty_other": "有 {{count}} 项更改未保存。",
+      "title_dirty_some": "有未保存的更改。",
+      "title_source_dirty": "YAML 源码中有未保存的修改。",
+      "subtitle_dirty": "在底部栏中检查并保存，或放弃它们。",
+      "title_recovery": "上次保存只应用了一部分。",
+      "subtitle_recovery": "请先重新加载设置，再做其他修改。",
+      "title_synced": "网关设置已同步。",
+      "subtitle_synced": "{{sections}} 个分区共 {{count}} 项设置。常用项在下方，搜索可找到任意一项。",
+      "source_note": "你正在编辑 YAML 源码。",
+      "back_to_settings": "返回设置",
+      "more": "更多",
+      "more_summary_visual": "编辑 YAML 源码 · 重新加载",
+      "more_summary_source": "YAML 源码 · 重新加载",
+      "editor_title": "编辑器",
+      "editor_hint": "“设置”把每个选项显示为字段；YAML 源码是网关读取的完整文件。",
+      "reload_title": "重新加载",
+      "reload_hint": "再次从网关读取配置。如有未保存的更改，丢弃前会先询问你。",
+      "reloading": "正在重新加载…"
     }
   },
   "quota_management": {
@@ -1797,7 +1910,28 @@
     "invalid_json": "请输入有效 JSON",
     "expected_array": "请输入 JSON 数组",
     "expected_object": "请输入 JSON 对象",
-    "invalid_enum": "请选择声明的枚举值"
+    "invalid_enum": "请选择声明的枚举值",
+    "flow": {
+      "title_loading": "正在读取插件…",
+      "title_failed": "无法读取插件。",
+      "title_off": "插件已关闭。",
+      "subtitle_off_one": "已安装 1 个插件，但在网关配置中开启插件前都不会运行。",
+      "subtitle_off_other": "已安装 {{count}} 个插件，但在网关配置中开启插件前都不会运行。",
+      "title_none": "还没有安装插件。",
+      "subtitle_none": "插件为网关增加功能。可以在插件商店中找到。",
+      "title_all_one": "1 个插件正在运行。",
+      "title_all_other": "全部 {{count}} 个插件都在运行。",
+      "subtitle_all": "可在这里停用某个插件或修改它的设置。",
+      "title_some_one": "1 个插件中有 {{running}} 个在运行。",
+      "title_some_other": "{{count}} 个插件中有 {{running}} 个在运行。",
+      "subtitle_some": "插件开启并在网关注册后才会运行。",
+      "open_store": "插件商店",
+      "more": "更多",
+      "more_summary": "搜索 · 目录 {{dir}} · 刷新",
+      "more_forced": "搜索正在筛选列表时会保持展开。",
+      "find_title": "搜索",
+      "runtime_title": "运行状态"
+    }
   },
   "plugin_store": {
     "title": "插件商店",
@@ -1894,7 +2028,28 @@
     "gate_step2_action": "我已阅读并理解上述风险",
     "gate_step3_prompt": "如需确认，请在下方输入框中键入 “{{token}}”",
     "gate_step3_action": "安装此插件",
-    "gate_step3_hint": "请输入上方显示的完整标识以启用安装。"
+    "gate_step3_hint": "请输入上方显示的完整标识以启用安装。",
+    "flow": {
+      "title_loading": "正在读取插件商店…",
+      "title_failed": "无法读取插件商店。",
+      "title_empty": "插件商店是空的。",
+      "subtitle_empty": "目前没有来源为这个网关提供插件。",
+      "title_updates_one": "有 1 个插件更新可用。",
+      "title_updates_other": "有 {{count}} 个插件更新可用。",
+      "subtitle_counts_one": "1 个插件可用，已安装 {{installed}} 个。",
+      "subtitle_counts_other": "{{count}} 个插件可用，已安装 {{installed}} 个。",
+      "title_available_one": "1 个插件可用。",
+      "title_available_other": "{{count}} 个插件可用。",
+      "subtitle_installed_one": "其中 1 个已安装。",
+      "subtitle_installed_other": "其中 {{count}} 个已安装。",
+      "subtitle_installed_zero": "还没有安装任何一个。",
+      "open_installed": "已安装的插件",
+      "more": "更多",
+      "more_summary": "搜索 · 目录 {{dir}} · 刷新",
+      "more_forced": "搜索正在筛选列表时会保持展开。",
+      "find_title": "搜索",
+      "runtime_title": "运行状态"
+    }
   },
   "plugin_resource": {
     "page_count": "{{count}} 个页面",
@@ -1931,7 +2086,23 @@
     "clear_login_title": "本地登录信息",
     "clear_login_desc": "清理本地保存的登录信息并退出登录。",
     "clear_login_button": "清理登录信息",
-    "clear_login_confirm": "确认清理本地登录信息并退出登录？"
+    "clear_login_confirm": "确认清理本地登录信息并退出登录？",
+    "flow": {
+      "eyebrow": "管理中心",
+      "title_connecting": "正在连接网关…",
+      "title_disconnected": "未连接到网关。",
+      "title_connected_unknown": "已连接到网关。",
+      "title_connected": "已连接到 CLI Proxy API {{current}}。",
+      "title_latest": "CLI Proxy API {{current}} 已是最新版本。",
+      "title_update": "CLI Proxy API {{latest}} 已可更新。",
+      "subtitle_update": "当前运行 {{current}}。此管理界面版本为 {{ui}}。",
+      "subtitle_ui": "此管理界面版本为 {{ui}}。",
+      "checking": "正在检查…",
+      "models_summary_one": "1 个可用模型 · {{groups}}",
+      "models_summary_other": "{{count}} 个可用模型 · {{groups}}",
+      "more": "更多",
+      "more_summary": "模型、链接、清除登录数据"
+    }
   },
   "notification": {
     "trusted_proxies_restart_required": "可信代理配置已保存，重启后端后生效。",
@@ -2357,6 +2528,44 @@
     },
     "modelCatalog": {
       "notLoaded": "未加载"
+    },
+    "flow": {
+      "eyebrow": "API 密钥",
+      "title_loading": "正在读取提供商密钥…",
+      "title_failed": "无法读取提供商密钥。",
+      "title_none": "还没有 API 密钥。",
+      "subtitle_none": "添加任意提供商的密钥，即可通过网关用它发送请求。登录的账号在“账号”页。",
+      "title_keys_one": "已配置 1 个提供商密钥。",
+      "title_keys_other": "已配置 {{count}} 个提供商密钥。",
+      "subtitle_all_on": "{{names}}。全部已启用。",
+      "subtitle_some_off_one": "{{names}}。有 1 个密钥已停用。",
+      "subtitle_some_off_other": "{{names}}。有 {{count}} 个密钥已停用。",
+      "subtitle_all_off": "{{names}}。所有密钥都已停用，不会处理任何请求。",
+      "quick_title_none": "{{name}} 尚未设置。",
+      "quick_subtitle_none": "先注册，再粘贴你的 {{name}} 密钥，即可通过网关使用它的模型。",
+      "quick_title_ready": "{{name}} 已设置好。",
+      "quick_subtitle_ready": "它的模型通过网关提供。可在下方修改密钥或协议。",
+      "quick_title_off": "{{name}} 已停用。",
+      "quick_subtitle_off": "密钥已保存，但重新启用前不会处理请求。",
+      "add_key": "添加密钥",
+      "add_another": "再添加一个",
+      "add_to": "再添加一个 {{name}} 密钥",
+      "open_key": "打开 {{name}}",
+      "toggle_key": "启用或停用 {{name}}",
+      "key_actions": "{{name}} 的操作",
+      "models_one": "1 个模型",
+      "models_other": "{{count}} 个模型",
+      "prefix": "前缀 {{prefix}}",
+      "start_with": "从这里开始",
+      "more": "更多",
+      "more_all": "全部提供商",
+      "more_summary_one": "{{count}} 个提供商 · 搜索、排序、按模型筛选",
+      "more_summary_other": "{{count}} 个提供商，{{empty}} 个没有密钥 · 搜索、排序、按模型筛选",
+      "more_summary_none": "{{count}} 个提供商 · 搜索、排序、按模型筛选",
+      "browse_hint": "网关支持的所有提供商，可搜索、排序并按模型筛选。",
+      "sync_title": "同步",
+      "sync_hint": "密钥读取自网关配置。",
+      "updated": "读取于 {{time}}"
     }
   },
   "claude_reset": {

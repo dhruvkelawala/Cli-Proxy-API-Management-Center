@@ -87,7 +87,14 @@
     "error_legacy_backend": "目前後端可使用 v0 管理介面，但不支援 v8。請將 CLIProxyAPI 升級至 v8 或更新版本後再使用此管理頁面。",
     "error_server": "後端處理管理介面時發生錯誤，請查看服務日誌",
     "error_cors": "跨域請求被阻擋，請檢查伺服器設定",
-    "error_ssl": "SSL/TLS 憑證驗證失敗"
+    "error_ssl": "SSL/TLS 憑證驗證失敗",
+    "flow": {
+      "eyebrow": "管理中心",
+      "title": "登入到你的閘道。",
+      "subtitle": "正在連線 {{url}}。輸入它的管理金鑰以繼續。",
+      "more": "連線",
+      "more_forced": "輸入自訂位址前會保持展開。"
+    }
   },
   "header": {
     "refresh_all": "全部重新整理",
@@ -701,7 +708,16 @@
     "provider_required": "請先填寫供應商名稱",
     "upgrade_required": "目前 CPA 版本不支援 OAuth 模型停用，請升級 CPA 版本",
     "upgrade_required_title": "需要升級 CPA 版本",
-    "upgrade_required_desc": "目前伺服器版本不支援取得 OAuth 模型停用功能，請升級到最新版本的 CPA（CLI Proxy API）後重試。"
+    "upgrade_required_desc": "目前伺服器版本不支援取得 OAuth 模型停用功能，請升級到最新版本的 CPA（CLI Proxy API）後重試。",
+    "flow": {
+      "title_pick": "選擇要隱藏模型的提供商。",
+      "subtitle_pick": "隱藏的模型不會出現在模型清單中，該提供商的所有帳號都會拒絕它們。",
+      "title_none": "{{provider}} 還沒有隱藏的模型。",
+      "title_some_one": "{{provider}} 隱藏了 1 個模型。",
+      "title_some_other": "{{provider}} 隱藏了 {{count}} 個模型。",
+      "subtitle_saved": "所有 {{provider}} 帳號都遵循這份清單。",
+      "subtitle_dirty": "有未儲存的變更。儲存後將套用到所有 {{provider}} 帳號。"
+    }
   },
   "excluded_models": {
     "trigger_summary": "已排除 {{excluded}} · {{available}} 可用",
@@ -800,7 +816,16 @@
     "provider_required": "請先填寫供應商名稱",
     "upgrade_required": "目前 CPA 版本不支援模型別名功能，請升級 CPA 版本",
     "upgrade_required_title": "需要升級 CPA 版本",
-    "upgrade_required_desc": "目前伺服器版本不支援 OAuth 模型別名功能，請升級到最新版本的 CPA（CLI Proxy API）後重試。"
+    "upgrade_required_desc": "目前伺服器版本不支援 OAuth 模型別名功能，請升級到最新版本的 CPA（CLI Proxy API）後重試。",
+    "flow": {
+      "title_pick": "選擇要重新命名模型的提供商。",
+      "subtitle_pick": "別名讓提供商的模型擁有一個用戶端可以請求的名稱。",
+      "title_none": "{{provider}} 還沒有別名。",
+      "title_some_one": "{{provider}} 的模型有 1 個別名。",
+      "title_some_other": "{{provider}} 的模型有 {{count}} 個別名。",
+      "subtitle_saved": "用戶端請求別名，閘道傳送原始模型名稱。",
+      "subtitle_dirty": "有未儲存的變更。儲存後將套用到所有 {{provider}} 帳號。"
+    }
   },
   "auth_login": {
     "devin_oauth_cancel": "取消 Devin 登入",
@@ -970,7 +995,39 @@
     "iflow_cookie_result_expired": "到期時間",
     "iflow_cookie_result_path": "儲存路徑",
     "iflow_cookie_result_type": "類型",
-    "remote_access_disabled": "遠端存取不支援此登入方式，請從本地（localhost）存取"
+    "remote_access_disabled": "遠端存取不支援此登入方式，請從本地（localhost）存取",
+    "flow": {
+      "eyebrow": "帳號",
+      "title_idle": "登入一個新帳號。",
+      "subtitle_idle": "選擇提供商。瀏覽器會開啟登入頁，完成後帳號會加入「帳號」頁。",
+      "title_browser": "正在為 {{name}} 準備登入…",
+      "subtitle_browser": "閘道正在產生登入連結。",
+      "title_signin": "請在瀏覽器中完成 {{name}} 的登入。",
+      "subtitle_signin": "完成後此頁面會自動偵測。如果瀏覽器無法連到閘道，請把它最後跳轉的網址貼到下方。",
+      "title_added": "已新增 {{name}} 帳號。",
+      "subtitle_added": "它已在「帳號」頁就緒。再次登入可新增另一個。",
+      "title_failed": "{{name}} 登入未完成。",
+      "subtitle_failed": "原因顯示在 {{name}} 下方。重新開始登入即可重試。",
+      "steps_label": "登入步驟",
+      "step_browser": "瀏覽器",
+      "step_signin": "登入",
+      "step_added": "帳號已新增",
+      "providers": "提供商",
+      "more": "更多提供商",
+      "more_forced": "這裡有登入或匯入正在進行時會保持展開。",
+      "other_providers": "其他提供商",
+      "vertex_short": "Vertex JSON",
+      "names": {
+        "meta": "Muse (Meta)",
+        "kimi": "Kimi 中國版",
+        "kimi_ai": "Kimi 國際版",
+        "codex": "Codex",
+        "anthropic": "Claude",
+        "antigravity": "Antigravity",
+        "xai": "xAI",
+        "devin": "Devin"
+      }
+    }
   },
   "stats": {
     "success": "成功",
@@ -1066,7 +1123,30 @@
     "search_empty_desc": "嘗試更換關鍵字或清空篩選條件。",
     "double_click_copy_hint": "雙擊複製記錄原文",
     "copy_success": "已複製記錄原文",
-    "copy_failed": "複製失敗"
+    "copy_failed": "複製失敗",
+    "flow": {
+      "eyebrow": "日誌",
+      "title_disconnected": "未連線到閘道。",
+      "title_file_off": "寫入日誌檔案已關閉。",
+      "subtitle_file_off": "閘道只顯示寫入檔案的日誌。開啟「寫入日誌檔案」後再回來。",
+      "open_setting": "開啟「寫入日誌檔案」設定",
+      "title_failed": "無法讀取日誌。",
+      "subtitle_failed": "會自動重試；也可以立即重新整理。",
+      "title_loading": "正在讀取日誌…",
+      "title_live": "日誌正在即時更新。",
+      "subtitle_live_read_one": "已載入 1 行 · 最近讀取於 {{time}}。",
+      "subtitle_live_read_other": "已載入 {{count}} 行 · 最近讀取於 {{time}}。",
+      "subtitle_live_unread_one": "已載入 1 行。",
+      "subtitle_live_unread_other": "已載入 {{count}} 行。",
+      "title_paused": "日誌讀取已暫停。",
+      "subtitle_paused_read_one": "已載入 1 行，讀取於 {{time}}。開啟即時讀取以跟隨新日誌。",
+      "subtitle_paused_read_other": "已載入 {{count}} 行，讀取於 {{time}}。開啟即時讀取以跟隨新日誌。",
+      "subtitle_paused_unread_one": "已載入 1 行。開啟即時讀取以跟隨新日誌。",
+      "subtitle_paused_unread_other": "已載入 {{count}} 行。開啟即時讀取以跟隨新日誌。",
+      "more": "更多",
+      "more_summary": "錯誤請求日誌 · 下載 · 清空",
+      "loaded_title": "已載入的日誌"
+    }
   },
   "config_management": {
     "title": "設定面板",
@@ -1708,6 +1788,39 @@
       "muted_on": "對話會在其帳號上保持 {{ttl}}。設為「僅使用某個帳號」的用戶端會忽略這些設定。",
       "muted_off": "每個請求獨立分配。設為「僅使用某個帳號」的用戶端會忽略這些設定。",
       "how_title": "運作方式"
+    },
+    "flow": {
+      "eyebrow": "設定",
+      "title_disconnected": "未連線到閘道。",
+      "subtitle_disconnected": "連線恢復後，設定會顯示在這裡。",
+      "title_loading": "正在讀取閘道設定…",
+      "title_load_failed": "無法讀取閘道設定。",
+      "subtitle_load_failed": "重新載入即可重試。",
+      "title_yaml_error": "YAML 有錯誤，因此只能開啟原始碼編輯器。",
+      "subtitle_yaml_error": "在原始碼中修正後，可在「更多」裡切回設定。",
+      "title_invalid_one": "有 1 項設定需要處理後才能儲存。",
+      "title_invalid_other": "有 {{count}} 項設定需要處理後才能儲存。",
+      "subtitle_invalid": "有問題的分區已在標籤上標出。",
+      "title_saving": "正在儲存變更…",
+      "title_dirty_one": "有 1 項變更未儲存。",
+      "title_dirty_other": "有 {{count}} 項變更未儲存。",
+      "title_dirty_some": "有未儲存的變更。",
+      "title_source_dirty": "YAML 原始碼中有未儲存的修改。",
+      "subtitle_dirty": "在底部列中檢查並儲存，或捨棄它們。",
+      "title_recovery": "上次儲存只套用了一部分。",
+      "subtitle_recovery": "請先重新載入設定，再做其他修改。",
+      "title_synced": "閘道設定已同步。",
+      "subtitle_synced": "{{sections}} 個分區共 {{count}} 項設定。常用項在下方，搜尋可找到任一項。",
+      "source_note": "你正在編輯 YAML 原始碼。",
+      "back_to_settings": "返回設定",
+      "more": "更多",
+      "more_summary_visual": "編輯 YAML 原始碼 · 重新載入",
+      "more_summary_source": "YAML 原始碼 · 重新載入",
+      "editor_title": "編輯器",
+      "editor_hint": "「設定」把每個選項顯示為欄位；YAML 原始碼是閘道讀取的完整檔案。",
+      "reload_title": "重新載入",
+      "reload_hint": "再次從閘道讀取設定。如有未儲存的變更，捨棄前會先詢問你。",
+      "reloading": "正在重新載入…"
     }
   },
   "quota_management": {
@@ -1823,7 +1936,28 @@
     "invalid_json": "請輸入有效 JSON",
     "expected_array": "請輸入 JSON 陣列",
     "expected_object": "請輸入 JSON 物件",
-    "invalid_enum": "請選擇宣告的枚舉值"
+    "invalid_enum": "請選擇宣告的枚舉值",
+    "flow": {
+      "title_loading": "正在讀取外掛…",
+      "title_failed": "無法讀取外掛。",
+      "title_off": "外掛已關閉。",
+      "subtitle_off_one": "已安裝 1 個外掛，但在閘道設定中開啟外掛前都不會執行。",
+      "subtitle_off_other": "已安裝 {{count}} 個外掛，但在閘道設定中開啟外掛前都不會執行。",
+      "title_none": "還沒有安裝外掛。",
+      "subtitle_none": "外掛為閘道增加功能。可以在外掛商店中找到。",
+      "title_all_one": "1 個外掛正在執行。",
+      "title_all_other": "全部 {{count}} 個外掛都在執行。",
+      "subtitle_all": "可在這裡停用某個外掛或修改它的設定。",
+      "title_some_one": "1 個外掛中有 {{running}} 個在執行。",
+      "title_some_other": "{{count}} 個外掛中有 {{running}} 個在執行。",
+      "subtitle_some": "外掛開啟並在閘道註冊後才會執行。",
+      "open_store": "外掛商店",
+      "more": "更多",
+      "more_summary": "搜尋 · 目錄 {{dir}} · 重新整理",
+      "more_forced": "搜尋正在篩選清單時會保持展開。",
+      "find_title": "搜尋",
+      "runtime_title": "執行狀態"
+    }
   },
   "plugin_store": {
     "title": "插件商店",
@@ -1920,7 +2054,28 @@
     "gate_step2_action": "我已閱讀並理解上述風險",
     "gate_step3_prompt": "如需確認，請在下方輸入框中鍵入 “{{token}}”",
     "gate_step3_action": "安裝此插件",
-    "gate_step3_hint": "請輸入上方顯示的完整識別碼以啟用安裝。"
+    "gate_step3_hint": "請輸入上方顯示的完整識別碼以啟用安裝。",
+    "flow": {
+      "title_loading": "正在讀取外掛商店…",
+      "title_failed": "無法讀取外掛商店。",
+      "title_empty": "外掛商店是空的。",
+      "subtitle_empty": "目前沒有來源為這個閘道提供外掛。",
+      "title_updates_one": "有 1 個外掛更新可用。",
+      "title_updates_other": "有 {{count}} 個外掛更新可用。",
+      "subtitle_counts_one": "1 個外掛可用，已安裝 {{installed}} 個。",
+      "subtitle_counts_other": "{{count}} 個外掛可用，已安裝 {{installed}} 個。",
+      "title_available_one": "1 個外掛可用。",
+      "title_available_other": "{{count}} 個外掛可用。",
+      "subtitle_installed_one": "其中 1 個已安裝。",
+      "subtitle_installed_other": "其中 {{count}} 個已安裝。",
+      "subtitle_installed_zero": "還沒有安裝任何一個。",
+      "open_installed": "已安裝的外掛",
+      "more": "更多",
+      "more_summary": "搜尋 · 目錄 {{dir}} · 重新整理",
+      "more_forced": "搜尋正在篩選清單時會保持展開。",
+      "find_title": "搜尋",
+      "runtime_title": "執行狀態"
+    }
   },
   "plugin_resource": {
     "page_count": "{{count}} 個頁面",
@@ -1957,7 +2112,23 @@
     "clear_login_title": "本地登入資訊",
     "clear_login_desc": "清理本地儲存的登入資訊並登出。",
     "clear_login_button": "清理登入資訊",
-    "clear_login_confirm": "確認清理本地登入資訊並登出？"
+    "clear_login_confirm": "確認清理本地登入資訊並登出？",
+    "flow": {
+      "eyebrow": "管理中心",
+      "title_connecting": "正在連線閘道…",
+      "title_disconnected": "未連線到閘道。",
+      "title_connected_unknown": "已連線到閘道。",
+      "title_connected": "已連線到 CLI Proxy API {{current}}。",
+      "title_latest": "CLI Proxy API {{current}} 已是最新版本。",
+      "title_update": "CLI Proxy API {{latest}} 已可更新。",
+      "subtitle_update": "目前執行 {{current}}。此管理介面版本為 {{ui}}。",
+      "subtitle_ui": "此管理介面版本為 {{ui}}。",
+      "checking": "正在檢查…",
+      "models_summary_one": "1 個可用模型 · {{groups}}",
+      "models_summary_other": "{{count}} 個可用模型 · {{groups}}",
+      "more": "更多",
+      "more_summary": "模型、連結、清除登入資料"
+    }
   },
   "notification": {
     "trusted_proxies_restart_required": "可信任代理設定已儲存，重新啟動後端後生效。",
@@ -2383,6 +2554,44 @@
     },
     "modelCatalog": {
       "notLoaded": "未載入"
+    },
+    "flow": {
+      "eyebrow": "API 金鑰",
+      "title_loading": "正在讀取提供商金鑰…",
+      "title_failed": "無法讀取提供商金鑰。",
+      "title_none": "還沒有 API 金鑰。",
+      "subtitle_none": "新增任一提供商的金鑰，即可透過閘道用它發送請求。登入的帳號在「帳號」頁。",
+      "title_keys_one": "已設定 1 個提供商金鑰。",
+      "title_keys_other": "已設定 {{count}} 個提供商金鑰。",
+      "subtitle_all_on": "{{names}}。全部已啟用。",
+      "subtitle_some_off_one": "{{names}}。有 1 個金鑰已停用。",
+      "subtitle_some_off_other": "{{names}}。有 {{count}} 個金鑰已停用。",
+      "subtitle_all_off": "{{names}}。所有金鑰都已停用，不會處理任何請求。",
+      "quick_title_none": "{{name}} 尚未設定。",
+      "quick_subtitle_none": "先註冊，再貼上你的 {{name}} 金鑰，即可透過閘道使用它的模型。",
+      "quick_title_ready": "{{name}} 已設定完成。",
+      "quick_subtitle_ready": "它的模型透過閘道提供。可在下方修改金鑰或協定。",
+      "quick_title_off": "{{name}} 已停用。",
+      "quick_subtitle_off": "金鑰已儲存，但重新啟用前不會處理請求。",
+      "add_key": "新增金鑰",
+      "add_another": "再新增一個",
+      "add_to": "再新增一個 {{name}} 金鑰",
+      "open_key": "開啟 {{name}}",
+      "toggle_key": "啟用或停用 {{name}}",
+      "key_actions": "{{name}} 的操作",
+      "models_one": "1 個模型",
+      "models_other": "{{count}} 個模型",
+      "prefix": "前綴 {{prefix}}",
+      "start_with": "從這裡開始",
+      "more": "更多",
+      "more_all": "全部提供商",
+      "more_summary_one": "{{count}} 個提供商 · 搜尋、排序、依模型篩選",
+      "more_summary_other": "{{count}} 個提供商，{{empty}} 個沒有金鑰 · 搜尋、排序、依模型篩選",
+      "more_summary_none": "{{count}} 個提供商 · 搜尋、排序、依模型篩選",
+      "browse_hint": "閘道支援的所有提供商，可搜尋、排序並依模型篩選。",
+      "sync_title": "同步",
+      "sync_hint": "金鑰讀取自閘道設定。",
+      "updated": "讀取於 {{time}}"
     }
   },
   "claude_reset": {
