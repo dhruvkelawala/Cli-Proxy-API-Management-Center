@@ -1,5 +1,4 @@
 import { describe, expect, test } from 'bun:test';
-import { readFileSync } from 'node:fs';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { TrafficFlow } from '@/components/flow';
@@ -73,26 +72,25 @@ describe('traffic layout', () => {
 });
 
 describe('TrafficFlow markup', () => {
-  const markup = renderToStaticMarkup(
-    createElement(TrafficFlow, {
-      label: 'Providers and their accounts',
-      hubLabel: 'Gateway',
-      hubDetail: '127.0.0.1:8317',
-      providers: [
-        {
-          id: 'claude',
-          label: 'Claude',
-          meta: '245 requests',
-          share: 0.8,
-          state: 'live',
-          accounts: [
-            { id: 'w', state: 'live', volume: 1, share: 0.7, failures: 0.1, content: 'Work' },
-            { id: 'p', state: 'warn', volume: 0, share: 0.1, failures: 0, content: 'Personal' },
-          ],
-        },
-      ],
-    })
-  );
+  const props = {
+    label: 'Providers and their accounts',
+    hubLabel: 'Gateway',
+    hubDetail: '127.0.0.1:8317',
+    providers: [
+      {
+        id: 'claude',
+        label: 'Claude',
+        meta: '245 requests',
+        share: 0.8,
+        state: 'live',
+        accounts: [
+          { id: 'w', state: 'live', volume: 1, share: 0.7, failures: 0.1, content: 'Work' },
+          { id: 'p', state: 'warn', volume: 0, share: 0.1, failures: 0, content: 'Personal' },
+        ],
+      },
+    ],
+  } as const;
+  const markup = renderToStaticMarkup(createElement(TrafficFlow, props as never));
 
   test('the diagram is decorative; providers and accounts are a labelled nested list', () => {
     expect(markup).toContain('<svg');
@@ -103,11 +101,36 @@ describe('TrafficFlow markup', () => {
     expect(markup).toContain('data-state="warn"');
   });
 
-  test('travelling dots respect reduced motion (CSS and component)', () => {
-    const source = readFileSync('src/components/flow/TrafficFlow.tsx', 'utf8');
-    expect(source).toContain('usePrefersReducedMotion()');
-    expect(source).toContain('{!reduced &&');
-    const css = readFileSync('src/components/flow/TrafficFlow.module.scss', 'utf8');
-    expect(css).toMatch(/prefers-reduced-motion: reduce[\s\S]*animation: none/);
+  const renderWith = (reduced: boolean) => {
+    const original = (globalThis as { window?: unknown }).window;
+    // usePrefersReducedMotion reads matchMedia when the component first renders.
+    (globalThis as { window?: unknown }).window = {
+      matchMedia: (query: string) => ({
+        matches: reduced && query.includes('prefers-reduced-motion'),
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      }),
+    };
+    try {
+      return renderToStaticMarkup(createElement(TrafficFlow, props as never));
+    } finally {
+      (globalThis as { window?: unknown }).window = original;
+    }
+  };
+
+  test('with motion allowed, live paths carry travelling dots and red flecks', () => {
+    const moving = renderWith(false);
+    expect(moving.match(/<animateMotion/g)?.length).toBe(6);
+    // A fleck is the smaller red dot (r=2.4); the failing account has one among its six.
+    expect(moving.match(/<circle r="2.4">/g)?.length).toBe(1);
+  });
+
+  test('with reduced motion, no dots travel but the paths and their weights stay', () => {
+    const still = renderWith(true);
+    expect(still).not.toContain('<animateMotion');
+    expect(still).not.toContain('<animate ');
+    expect(still.match(/<path/g)?.length).toBe(renderWith(false).match(/<path/g)?.length);
+    expect(still).toContain('stroke-width:3.45');
+    expect(still).toContain('stroke-width:1.53');
   });
 });
