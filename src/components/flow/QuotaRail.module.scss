@@ -1,0 +1,42 @@
+.rail {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.track {
+  display: block;
+  height: 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-tertiary) 22%, transparent);
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--text-secondary);
+  transform-origin: left center;
+  transition: transform 400ms var(--ease-out-strong);
+
+  &[data-low='true'] {
+    background: var(--danger-color);
+  }
+}
+
+.caption {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 12.5px;
+  color: var(--text-operational-muted, var(--text-tertiary));
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fill {
+    transition: none;
+  }
+}
