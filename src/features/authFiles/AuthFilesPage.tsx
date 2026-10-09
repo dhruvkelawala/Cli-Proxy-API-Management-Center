@@ -668,8 +668,10 @@ export function AuthFilesPage() {
   const editorFile = prefixProxyEditor
     ? (files.find((file) => file.name === prefixProxyEditor.fileName) ?? null)
     : null;
-  const toggleDisabled = (file: (typeof files)[number]) =>
-    disableControls ||
+  // Only global conditions disable the row switch; its own in-flight update makes it busy
+  // instead, so keyboard focus stays on it.
+  const toggleDisabled = () => disableControls;
+  const toggleBusy = (file: (typeof files)[number]) =>
     statusUpdating[getAuthFileRefreshKey(file)] === true ||
     manualRefreshing[getAuthFileRefreshKey(file)] === true;
 
@@ -888,6 +890,7 @@ export function AuthFilesPage() {
             selecting={showSelection}
             selectedFiles={selectedFiles}
             isToggleDisabled={toggleDisabled}
+            isToggleBusy={toggleBusy}
             animateEntrance={enableCardEntrance}
             onOpen={openPrefixProxyEditor}
             onToggleStatus={handleStatusToggle}

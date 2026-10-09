@@ -25,8 +25,13 @@ export interface AccountRowProps {
   /** Batch selection mode: a checkbox leads the row. */
   selecting: boolean;
   selected: boolean;
-  /** The enable switch is busy or controls are off. */
+  /** Controls are off (disconnected, refreshing everything): the switch is disabled. */
   toggleDisabled: boolean;
+  /**
+   * This account's own update is in flight. The switch stays enabled (disabling it would drop
+   * keyboard focus) but ignores input until the update settles.
+   */
+  toggleBusy?: boolean;
   /** Position for the one-time entrance stagger; null skips it. */
   entranceIndex: number | null;
   onOpen: (file: AuthFileItem) => void;
@@ -47,6 +52,7 @@ export function AccountRow({
   selecting,
   selected,
   toggleDisabled,
+  toggleBusy = false,
   entranceIndex,
   onOpen,
   onToggleStatus,
@@ -138,7 +144,9 @@ export function AccountRow({
             ariaLabel={accountName}
             checked={enabled}
             disabled={toggleDisabled}
-            onChange={(value) => onToggleStatus(file, value)}
+            onChange={(value) => {
+              if (!toggleBusy) onToggleStatus(file, value);
+            }}
           />
         )}
       </span>

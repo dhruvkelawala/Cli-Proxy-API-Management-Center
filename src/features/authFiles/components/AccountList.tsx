@@ -18,6 +18,7 @@ export interface AccountListProps {
   selecting: boolean;
   selectedFiles: Set<string>;
   isToggleDisabled: (file: AuthFileItem) => boolean;
+  isToggleBusy?: (file: AuthFileItem) => boolean;
   /** Stagger the rows in once (the first render with data). */
   animateEntrance: boolean;
   onOpen: (file: AuthFileItem) => void;
@@ -35,6 +36,7 @@ export function AccountList({
   selecting,
   selectedFiles,
   isToggleDisabled,
+  isToggleBusy,
   animateEntrance,
   onOpen,
   onToggleStatus,
@@ -73,6 +75,7 @@ export function AccountList({
                   selecting={selecting}
                   selected={selectedFiles.has(file.name)}
                   toggleDisabled={isToggleDisabled(file)}
+                  toggleBusy={isToggleBusy?.(file) ?? false}
                   entranceIndex={animateEntrance ? index++ : null}
                   onOpen={onOpen}
                   onToggleStatus={onToggleStatus}

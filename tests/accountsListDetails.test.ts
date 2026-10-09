@@ -122,6 +122,32 @@ describe('quota indicator for any provider', () => {
   });
 });
 
+describe('row switch while its update is in flight', () => {
+  test('stays enabled (keeps keyboard focus) instead of being disabled', () => {
+    const work = file('work.json', { note: 'Work' });
+    const render = (toggleBusy: boolean, toggleDisabled: boolean) =>
+      renderToStaticMarkup(
+        createElement(AccountRow, {
+          file: work,
+          presentation: presentAccounts([work]).get(work),
+          indicator: null,
+          clientLinks: null,
+          selecting: false,
+          selected: false,
+          toggleDisabled,
+          toggleBusy,
+          entranceIndex: null,
+          onOpen: () => {},
+          onToggleStatus: () => {},
+          onToggleSelect: () => {},
+        })
+      );
+    const switchTag = (markup: string) => markup.match(/<input[^>]*role="switch"[^>]*>/)?.[0] ?? '';
+    expect(switchTag(render(true, false))).not.toContain('disabled');
+    expect(switchTag(render(false, true))).toContain('disabled');
+  });
+});
+
 describe('restored detail', () => {
   test('the details sheet shows the per-account request status bar', () => {
     const work = file('work.json', {
