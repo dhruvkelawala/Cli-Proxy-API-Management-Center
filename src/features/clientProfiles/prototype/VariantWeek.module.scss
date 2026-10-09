@@ -1,0 +1,243 @@
+// PROTOTYPE C · The week
+
+.week {
+  margin-top: 44px;
+  display: grid;
+  gap: 0;
+}
+
+.bandLabel {
+  margin-bottom: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.band {
+  position: relative;
+  height: 44px;
+}
+
+.segment {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--text-tertiary) 10%, transparent);
+  box-shadow: inset 0 0 0 1px var(--bg-secondary);
+  overflow: hidden;
+  transition:
+    left 360ms var(--proto-ease),
+    width 360ms var(--proto-ease),
+    background 360ms var(--proto-ease);
+
+  &[data-current='true'] {
+    background: color-mix(in srgb, var(--proto-accent) 16%, transparent);
+  }
+
+  &[data-now='true'][data-current='false'] {
+    box-shadow:
+      inset 0 0 0 1px var(--bg-secondary),
+      inset 0 0 0 2px color-mix(in srgb, var(--text-tertiary) 45%, transparent);
+  }
+
+  & + & {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+}
+
+.segmentText {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: segIn 320ms var(--proto-ease);
+
+  [data-current='true'] > & {
+    color: var(--text-primary);
+  }
+}
+
+@keyframes segIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.ticks {
+  position: relative;
+  height: 28px;
+  margin-top: 8px;
+  border-top: 1px solid var(--proto-line);
+}
+
+.tick,
+.nowTick {
+  position: absolute;
+  top: 8px;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -9px;
+    left: 0;
+    width: 1px;
+    height: 5px;
+    background: var(--proto-line);
+  }
+}
+
+.nowTick {
+  color: var(--proto-accent);
+  font-weight: 600;
+
+  &::before {
+    background: var(--proto-accent);
+  }
+}
+
+.lanes {
+  display: grid;
+  gap: 22px;
+  margin-top: 26px;
+}
+
+.lane {
+  display: grid;
+  gap: 10px;
+}
+
+.laneHead {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+
+.laneName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.laneLeft {
+  margin-left: auto;
+  font-size: 12.5px;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.track {
+  position: relative;
+  height: 30px;
+}
+
+.room {
+  position: absolute;
+  top: 6px;
+  left: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--text-secondary);
+
+  &[data-low='true'] {
+    background: var(--proto-bad);
+  }
+}
+
+.reset {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+}
+
+.resetDot {
+  width: 9px;
+  height: 9px;
+  margin-top: 3px;
+  border-radius: 50%;
+  border: 1.5px solid var(--text-secondary);
+  background: var(--bg-secondary);
+}
+
+.resetText {
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.reset[data-edge='start'] {
+  align-items: flex-start;
+  transform: translateX(-4px);
+}
+
+.reset[data-edge='end'] {
+  align-items: flex-end;
+  transform: translateX(calc(-100% + 4px));
+}
+
+.unknown {
+  font-size: 12.5px;
+  color: var(--text-tertiary);
+}
+
+.below {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  margin-top: 26px;
+
+  > p {
+    flex: 1 1 280px;
+  }
+}
+
+.swap {
+  padding: 8px 14px;
+  border: 1px solid var(--proto-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 200ms var(--proto-ease);
+
+  &:hover {
+    background: var(--bg-tertiary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--proto-accent);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segment {
+    transition: none;
+  }
+  .segmentText {
+    animation: none;
+  }
+}

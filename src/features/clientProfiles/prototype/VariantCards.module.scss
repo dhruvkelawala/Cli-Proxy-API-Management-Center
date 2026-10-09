@@ -1,0 +1,128 @@
+// PROTOTYPE B · Two cards
+
+.summary {
+  margin: 14px 0 0;
+  max-width: 54ch;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.stack {
+  display: grid;
+  gap: 12px;
+  margin: 40px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: grid;
+  gap: 8px;
+  padding: 20px 22px 22px;
+
+  @media (max-width: 560px) {
+    padding: 16px 18px 18px;
+  }
+  border: 1px solid var(--proto-line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bg-primary) 55%, var(--bg-secondary));
+  transition: border-color 300ms var(--proto-ease);
+
+  &[data-serving='true'] {
+    border-color: color-mix(in srgb, var(--proto-accent) 50%, var(--proto-line));
+  }
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rank {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.now {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--proto-accent);
+
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+}
+
+.name {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.016em;
+  color: var(--text-primary);
+}
+
+.swapRow {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin-top: 18px;
+}
+
+.swap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px 8px 12px;
+  border: 1px solid var(--proto-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 200ms var(--proto-ease);
+
+  svg {
+    color: var(--text-secondary);
+  }
+
+  &:hover {
+    background: var(--bg-tertiary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--proto-accent);
+    outline-offset: 2px;
+  }
+}
+
+.hint {
+  flex: 1 1 260px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-tertiary);
+
+  &[data-good='false'] {
+    color: var(--text-secondary);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .swap {
+    transition: none;
+  }
+}

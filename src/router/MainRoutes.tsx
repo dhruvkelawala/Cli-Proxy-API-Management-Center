@@ -3,6 +3,8 @@ import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { ProvidersWorkbenchPage } from '@/features/providers/ProvidersWorkbenchPage';
 import { AuthFilesPage } from '@/features/authFiles/AuthFilesPage';
 import { ClientRoutesPage } from '@/features/clientProfiles/ClientRoutesPage';
+// PROTOTYPE (throwaway): friendly Client routes variants, dev builds only.
+import { ClientRoutesPrototype } from '@/features/clientProfiles/prototype/ClientRoutesPrototype';
 import { AuthFilesOAuthExcludedEditPage } from '@/pages/AuthFilesOAuthExcludedEditPage';
 import { AuthFilesOAuthModelAliasEditPage } from '@/pages/AuthFilesOAuthModelAliasEditPage';
 import { OAuthPage } from '@/pages/OAuthPage';
@@ -27,7 +29,10 @@ const createMainRoutes = (supportsPlugin: boolean) => [
   { path: '/auth-files', element: <AuthFilesPage /> },
   { path: '/auth-files/oauth-excluded', element: <AuthFilesOAuthExcludedEditPage /> },
   { path: '/auth-files/oauth-model-alias', element: <AuthFilesOAuthModelAliasEditPage /> },
-  { path: '/client-routes', element: <ClientRoutesPage /> },
+  {
+    path: '/client-routes',
+    element: import.meta.env.DEV ? <ClientRoutesPrototype /> : <ClientRoutesPage />,
+  },
   { path: '/oauth', element: <OAuthPage /> },
   { path: '/quota', element: <QuotaPage /> },
   ...(supportsPlugin
