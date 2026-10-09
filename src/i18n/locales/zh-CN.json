@@ -1946,7 +1946,8 @@
     "commercial_mode_restart_required": "商业模式开关已变更，请重启服务后生效",
     "copy_failed": "复制失败",
     "link_copied": "已复制",
-    "copied": "已复制到剪贴板"
+    "copied": "已复制到剪贴板",
+    "action_available": "此消息中可使用「{{action}}」。"
   },
   "language": {
     "switch": "语言",

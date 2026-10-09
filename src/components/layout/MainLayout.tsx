@@ -326,6 +326,16 @@ export function MainLayout() {
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [sidebarOpen, closeSidebarRestoringFocus]);
+  // Undo-style actions belong to the gateway they were offered for: drop them on a switch.
+  const removeActionNotifications = useNotificationStore(
+    (state) => state.removeActionNotifications
+  );
+  const previousApiBase = useRef(apiBase);
+  useEffect(() => {
+    if (previousApiBase.current === apiBase) return;
+    previousApiBase.current = apiBase;
+    removeActionNotifications();
+  }, [apiBase, removeActionNotifications]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [navMoreOpen, setNavMoreOpen] = useState(() =>
     readNavMoreOpen(typeof window === 'undefined' ? null : window.localStorage)

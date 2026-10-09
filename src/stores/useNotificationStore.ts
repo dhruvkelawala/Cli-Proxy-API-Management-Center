@@ -7,7 +7,7 @@ import { create } from 'zustand';
 import type { ReactNode } from 'react';
 import type { Notification, NotificationAction, NotificationType } from '@/types';
 import { generateId } from '@/utils/helpers';
-import { NOTIFICATION_DURATION_MS } from '@/utils/constants';
+import { ACTION_NOTIFICATION_DURATION_MS, NOTIFICATION_DURATION_MS } from '@/utils/constants';
 
 interface ConfirmationOptions {
   title?: string;
@@ -33,6 +33,8 @@ interface NotificationState {
     action?: NotificationAction
   ) => void;
   removeNotification: (id: string) => void;
+  /** Drops toasts that offer an action (e.g. Undo); used when the connection changes. */
+  removeActionNotifications: () => void;
   showConfirmation: (options: ConfirmationOptions) => void;
   hideConfirmation: () => void;
   setConfirmationLoading: (loading: boolean) => void;
@@ -46,13 +48,14 @@ export const useNotificationStore = create<NotificationState>((set) => ({
     options: null,
   },
 
-  showNotification: (message, type = 'info', duration = NOTIFICATION_DURATION_MS, action) => {
+  showNotification: (message, type = 'info', duration, action) => {
     const id = generateId();
     const notification: Notification = {
       id,
       message,
       type,
-      duration,
+      // A toast with an action stays long enough to read it and reach the button.
+      duration: duration ?? (action ? ACTION_NOTIFICATION_DURATION_MS : NOTIFICATION_DURATION_MS),
       ...(action ? { action } : {}),
     };
 
@@ -62,6 +65,12 @@ export const useNotificationStore = create<NotificationState>((set) => ({
 
     // NotificationContainer owns readable-time expiry and cleans up timers on unmount.
     // Keeping timers out of the store allows hover/focus/hidden-tab pauses.
+  },
+
+  removeActionNotifications: () => {
+    set((state) => ({
+      notifications: state.notifications.filter((n) => !n.action),
+    }));
   },
 
   removeNotification: (id) => {

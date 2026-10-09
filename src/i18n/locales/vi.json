@@ -1908,7 +1908,8 @@
     "type_success": "Thành công",
     "type_info": "Thông tin",
     "type_warning": "Cảnh báo",
-    "type_error": "Lỗi"
+    "type_error": "Lỗi",
+    "action_available": "Có thể dùng “{{action}}” trong thông báo này."
   },
   "language": {
     "switch": "Ngôn ngữ",

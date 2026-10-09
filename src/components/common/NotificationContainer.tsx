@@ -111,6 +111,12 @@ function NotificationCard({
       >
         <span className={styles.srOnly}>{t(`notification.type_${type}`)}: </span>
         {message}
+        {action ? (
+          <span className={styles.srOnly}>
+            {' '}
+            {t('notification.action_available', { action: action.label })}
+          </span>
+        ) : null}
       </div>
       {action ? (
         <button

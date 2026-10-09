@@ -46,3 +46,5 @@ export const SUPPORTED_LANGUAGES = LANGUAGE_ORDER;
 
 // 通知持续时间
 export const NOTIFICATION_DURATION_MS = 3000;
+/** Toasts that offer an action (e.g. Undo) stay up longer so the action can be reached. */
+export const ACTION_NOTIFICATION_DURATION_MS = 9000;

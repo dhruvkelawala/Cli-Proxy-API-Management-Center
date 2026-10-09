@@ -1951,7 +1951,8 @@
     "commercial_mode_restart_required": "Commercial mode setting changed. Please restart the service for it to take effect",
     "copy_failed": "Copy failed",
     "link_copied": "Link copied to clipboard",
-    "copied": "Copied to clipboard"
+    "copied": "Copied to clipboard",
+    "action_available": "{{action}} is available in this message."
   },
   "language": {
     "switch": "Language",
