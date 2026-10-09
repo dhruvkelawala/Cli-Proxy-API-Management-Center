@@ -94,9 +94,17 @@ key descriptors (`{ key, values }`), so it can be tested without rendering:
 
 ### More stays open while it holds something
 
-A search that filters the visible list (Plugins, Plugin Store), a sign-in or Vertex import under
-way (OAuth), or a custom address being typed (login) keeps the page's More open through
-`forcedOpen`, with a one-line `forcedNote`. A filter is never hidden behind a closed More.
+Only something under way holds a More open (`forcedOpen`, with a one-line `forcedNote`): a sign-in
+or Vertex import in progress (OAuth), or a custom address ticked but still empty (login). An error
+or a finished result does not; it can be read and dismissed. Search that filters a list sits above
+the list, never behind a More. Errors that point at the address (network, 404, old backend) open
+the login page's Connection on their own.
+
+### Sentences follow the latest thing
+
+When several things could be described (OAuth sign-ins), something still under way wins over a
+result, and among equals the latest started wins. Changing counts and times are not announced:
+PageHeader's `live` is off where the subtitle ticks (Logs). A failed step says so in words.
 
 ### Retrofitting an older page
 
@@ -109,22 +117,22 @@ rather than rewriting each `<Button>`.
 
 ## Pages
 
-| Page               | Main view                                                                                                                                                 | Under More                                                                                                    |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Overview           | The state sentence (`describeOverview`), TrafficFlow, 5-hour and weekly rails per account, one line of totals                                             | Throughput chart, per-provider requests and success rate, account health, gateway settings, links             |
-| Accounts           | The state sentence, search, one row per account grouped by provider (Claude in routing order), Add account; provider tabs only for 7+ accounts            | Show filter, sort, list/cards, page size, batch selection, model rules, scoped Delete                         |
-| Routing            | The order sentence, FlowDiagram of clients → gateway → accounts                                                                                           | Shared strategy, session affinity, per-client rules, client keys                                              |
-| Quota              | Per-account quota cards and the windows timeline (only providers with accounts get a tab)                                                                 | Sort                                                                                                          |
-| AI Providers       | "3 provider keys configured." / "No API keys yet."; one hairline row per key grouped by provider (state, switch, View/Edit/Delete menu); "Add a key" menu | Every provider with search, sort, model filter and the full table; quick-fill sponsors; sync time and Refresh |
-| Quick Start        | The sponsor's state sentence and its set-up form                                                                                                          | Sync time and Refresh                                                                                         |
-| OAuth              | "Sign in a new account." changing with the sign-in; StepFlow; Claude, Codex, Antigravity rows; the sign-in under way unfolds under its row                | Muse, Kimi (both), xAI, Devin, plugin providers, Vertex JSON import                                           |
-| Logs               | Whether logs can be read and if they are live; the viewer (search, level, filters, refresh, live, fullscreen)                                             | Download and clear the loaded lines; error request logs (read only while open)                                |
-| Config             | "Your gateway settings are in sync." (or unsaved/invalid counts); search; quiet section tabs; the active section (Common first)                           | Visual ↔ YAML source switch; reload                                                                           |
-| Plugins            | How many plugins run; one row per plugin with switch, Edit config, Delete                                                                                 | Search; global status, folder, counts; refresh                                                                |
-| Plugin Store       | What is available or updatable; the trust note; status filters; one row per plugin                                                                        | Search; global status, folder, count; refresh                                                                 |
-| Management Center  | Gateway version (with Check for updates), connection, UI version, build time, model count                                                                 | Models by family with refresh; links; clear local login data (asks first)                                     |
-| Model-rule editors | A sentence about the chosen provider's rules; provider chips; the rules; Save in the top bar                                                              | (none; they are short forms)                                                                                  |
-| Login              | "Sign in to your gateway."; management key; remember; Login                                                                                               | Connection: the detected address and a custom one                                                             |
+| Page               | Main view                                                                                                                                                                                                         | Under More                                                                                                    |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Overview           | The state sentence (`describeOverview`), TrafficFlow, 5-hour and weekly rails per account, one line of totals                                                                                                     | Throughput chart, per-provider requests and success rate, account health, gateway settings, links             |
+| Accounts           | The state sentence, search, one row per account grouped by provider (Claude in routing order), Add account; provider tabs only for 7+ accounts                                                                    | Show filter, sort, list/cards, page size, batch selection, model rules, scoped Delete                         |
+| Routing            | The order sentence, FlowDiagram of clients → gateway → accounts                                                                                                                                                   | Shared strategy, session affinity, per-client rules, client keys                                              |
+| Quota              | Per-account quota cards and the windows timeline (only providers with accounts get a tab)                                                                                                                         | Sort                                                                                                          |
+| AI Providers       | "3 provider keys configured." / "No API keys yet."; one hairline row per key grouped by provider (state, switch, View/Edit/Delete menu); "Add a key" menu                                                         | Every provider with search, sort, model filter and the full table; quick-fill sponsors; sync time and Refresh |
+| Quick Start        | The sponsor's state sentence and its set-up form                                                                                                                                                                  | Sync time and Refresh                                                                                         |
+| OAuth              | "Sign in a new account." following the latest sign-in; StepFlow; Claude, Codex, Antigravity rows with one short line and a "Sign in" button; the sign-in under way unfolds under its row (errors are dismissible) | Muse, Kimi (both), xAI, Devin, plugin providers, Vertex JSON import                                           |
+| Logs               | Whether logs can be read and if they are live (not announced on each read); the viewer (search, level, filters, refresh, live, fullscreen, which brings Download and Clear and makes the rest inert)              | Download and clear the loaded lines; error request logs (read only while open)                                |
+| Config             | "Your gateway settings are in sync." (or unsaved/invalid counts); search; quiet section tabs; the active section (Common first)                                                                                   | Visual ↔ YAML source switch; reload                                                                           |
+| Plugins            | How many plugins run; search; one row per plugin with switch, Edit config, Delete                                                                                                                                 | Global status, folder, counts; refresh                                                                        |
+| Plugin Store       | What is available or updatable; the trust note; search; status filters; one row per plugin                                                                                                                        | Global status, folder, count; refresh                                                                         |
+| Management Center  | Gateway version (with Check for updates), connection, UI version, build time, model count                                                                                                                         | Models by family with refresh; links; clear local login data (asks first)                                     |
+| Model-rule editors | A sentence about the chosen provider's rules; provider chips; the rules; Save in the top bar                                                                                                                      | (none; they are short forms)                                                                                  |
+| Login              | "Sign in to your gateway." naming the address it will use; management key; remember; Login                                                                                                                        | Connection: the detected address and a custom one (opens itself on address errors)                            |
 
 An account row opens its details sheet, which starts with how the account is doing (status, pool,
 cooldown, quota, pinned clients) and its one-off actions (models, refresh, download, delete).
