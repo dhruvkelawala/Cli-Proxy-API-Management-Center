@@ -1,39 +1,10 @@
-@use '../../styles/mixins' as *;
-@use '../../styles/variables' as *;
+// AI Providers / Quick Start (Flow design language, src/styles/DESIGN.md). The column, lists and
+// text buttons come from components/flow/flowPage.module.scss; this module only lays out the
+// "browse every provider" block under More.
 
-.page {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  width: 100%;
-  padding: 24px;
-  box-sizing: border-box;
-}
-
-.layout {
+.browse {
   display: grid;
-  align-items: start;
-  gap: 16px;
-  grid-template-columns: minmax(0, 1fr);
-
-  @media (min-width: 1280px) {
-    grid-template-columns: 240px minmax(0, 1fr);
-  }
-}
-
-.layoutSingle {
-  @media (min-width: 1280px) {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-.modelCatalogSlot {
-  margin-top: 4px;
-}
-
-@media (max-width: 768px) {
-  .page {
-    padding: 16px;
-    gap: 16px;
-  }
+  gap: 24px;
+  min-width: 0;
+  margin-top: 6px;
 }

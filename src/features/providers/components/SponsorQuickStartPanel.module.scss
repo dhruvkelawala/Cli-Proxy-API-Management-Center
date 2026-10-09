@@ -2,11 +2,8 @@
 @use '../../../styles/variables' as *;
 
 .panel {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  padding: 20px;
+  // Flow: no box; the page header already names the sponsor.
+  padding: 0;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -65,8 +62,8 @@
 }
 
 .logo {
-  width: 30px;
-  height: 30px;
+  width: 20px;
+  height: 20px;
   border-radius: var(--radius-md);
   object-fit: contain;
   flex-shrink: 0;
@@ -82,10 +79,10 @@
 .title {
   margin: 0;
   color: var(--text-primary);
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.22;
-  letter-spacing: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 
 .footer {
@@ -97,21 +94,20 @@
 }
 
 .empty {
-  border: 1px dashed var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 32px;
-  text-align: center;
-  color: var(--muted-foreground);
-  font-size: 14px;
+  padding: 18px 0 0;
+  border-top: 1px solid var(--hairline);
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  line-height: 1.55;
 }
 
 .emptyActions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 12px;
+  justify-content: flex-start;
+  gap: 12px 22px;
+  margin-top: 18px;
 }
 
 .emptyActionButton {
@@ -167,20 +163,26 @@
 }
 
 .emptyActionButtonEmphasis {
-  color: var(--amber-text);
-  border-color: color-mix(in srgb, var(--amber-color) 48%, var(--border-color));
-  background: color-mix(in srgb, var(--amber-color) 14%, var(--bg-primary));
-  font-weight: 600;
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--amber-color) 18%, transparent);
+  // A quiet text link, not a second button.
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  font-weight: 400;
+  text-decoration: underline;
+  text-decoration-color: var(--hairline);
+  text-underline-offset: 4px;
 
   &:hover {
-    border-color: color-mix(in srgb, var(--amber-color) 72%, var(--border-color));
-    background: color-mix(in srgb, var(--amber-color) 20%, var(--bg-primary));
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--amber-color) 18%, transparent);
+    border: 0;
+    background: none;
+    color: var(--text-primary);
+    text-decoration-color: currentColor;
   }
 
   &:focus-visible {
-    outline-color: var(--amber-color);
+    outline-color: var(--accent-indigo);
   }
 }
 
@@ -205,16 +207,6 @@
 }
 
 @media (max-width: 768px) {
-  .panel {
-    padding: 16px;
-    gap: 18px;
-  }
-
-  .title {
-    font-size: 22px;
-    line-height: 1.25;
-  }
-
   .titleRow {
     gap: 10px;
   }
@@ -226,5 +218,11 @@
       width: 100%;
       justify-content: center;
     }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation-duration: 2s;
   }
 }
