@@ -97,7 +97,6 @@
     "status": "Connection Status:"
   },
   "nav": {
-    "dashboard": "Dashboard",
     "quick_start": "Quick Start",
     "ai_providers": "AI Providers",
     "auth_files": "Accounts",
@@ -112,13 +111,6 @@
     "overview": "Overview",
     "quota": "Quota",
     "more": "More"
-  },
-  "nav_groups": {
-    "operate": "Operate",
-    "gateway": "Gateway",
-    "observe": "Observe",
-    "plugin_pages": "Plugins",
-    "control": "Control"
   },
   "nav_meta": {
     "dashboard": "Operations overview",
@@ -2390,11 +2382,6 @@
     "auth_error": "Authorization was refused."
   },
   "client_routes": {
-    "title": "Client routes",
-    "subtitle": "Choose which subscription each client may use. Pick a cell to change one rule.",
-    "gateway": "Rules are stored on the gateway at {{host}}",
-    "new_profile": "New profile",
-    "loading": "Loading client routes…",
     "retry": "Try again",
     "load_error_title": "Couldn't load client routes",
     "refresh_error_title": "Couldn't refresh client routes",
@@ -2433,15 +2420,6 @@
       "title": "Rules are saved, not enforced yet",
       "body": "The gateway stores these rules, but strict routing arrives in a later gateway update. Until then, requests made with a client key whose profile has an Only rule are rejected (HTTP 503). Keys on profiles where every rule is Automatic keep working as before.",
       "short": "Strict routing isn't enforced by this gateway yet. Until it is, requests from clients with an Only rule are rejected (HTTP 503) instead of being routed."
-    },
-    "unsupported": {
-      "title": "This gateway doesn't support client routes",
-      "body": "Client routes need a CLIProxyAPI version with the client profile API. Nothing can be saved here, and existing routing is unchanged.",
-      "incompatible": "This gateway uses a client profile API version this dashboard doesn't understand, so editing is turned off."
-    },
-    "empty": {
-      "title": "No client profiles yet",
-      "body": "A profile is the identity a client connects with. Create one, then link a client key to it."
     },
     "shared_band": {
       "label": "Shared pool",

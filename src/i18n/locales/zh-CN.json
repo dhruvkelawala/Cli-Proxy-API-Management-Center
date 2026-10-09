@@ -97,7 +97,6 @@
     "status": "连接状态:"
   },
   "nav": {
-    "dashboard": "仪表盘",
     "quick_start": "快速开始",
     "ai_providers": "AI 提供商",
     "auth_files": "账号",
@@ -112,13 +111,6 @@
     "overview": "概览",
     "quota": "额度",
     "more": "更多"
-  },
-  "nav_groups": {
-    "operate": "运行",
-    "gateway": "网关",
-    "observe": "观测",
-    "plugin_pages": "插件",
-    "control": "控制"
   },
   "nav_meta": {
     "dashboard": "运行总览",
@@ -2385,11 +2377,6 @@
     "auth_error": "授权被拒绝。"
   },
   "client_routes": {
-    "title": "客户端路由",
-    "subtitle": "为每个客户端选择可使用的订阅。点击单元格修改一条规则。",
-    "gateway": "规则保存在网关 {{host}} 上",
-    "new_profile": "新建配置",
-    "loading": "正在加载客户端路由…",
     "retry": "重试",
     "load_error_title": "无法加载客户端路由",
     "refresh_error_title": "无法刷新客户端路由",
@@ -2427,15 +2414,6 @@
       "title": "规则已保存，尚未强制执行",
       "body": "网关会保存这些规则，但严格路由将在后续网关更新中提供。在此之前，配置中含有“仅”规则的客户端密钥发出的请求会被拒绝（HTTP 503）。所有规则均为自动的配置所用密钥照常工作。",
       "short": "此网关尚未强制执行严格路由。在此之前，含有“仅”规则的客户端请求会被拒绝（HTTP 503），而不是被路由。"
-    },
-    "unsupported": {
-      "title": "此网关不支持客户端路由",
-      "body": "客户端路由需要带有客户端配置 API 的 CLIProxyAPI 版本。此处无法保存任何内容，现有路由保持不变。",
-      "incompatible": "此网关使用本面板无法识别的客户端配置 API 版本，因此已关闭编辑。"
-    },
-    "empty": {
-      "title": "还没有客户端配置",
-      "body": "配置是客户端连接时使用的身份。先创建一个，再为其关联客户端密钥。"
     },
     "shared_band": {
       "label": "共享账号池",

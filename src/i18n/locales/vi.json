@@ -97,7 +97,6 @@
     "status": "Trạng thái kết nối:"
   },
   "nav": {
-    "dashboard": "Bảng điều khiển",
     "quick_start": "Bắt đầu nhanh",
     "ai_providers": "AI Provider",
     "auth_files": "Tài khoản",
@@ -112,13 +111,6 @@
     "overview": "Tổng quan",
     "quota": "Hạn mức",
     "more": "Thêm"
-  },
-  "nav_groups": {
-    "operate": "Vận hành",
-    "gateway": "Gateway",
-    "observe": "Giám sát",
-    "plugin_pages": "Plugin",
-    "control": "Điều khiển"
   },
   "nav_meta": {
     "dashboard": "Tổng quan vận hành",
@@ -2396,11 +2388,6 @@
     "auth_error": "Ủy quyền đã bị từ chối."
   },
   "client_routes": {
-    "title": "Định tuyến máy khách",
-    "subtitle": "Chọn gói đăng ký mà mỗi máy khách được dùng. Chọn một ô để đổi một quy tắc.",
-    "gateway": "Quy tắc được lưu trên cổng {{host}}",
-    "new_profile": "Hồ sơ mới",
-    "loading": "Đang tải định tuyến máy khách…",
     "retry": "Thử lại",
     "load_error_title": "Không tải được định tuyến máy khách",
     "refresh_error_title": "Không làm mới được định tuyến máy khách",
@@ -2439,15 +2426,6 @@
       "title": "Quy tắc đã được lưu, chưa được áp dụng",
       "body": "Cổng lưu các quy tắc này, nhưng định tuyến nghiêm ngặt sẽ có trong một bản cập nhật cổng sau. Trước đó, yêu cầu dùng khóa máy khách có hồ sơ chứa quy tắc Chỉ sẽ bị từ chối (HTTP 503). Khóa của hồ sơ có mọi quy tắc là Tự động vẫn hoạt động như trước.",
       "short": "Cổng này chưa áp dụng định tuyến nghiêm ngặt. Trước đó, yêu cầu từ máy khách có quy tắc Chỉ bị từ chối (HTTP 503) thay vì được định tuyến."
-    },
-    "unsupported": {
-      "title": "Cổng này không hỗ trợ định tuyến máy khách",
-      "body": "Định tuyến máy khách cần phiên bản CLIProxyAPI có API hồ sơ máy khách. Không thể lưu gì ở đây và định tuyến hiện tại không đổi.",
-      "incompatible": "Cổng này dùng phiên bản API hồ sơ máy khách mà bảng điều khiển không hiểu, nên tính năng chỉnh sửa bị tắt."
-    },
-    "empty": {
-      "title": "Chưa có hồ sơ máy khách",
-      "body": "Hồ sơ là danh tính mà máy khách dùng khi kết nối. Hãy tạo một hồ sơ, rồi liên kết một khóa máy khách với nó."
     },
     "shared_band": {
       "label": "Nhóm dùng chung",

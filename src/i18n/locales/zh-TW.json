@@ -97,7 +97,6 @@
     "status": "連線狀態:"
   },
   "nav": {
-    "dashboard": "儀表板",
     "quick_start": "快速開始",
     "ai_providers": "AI 供應商",
     "auth_files": "帳號",
@@ -112,13 +111,6 @@
     "overview": "概覽",
     "quota": "額度",
     "more": "更多"
-  },
-  "nav_groups": {
-    "operate": "運行",
-    "gateway": "閘道",
-    "observe": "觀測",
-    "plugin_pages": "插件",
-    "control": "控制"
   },
   "nav_meta": {
     "dashboard": "運行總覽",
@@ -2411,11 +2403,6 @@
     "auth_error": "授權遭拒。"
   },
   "client_routes": {
-    "title": "用戶端路由",
-    "subtitle": "為每個用戶端選擇可使用的訂閱。點選儲存格以修改一條規則。",
-    "gateway": "規則儲存在閘道 {{host}} 上",
-    "new_profile": "新增設定檔",
-    "loading": "正在載入用戶端路由…",
     "retry": "重試",
     "load_error_title": "無法載入用戶端路由",
     "refresh_error_title": "無法重新整理用戶端路由",
@@ -2453,15 +2440,6 @@
       "title": "規則已儲存，尚未強制執行",
       "body": "閘道會儲存這些規則，但嚴格路由將在之後的閘道更新中提供。在此之前，設定檔含有「僅」規則的用戶端金鑰所發出的請求會被拒絕（HTTP 503）。所有規則皆為自動的設定檔所用金鑰照常運作。",
       "short": "此閘道尚未強制執行嚴格路由。在此之前，含有「僅」規則的用戶端請求會被拒絕（HTTP 503），而不是被路由。"
-    },
-    "unsupported": {
-      "title": "此閘道不支援用戶端路由",
-      "body": "用戶端路由需要具備用戶端設定檔 API 的 CLIProxyAPI 版本。此處無法儲存任何內容，現有路由維持不變。",
-      "incompatible": "此閘道使用本面板無法辨識的用戶端設定檔 API 版本，因此已關閉編輯。"
-    },
-    "empty": {
-      "title": "還沒有用戶端設定檔",
-      "body": "設定檔是用戶端連線時使用的身分。先建立一個，再為它連結用戶端金鑰。"
     },
     "shared_band": {
       "label": "共用帳號池",
