@@ -133,3 +133,13 @@ export const pathTail = (d: string): string => d.replace(/^M\s*[-\d.]+\s+[-\d.]+
 /** Source → hub → card, as one path (for travelling dots and locked routes). */
 export const routePath = (layout: FlowLayout, anchor: Point, box: Box): string =>
   `${inboundPath(layout, anchor)} ${pathTail(outboundPath(layout, box))}`;
+
+/**
+ * Mouse and pen drag from anywhere on a card. Touch drags only from the grip handle, so a
+ * swipe over a card scrolls instead of reordering.
+ */
+export const isDragStart = (pointerType: string, target: EventTarget | null): boolean => {
+  if (pointerType !== 'touch') return true;
+  const element = target as { closest?: (selector: string) => unknown } | null;
+  return Boolean(element?.closest?.('[data-grip]'));
+};

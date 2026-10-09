@@ -128,7 +128,8 @@
 
   &[data-reorderable='true'] {
     cursor: grab;
-    touch-action: none;
+    // Touch scrolls over a card; only the grip captures the gesture (see isDragStart).
+    touch-action: pan-y;
   }
 
   &[data-state='live'] {
@@ -158,12 +159,23 @@
 
 .grip {
   position: absolute;
-  top: 16px;
-  right: 14px;
+  top: 6px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   line-height: 0;
   fill: var(--text-tertiary);
   opacity: 0.5;
+  touch-action: none;
   transition: opacity 200ms var(--ease-out-strong);
+
+  // No hover on touch screens: the handle is always visible there.
+  @media (hover: none) {
+    opacity: 1;
+  }
 }
 
 .srOnly {

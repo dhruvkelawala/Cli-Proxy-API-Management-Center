@@ -14,6 +14,7 @@ import {
   computeFlowLayout,
   dropIndexFor,
   inboundPath,
+  isDragStart,
   moveItem,
   outboundPath,
   routePath,
@@ -66,6 +67,7 @@ export interface FlowDiagramProps<D extends FlowDestination> {
 type DragState = { id: string; from: number; startY: number; dy: number; active: boolean };
 
 const GLIDE_MS = 360;
+
 const DRAG_THRESHOLD = 4;
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 4);
 
@@ -214,6 +216,8 @@ export function FlowDiagram<D extends FlowDestination>({
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>, id: string, index: number) => {
     if (!canReorder || event.button !== 0) return;
+    // On touch the card scrolls the page; only the grip handle starts a drag.
+    if (!isDragStart(event.pointerType, event.target)) return;
     event.currentTarget.setPointerCapture?.(event.pointerId);
     setDrag({ id, from: index, startY: event.clientY, dy: 0, active: false });
   };
@@ -383,7 +387,7 @@ export function FlowDiagram<D extends FlowDestination>({
               onKeyDown={(event) => onKeyDown(event, index)}
             >
               {canReorder && (
-                <span className={styles.grip} aria-hidden="true">
+                <span className={styles.grip} data-grip="" aria-hidden="true">
                   <svg width="8" height="12" viewBox="0 0 8 12">
                     {[0, 5, 10].flatMap((y) => [
                       <circle key={`a${y}`} cx="1.5" cy={y + 1} r="1.1" />,
