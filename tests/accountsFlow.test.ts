@@ -242,7 +242,8 @@ describe('ActionMenu', () => {
     expect(markup).not.toContain('role="menu"');
     const source = read('src/components/flow/ActionMenu.tsx');
     expect(source).toContain('role="menuitem"');
-    expect(source).toMatch(/'ArrowDown'[\s\S]*'ArrowUp'[\s\S]*'Home'[\s\S]*'End'[\s\S]*'Escape'/);
+    // Arrow/Home/End movement is tested on its model in actionMenu.test.ts.
+    expect(source).toContain("event.key === 'Escape'");
   });
 });
 

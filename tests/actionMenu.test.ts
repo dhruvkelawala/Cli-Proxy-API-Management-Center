@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { menuKeyTarget, openingIndex } from '@/components/flow/ActionMenu';
+import { menuKeyTarget, openingIndex } from '@/components/flow/actionMenuModel';
 
 describe('ActionMenu keyboard model', () => {
   // Items 0..3 with item 2 disabled.
