@@ -2892,7 +2892,13 @@
     "details": {
       "traffic": "Thông lượng",
       "gateway": "Gateway",
-      "elsewhere": "Trang khác"
+      "elsewhere": "Trang khác",
+      "providers": "Nhà cung cấp",
+      "provider": "Nhà cung cấp",
+      "accounts": "Tài khoản",
+      "requests": "Yêu cầu ({{window}})",
+      "health_line_one": "{{count}} tài khoản: {{available}} khả dụng, {{attention}} cần xử lý, {{unknown}} chưa rõ, {{disabled}} đang tắt.",
+      "health_line_other": "{{count}} tài khoản: {{available}} khả dụng, {{attention}} cần xử lý, {{unknown}} chưa rõ, {{disabled}} đang tắt."
     },
     "stale": {
       "kept": "Chưa làm mới được; đang hiện dữ liệu đọc lần trước.",

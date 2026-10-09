@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores';
-import { formatDateValue } from '@/utils/format';
+import { formatDateValue, formatPercent } from '@/utils/format';
+import { providerLabel } from '@/features/dashboard/utils';
 import { ThroughputChart } from '@/features/dashboard/components/ThroughputChart';
 import type { useDashboardOverview } from '@/features/dashboard/hooks/useDashboardOverview';
 import styles from '../Overview.module.scss';
@@ -27,7 +28,8 @@ export function OverviewDetails({
   const { t, i18n } = useTranslation();
   const serverVersion = useAuthStore((state) => state.serverVersion);
   const serverBuildDate = useAuthStore((state) => state.serverBuildDate);
-  const { config, counts, credentials, traffic } = dashboard;
+  const { config, counts, credentials, traffic, providers } = dashboard;
+  const unknownLabel = t('dashboard.provider_unknown');
 
   const strategy = config?.routingStrategy?.trim();
   const rows: Array<{ label: string; value: string; mono?: boolean }> = [
@@ -79,6 +81,47 @@ export function OverviewDetails({
           </p>
         )}
         <ThroughputChart traffic={traffic} />
+      </section>
+
+      <section className={styles.detailSection}>
+        <h3 className={styles.detailTitle}>{t('overview.details.providers')}</h3>
+        {credentials && credentials.total > 0 && (
+          <p className={styles.detailNote}>
+            {t('overview.details.health_line', {
+              count: credentials.total,
+              available: credentials.available,
+              attention: credentials.needsAttention,
+              unknown: credentials.unknown,
+              disabled: credentials.disabled,
+            })}
+          </p>
+        )}
+        {providers.length === 0 ? (
+          <p className={styles.detailNote}>{t('dashboard.fleet_empty')}</p>
+        ) : (
+          <table className={styles.providerTable}>
+            <thead>
+              <tr>
+                <th scope="col">{t('overview.details.provider')}</th>
+                <th scope="col">{t('overview.details.accounts')}</th>
+                <th scope="col">{t('overview.details.requests', { window: windowLabel })}</th>
+                <th scope="col">{t('dashboard.success_rate')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {providers.map((provider) => (
+                <tr key={provider.id}>
+                  <th scope="row">{providerLabel(provider.id, unknownLabel)}</th>
+                  <td>{provider.credentials.toLocaleString()}</td>
+                  <td>{provider.total.toLocaleString()}</td>
+                  <td>
+                    {provider.successRate === null ? DASH : formatPercent(provider.successRate)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </section>
 
       <section className={styles.detailSection}>

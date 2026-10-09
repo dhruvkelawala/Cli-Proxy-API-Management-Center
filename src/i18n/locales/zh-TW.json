@@ -2895,7 +2895,12 @@
     "details": {
       "traffic": "吞吐量",
       "gateway": "閘道",
-      "elsewhere": "其他頁面"
+      "elsewhere": "其他頁面",
+      "providers": "供應商",
+      "provider": "供應商",
+      "accounts": "帳號",
+      "requests": "請求（{{window}}）",
+      "health_line": "共 {{count}} 個帳號：{{available}} 個可用，{{attention}} 個需要處理，{{unknown}} 個未知，{{disabled}} 個已關閉。"
     },
     "stale": {
       "kept": "剛才沒能重新整理，顯示的是上次讀取的內容。",

@@ -2869,7 +2869,12 @@
     "details": {
       "traffic": "吞吐量",
       "gateway": "网关",
-      "elsewhere": "其他页面"
+      "elsewhere": "其他页面",
+      "providers": "提供商",
+      "provider": "提供商",
+      "accounts": "账号",
+      "requests": "请求（{{window}}）",
+      "health_line": "共 {{count}} 个账号：{{available}} 个可用，{{attention}} 个需要处理，{{unknown}} 个未知，{{disabled}} 个已关闭。"
     },
     "stale": {
       "kept": "刚才没能刷新，显示的是上次读取的内容。",

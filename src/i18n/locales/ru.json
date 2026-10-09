@@ -2921,7 +2921,15 @@
     "details": {
       "traffic": "Пропускная способность",
       "gateway": "Шлюз",
-      "elsewhere": "Другие разделы"
+      "elsewhere": "Другие разделы",
+      "providers": "Провайдеры",
+      "provider": "Провайдер",
+      "accounts": "Аккаунты",
+      "requests": "Запросы ({{window}})",
+      "health_line_one": "{{count}} аккаунт: доступно {{available}}, требуют внимания {{attention}}, неизвестно {{unknown}}, выключено {{disabled}}.",
+      "health_line_few": "{{count}} аккаунта: доступно {{available}}, требуют внимания {{attention}}, неизвестно {{unknown}}, выключено {{disabled}}.",
+      "health_line_many": "{{count}} аккаунтов: доступно {{available}}, требуют внимания {{attention}}, неизвестно {{unknown}}, выключено {{disabled}}.",
+      "health_line_other": "{{count}} аккаунта: доступно {{available}}, требуют внимания {{attention}}, неизвестно {{unknown}}, выключено {{disabled}}."
     },
     "stale": {
       "kept": "Не удалось обновить; показано то, что было прочитано последним.",

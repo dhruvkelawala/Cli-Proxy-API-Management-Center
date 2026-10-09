@@ -2886,7 +2886,13 @@
     "details": {
       "traffic": "Throughput",
       "gateway": "Gateway",
-      "elsewhere": "Elsewhere"
+      "elsewhere": "Elsewhere",
+      "providers": "Providers",
+      "provider": "Provider",
+      "accounts": "Accounts",
+      "requests": "Requests ({{window}})",
+      "health_line_one": "{{count}} account: {{available}} available, {{attention}} need attention, {{unknown}} unknown, {{disabled}} off.",
+      "health_line_other": "{{count}} accounts: {{available}} available, {{attention}} need attention, {{unknown}} unknown, {{disabled}} off."
     },
     "stale": {
       "kept": "Couldn’t refresh just now; showing what was last read.",

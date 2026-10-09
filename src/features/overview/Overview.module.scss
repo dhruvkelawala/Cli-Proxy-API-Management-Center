@@ -301,6 +301,41 @@
   color: var(--text-secondary);
 }
 
+.providerTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  font-variant-numeric: tabular-nums;
+
+  th,
+  td {
+    padding: 9px 0;
+    border-bottom: 1px solid var(--hairline);
+    text-align: right;
+    font-weight: 400;
+  }
+
+  th:first-child {
+    text-align: left;
+  }
+
+  thead th {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-operational-muted, var(--text-tertiary));
+  }
+
+  tbody th {
+    color: var(--text-primary);
+  }
+
+  td {
+    color: var(--text-secondary);
+  }
+}
+
 .specs {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
