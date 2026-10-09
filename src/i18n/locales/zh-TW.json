@@ -2865,12 +2865,11 @@
     "flow": {
       "section": "即時流量",
       "label": "供應商及其帳號",
-      "legend": "路徑越粗，近幾小時承載的請求越多；紅點表示失敗。",
+      "legend": "最近 30 分鐘：路徑越粗，承載的請求越多；圓點是即時流量，紅點表示失敗。",
       "change_order": "調整優先順序",
       "recent_title": "最近 30 分鐘 {{count}} 個請求",
       "requests": "{{formatted}} 個請求",
-      "accounts": "{{count}} 個帳號",
-      "recent_unit": "30 分鐘"
+      "accounts": "{{count}} 個帳號"
     },
     "quota": {
       "title": "額度",

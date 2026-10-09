@@ -2853,15 +2853,14 @@
     "flow": {
       "section": "Live traffic",
       "label": "Providers and their accounts",
-      "legend": "Thicker paths carried more requests in the last few hours; red flecks are failures.",
+      "legend": "Last 30 minutes: thicker paths carried more requests, dots are live traffic, red flecks are failures.",
       "change_order": "Change who goes first",
       "recent_title_one": "{{count}} request in the last 30 minutes",
       "recent_title_other": "{{count}} requests in the last 30 minutes",
       "requests_one": "{{formatted}} request",
       "requests_other": "{{formatted}} requests",
       "accounts_one": "{{count}} account",
-      "accounts_other": "{{count}} accounts",
-      "recent_unit": "30 min"
+      "accounts_other": "{{count}} accounts"
     },
     "quota": {
       "title": "Quota",

@@ -8,7 +8,6 @@ import {
   flowStateOf,
   flowVolume,
   recentTotal,
-  trafficTotal,
   type ProviderGroup,
 } from './overviewModel';
 import styles from './Overview.module.scss';
@@ -33,8 +32,9 @@ export function buildFlowProviders(
     providerLabel,
   }: { t: TFunction; formatWhen: FormatWhen; providerLabel: (provider: string) => string }
 ): TrafficProviderNode[] {
+  // One window everywhere in the flow: the last 30 minutes (RECENT_BUCKETS), labelled once.
   const all = groups.flatMap((group) => group.accounts);
-  const grand = groups.reduce((sum, group) => sum + trafficTotal(group.traffic), 0);
+  const grand = groups.reduce((sum, group) => sum + recentTotal(group.traffic), 0);
   const busiest = Math.max(0, ...all.map((item) => recentTotal(item.traffic)));
   const share = (value: number) => (grand > 0 ? value / grand : 0);
 
@@ -47,7 +47,7 @@ export function buildFlowProviders(
         id: item.account.id,
         state,
         volume: flowVolume(item, busiest),
-        share: share(trafficTotal(item.traffic)),
+        share: share(recent),
         failures: flowFailures(item.traffic),
         content: (
           <>
@@ -64,16 +64,13 @@ export function buildFlowProviders(
                   {t('overview.flow.recent_title', { count: recent })}
                 </span>
                 <span aria-hidden="true">{count(recent)}</span>
-                <span className={styles.nodeCountUnit} aria-hidden="true">
-                  {t('overview.flow.recent_unit')}
-                </span>
               </span>
             )}
           </>
         ),
       };
     });
-    const total = trafficTotal(group.traffic);
+    const total = recentTotal(group.traffic);
     return {
       id: group.provider,
       label: providerLabel(group.provider),

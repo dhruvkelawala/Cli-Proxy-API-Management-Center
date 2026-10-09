@@ -2859,15 +2859,14 @@
     "flow": {
       "section": "Lưu lượng trực tiếp",
       "label": "Nhà cung cấp và tài khoản của họ",
-      "legend": "Đường càng dày thì càng nhiều yêu cầu trong vài giờ qua; chấm đỏ là lỗi.",
+      "legend": "30 phút qua: đường càng dày thì càng nhiều yêu cầu; chấm là lưu lượng trực tiếp, chấm đỏ là lỗi.",
       "change_order": "Đổi thứ tự ưu tiên",
       "recent_title_one": "{{count}} yêu cầu trong 30 phút qua",
       "recent_title_other": "{{count}} yêu cầu trong 30 phút qua",
       "requests_one": "{{formatted}} yêu cầu",
       "requests_other": "{{formatted}} yêu cầu",
       "accounts_one": "{{count}} tài khoản",
-      "accounts_other": "{{count}} tài khoản",
-      "recent_unit": "30 phút"
+      "accounts_other": "{{count}} tài khoản"
     },
     "quota": {
       "title": "Hạn mức",

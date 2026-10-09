@@ -2839,12 +2839,11 @@
     "flow": {
       "section": "实时流量",
       "label": "提供商及其账号",
-      "legend": "路径越粗，近几小时承载的请求越多；红点表示失败。",
+      "legend": "最近 30 分钟：路径越粗，承载的请求越多；圆点是实时流量，红点表示失败。",
       "change_order": "调整优先顺序",
       "recent_title": "最近 30 分钟 {{count}} 个请求",
       "requests": "{{formatted}} 个请求",
-      "accounts": "{{count}} 个账号",
-      "recent_unit": "30 分钟"
+      "accounts": "{{count}} 个账号"
     },
     "quota": {
       "title": "额度",
