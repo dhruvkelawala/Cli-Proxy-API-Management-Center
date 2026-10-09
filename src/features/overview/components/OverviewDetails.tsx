@@ -30,6 +30,17 @@ export function OverviewDetails({
   const serverBuildDate = useAuthStore((state) => state.serverBuildDate);
   const { config, counts, credentials, traffic, providers } = dashboard;
   const unknownLabel = t('dashboard.provider_unknown');
+  // The same window as the chart above (the recent buckets), not lifetime counters.
+  const providerRows = providers.map((provider) => {
+    const success = provider.buckets.reduce((sum, bucket) => sum + bucket.success, 0);
+    const failed = provider.buckets.reduce((sum, bucket) => sum + bucket.failed, 0);
+    const total = success + failed;
+    return {
+      ...provider,
+      windowTotal: total,
+      windowRate: total > 0 ? (success / total) * 100 : null,
+    };
+  });
 
   const strategy = config?.routingStrategy?.trim();
   const rows: Array<{ label: string; value: string; mono?: boolean }> = [
@@ -109,13 +120,13 @@ export function OverviewDetails({
               </tr>
             </thead>
             <tbody>
-              {providers.map((provider) => (
+              {providerRows.map((provider) => (
                 <tr key={provider.id}>
                   <th scope="row">{providerLabel(provider.id, unknownLabel)}</th>
                   <td>{provider.credentials.toLocaleString()}</td>
-                  <td>{provider.total.toLocaleString()}</td>
+                  <td>{provider.windowTotal.toLocaleString()}</td>
                   <td>
-                    {provider.successRate === null ? DASH : formatPercent(provider.successRate)}
+                    {provider.windowRate === null ? DASH : formatPercent(provider.windowRate)}
                   </td>
                 </tr>
               ))}

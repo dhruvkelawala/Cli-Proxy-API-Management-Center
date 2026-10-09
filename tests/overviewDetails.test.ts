@@ -45,7 +45,11 @@ describe('Overview More', () => {
           failure: 5,
           total: 245,
           successRate: 97.96,
-          buckets: [],
+          // The window: 49 of 50 in the recent buckets (lifetime totals must not show).
+          buckets: [
+            { time: '10:00-10:10', success: 30, failed: 1 },
+            { time: '10:10-10:20', success: 19, failed: 0 },
+          ],
         },
         {
           id: 'codex',
@@ -67,8 +71,9 @@ describe('Overview More', () => {
     );
     expect(markup).toContain('<table');
     expect(markup).toContain('Claude');
-    expect(markup).toContain('245');
+    expect(markup).toContain('<td>50</td>');
     expect(markup).toContain('<td>98%</td>');
+    expect(markup).not.toContain('<td>245</td>');
     expect(markup).toContain('3 accounts: 2 available, 1 need attention, 0 unknown, 0 off.');
   });
 });
