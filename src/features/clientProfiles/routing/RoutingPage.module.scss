@@ -1,0 +1,373 @@
+// Routing page (Flow design language, src/styles/DESIGN.md): one centred reading column.
+
+.page {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: clamp(8px, 4vw, 40px) 0 96px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 48px 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.hero {
+  margin-top: 44px;
+}
+
+// Card body (inside FlowDiagram nodes)
+.rank {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-operational-muted, var(--text-tertiary));
+  transition: color 300ms var(--ease-out-strong);
+
+  &[data-first='true'] {
+    color: var(--accent-indigo);
+  }
+}
+
+.accountName {
+  margin-bottom: 2px;
+  overflow: hidden;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  color: var(--text-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Lines under the diagram
+.below {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.hint {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.actionsRow {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  min-height: 21px;
+}
+
+.saving {
+  font-size: 12.5px;
+  color: var(--text-operational-muted, var(--text-tertiary));
+}
+
+.textButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--hairline);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition:
+    color 200ms var(--ease-out-strong),
+    text-decoration-color 200ms var(--ease-out-strong);
+
+  &:hover {
+    color: var(--text-primary);
+    text-decoration-color: currentColor;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-indigo);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.55;
+  }
+
+  &[aria-pressed='true'] {
+    color: var(--accent-indigo);
+  }
+}
+
+.footnotes {
+  display: grid;
+  gap: 8px;
+  margin-top: 28px;
+
+  p {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+
+    > svg,
+    > span:first-child {
+      flex: none;
+      margin-top: 2px;
+      color: var(--text-tertiary);
+    }
+
+    &[data-problem='true'] {
+      color: var(--danger-color);
+
+      > svg {
+        color: currentColor;
+      }
+    }
+  }
+}
+
+.otherMark {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  font-size: 12px;
+}
+
+// Turned-off accounts: below the order, never in it.
+.offList {
+  display: grid;
+  gap: 6px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    min-width: 0;
+    font-size: 13.5px;
+    color: var(--text-secondary);
+  }
+}
+
+.offRank {
+  flex: none;
+  min-width: 64px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-operational-muted, var(--text-tertiary));
+}
+
+.offName {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Main-view notices: one quiet line each; colour only on the icon.
+.notices {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.quietNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+
+  > svg {
+    flex: none;
+    margin-top: 3px;
+    color: var(--text-tertiary);
+  }
+
+  &[data-tone='warn'] > svg {
+    color: var(--amber-color);
+  }
+
+  &[data-tone='danger'] > svg {
+    color: var(--danger-color);
+  }
+}
+
+.quietNoticeText {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+
+// More
+.moreWrap {
+  margin-top: 44px;
+}
+
+.more {
+  display: grid;
+  gap: 32px;
+  padding-top: 4px;
+}
+
+.moreSection {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.moreTitle {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-operational-muted, var(--text-tertiary));
+}
+
+.moreNote {
+  margin: 0;
+  max-width: 60ch;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.rows {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(96px, 150px) minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 6px 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--hairline);
+
+  &:last-child {
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: minmax(0, 1fr) auto;
+
+    .rowRules {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+  }
+}
+
+.rowName {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-primary);
+
+  svg {
+    flex: none;
+    color: var(--text-tertiary);
+  }
+
+  > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.rowRules {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rowRule {
+  font-size: 13.5px;
+  color: var(--text-primary);
+
+  &[data-locked='true'] {
+    font-weight: 500;
+  }
+}
+
+.rowRuleQuiet {
+  font-size: 12.5px;
+  color: var(--text-operational-muted, var(--text-tertiary));
+}
+
+.rowWarn {
+  margin-top: 2px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+
+  &[data-broken='true'] {
+    color: var(--danger-color);
+  }
+}
+
+.rowActions {
+  display: inline-flex;
+  gap: 14px;
+  justify-self: end;
+  white-space: nowrap;
+
+  .textButton {
+    font-size: 12.5px;
+  }
+}
+
+.errorBlock {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rank,
+  .textButton {
+    transition: none;
+  }
+}

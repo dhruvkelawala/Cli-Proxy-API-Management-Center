@@ -1,0 +1,197 @@
+// FlowDiagram: the hero of a Flow page. See src/styles/DESIGN.md.
+
+.stage {
+  position: relative;
+  width: 100%;
+}
+
+.svg {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.path {
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  transition:
+    stroke 320ms var(--ease-out-strong),
+    stroke-opacity 320ms var(--ease-out-strong);
+
+  &[data-state='live'] {
+    stroke: var(--accent-indigo);
+    stroke-opacity: 0.85;
+  }
+
+  &[data-state='waiting'] {
+    stroke: var(--text-tertiary);
+    stroke-opacity: 0.6;
+    stroke-dasharray: 3 5;
+  }
+
+  &[data-state='out'] {
+    stroke: var(--text-tertiary);
+    stroke-opacity: 0.22;
+    stroke-dasharray: 3 5;
+  }
+
+  &[data-state='locked'] {
+    stroke: var(--amber-color);
+    stroke-opacity: 0.75;
+  }
+
+  &[data-state='broken'] {
+    stroke: var(--danger-color);
+    stroke-opacity: 0.8;
+    stroke-dasharray: 2 4;
+  }
+}
+
+.hub {
+  fill: var(--bg-primary);
+  stroke: var(--accent-indigo);
+  stroke-width: 1.5;
+}
+
+.dot {
+  fill: var(--accent-indigo);
+}
+
+.hubLabel {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.source {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 112px;
+  transform: translateY(-50%);
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+
+  svg {
+    flex: none;
+    color: var(--text-tertiary);
+  }
+
+  &[data-problem='true'] {
+    color: var(--danger-color);
+
+    svg {
+      color: currentColor;
+    }
+  }
+
+  &[data-narrow='true'] {
+    transform: translateX(-50%);
+  }
+}
+
+.sourceLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nodes {
+  position: absolute;
+  inset: 0;
+}
+
+.node {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--bg-primary) 55%, var(--bg-secondary));
+  user-select: none;
+  transition:
+    box-shadow 200ms var(--ease-out-strong),
+    border-color 300ms var(--ease-out-strong),
+    background-color 300ms var(--ease-out-strong);
+
+  &[data-reorderable='true'] {
+    cursor: grab;
+    // Touch scrolls over a card; only the grip captures the gesture (see isDragStart).
+    touch-action: pan-y;
+  }
+
+  &[data-state='live'] {
+    border-color: color-mix(in srgb, var(--accent-indigo) 55%, var(--hairline));
+  }
+
+  &[data-state='out'] {
+    background: transparent;
+  }
+
+  &[data-dragging='true'] {
+    z-index: 2;
+    cursor: grabbing;
+    box-shadow: var(--floating-shadow, 0 12px 32px rgb(0 0 0 / 0.3));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-indigo);
+    outline-offset: 2px;
+  }
+
+  &:hover .grip,
+  &:focus-visible .grip {
+    opacity: 1;
+  }
+}
+
+.grip {
+  position: absolute;
+  top: 6px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  line-height: 0;
+  fill: var(--text-tertiary);
+  opacity: 0.5;
+  touch-action: none;
+  transition: opacity 200ms var(--ease-out-strong);
+
+  // No hover on touch screens: the handle is always visible there.
+  @media (hover: none) {
+    opacity: 1;
+  }
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .path,
+  .node,
+  .grip {
+    transition: none;
+  }
+}

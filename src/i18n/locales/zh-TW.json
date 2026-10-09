@@ -97,39 +97,35 @@
     "status": "連線狀態:"
   },
   "nav": {
-    "dashboard": "儀表板",
     "quick_start": "快速開始",
     "ai_providers": "AI 供應商",
     "auth_files": "帳號",
-    "client_routes": "用戶端路由",
+    "client_routes": "路由",
     "oauth": "OAuth 登入",
     "quota_management": "配額管理",
     "plugins": "插件管理",
     "plugin_store": "插件商店",
     "config_management": "設定面板",
     "logs": "記錄檢視",
-    "system_info": "中心資訊"
-  },
-  "nav_groups": {
-    "operate": "運行",
-    "gateway": "閘道",
-    "observe": "觀測",
-    "plugin_pages": "插件",
-    "control": "控制"
+    "system_info": "中心資訊",
+    "overview": "概覽",
+    "quota": "額度",
+    "more": "更多"
   },
   "nav_meta": {
     "dashboard": "運行總覽",
     "quick_start": "APIKEY.FUN 快速設定",
     "ai_providers": "上游模型路由",
     "auth_files": "帳號與憑證",
-    "client_routes": "為每個用戶端選擇訂閱",
+    "client_routes": "誰先用，誰做備用",
     "oauth": "OAuth 授權登入",
     "quota_management": "API Key 與限額",
     "plugins": "插件啟停與設定",
     "plugin_store": "探索並安裝插件",
     "logs": "請求追蹤與排查",
     "config_management": "閘道基礎設定",
-    "system_info": "運行與診斷資訊"
+    "system_info": "運行與診斷資訊",
+    "more": "設定、日誌、配置與系統"
   },
   "dashboard": {
     "hero_verdict_good": "運行平穩",
@@ -1976,7 +1972,8 @@
     "commercial_mode_restart_required": "商業模式開關已變更，請重啟服務後生效",
     "copy_failed": "複製失敗",
     "link_copied": "已複製",
-    "copied": "已複製到剪貼簿"
+    "copied": "已複製到剪貼簿",
+    "action_available": "此訊息中可使用「{{action}}」。"
   },
   "language": {
     "switch": "語言",
@@ -2407,27 +2404,12 @@
     "auth_error": "授權遭拒。"
   },
   "client_routes": {
-    "title": "用戶端路由",
-    "subtitle": "為每個用戶端選擇可使用的訂閱。點選儲存格以修改一條規則。",
-    "gateway": "規則儲存在閘道 {{host}} 上",
-    "new_profile": "新增設定檔",
-    "loading": "正在載入用戶端路由…",
     "retry": "重試",
     "load_error_title": "無法載入用戶端路由",
     "refresh_error_title": "無法重新整理用戶端路由",
     "providers": {
       "claude": "Claude",
       "codex": "Codex"
-    },
-    "matrix": {
-      "caption": "各用戶端設定檔在每個提供者下可使用的訂閱",
-      "profile_column": "用戶端設定檔",
-      "edit_profile": "{{name}} 的設定檔與金鑰",
-      "cell_context": "{{profile}}：",
-      "cell_change": "修改規則",
-      "keys_count": "{{count}} 個用戶端金鑰",
-      "no_keys": "尚未連結用戶端金鑰",
-      "footnote": "一條規則涵蓋以該設定檔用戶端金鑰發出的該提供者全部請求。Claude 與 Codex 規則彼此獨立。"
     },
     "pill": {
       "automatic": "自動",
@@ -2460,25 +2442,12 @@
       "body": "閘道會儲存這些規則，但嚴格路由將在之後的閘道更新中提供。在此之前，設定檔含有「僅」規則的用戶端金鑰所發出的請求會被拒絕（HTTP 503）。所有規則皆為自動的設定檔所用金鑰照常運作。",
       "short": "此閘道尚未強制執行嚴格路由。在此之前，含有「僅」規則的用戶端請求會被拒絕（HTTP 503），而不是被路由。"
     },
-    "unsupported": {
-      "title": "此閘道不支援用戶端路由",
-      "body": "用戶端路由需要具備用戶端設定檔 API 的 CLIProxyAPI 版本。此處無法儲存任何內容，現有路由維持不變。",
-      "incompatible": "此閘道使用本面板無法辨識的用戶端設定檔 API 版本，因此已關閉編輯。"
-    },
-    "empty": {
-      "title": "還沒有用戶端設定檔",
-      "body": "設定檔是用戶端連線時使用的身分。先建立一個，再為它連結用戶端金鑰。"
-    },
     "shared_band": {
       "label": "共用帳號池",
       "loading": "載入中…",
       "affinity_on": "對話固定在同一帳號",
       "affinity_on_ttl": "對話固定在同一帳號，保持 {{ttl}}",
       "affinity_off": "對話不固定在同一帳號",
-      "edit": "編輯",
-      "hide": "收合",
-      "edit_aria": "編輯共用帳號池設定",
-      "hide_aria": "收合共用帳號池設定",
       "locked": "儲存或捨棄共用帳號池的變更後才能收合。"
     },
     "connection": {
@@ -2656,5 +2625,125 @@
       "enroll_first": "選擇用戶端之前，請先為 {{account}} 做嚴格路由準備。",
       "unsupported": "此憑證無法用於嚴格路由。"
     }
+  },
+  "routing": {
+    "eyebrow": "Claude",
+    "loading": "正在載入路由…",
+    "title_first": "新對話會使用 {{account}}。",
+    "follow_backup": "如果 {{account}} 用完，會自動切換到 {{backup}}。",
+    "follow_no_backup": "目前沒有備用帳號。",
+    "title_shared": "新對話由 {{accounts}} 共同分擔。",
+    "follow_shared": "其中一個用完時，其餘帳號繼續接手。",
+    "title_fallback": "{{out}} 已用完，新對話改用 {{account}}。",
+    "follow_back_at": "{{when}}會切回 {{out}}。",
+    "follow_back_later": "{{out}} 恢復額度後會切回。",
+    "follow_preview": "這只是預覽，沒有做任何變更。",
+    "title_none": "目前沒有可用額度的 Claude 帳號。",
+    "follow_none": "在有帳號恢復之前，新對話會失敗。",
+    "title_empty": "還沒有 Claude 帳號。",
+    "follow_empty": "在「OAuth 登入」中登入 Claude 後會顯示在這裡。",
+    "rank": {
+      "first": "優先",
+      "backup": "備用",
+      "shared": "共用",
+      "off": "已關閉"
+    },
+    "health": {
+      "available": "可用",
+      "attention": "可用，近期有少量錯誤",
+      "cooling": "冷卻中",
+      "cooling_until": "冷卻中，{{when}}恢復",
+      "limit": "已達上限",
+      "limit_until": "已達上限，{{when}}恢復",
+      "disabled": "已關閉",
+      "unknown": "狀態未知",
+      "preview_out": "額度用完（預覽）"
+    },
+    "quota": {
+      "week_left": "本週剩餘 {{percent}}%",
+      "week_left_reset": "本週剩餘 {{percent}}% · {{when}}重置",
+      "checking": "正在查詢剩餘額度…",
+      "meter_label": "{{account}}：本週剩餘額度"
+    },
+    "when": {
+      "today": "今天 {{time}}",
+      "tomorrow": "明天 {{time}}",
+      "other": "{{day}} {{time}}"
+    },
+    "hint": {
+      "sooner_bad": "{{account}} 較早重置（{{when}}），除非先用它，否則剩餘的 {{percent}}% 會浪費。",
+      "sooner_good": "{{account}} 較早重置（{{when}}），先用它不會浪費額度。",
+      "drag": "拖曳帳號，或聚焦後按 ↑ / ↓，即可調整誰先用。",
+      "single": "再新增一個 Claude 帳號即可擁有備用。"
+    },
+    "make_first": "改為先用 {{account}}",
+    "preview_start": "預覽：{{account}} 用完",
+    "preview_end": "結束預覽",
+    "list_label": "依順序排列的 Claude 帳號",
+    "card_label": "{{rank}}：{{account}}。{{status}}",
+    "reorder_hint": "按上下方向鍵移動，按 Home 設為優先。",
+    "hub": "閘道",
+    "all_clients": "所有用戶端",
+    "saving": "正在儲存新順序…",
+    "saved": "現在優先使用 {{account}}。",
+    "save_failed": "無法儲存新順序，已恢復原順序。",
+    "save_failed_detail": "無法儲存新順序（{{message}}），已恢復原順序。",
+    "clients": {
+      "none": "還沒有設定用戶端；所有用戶端金鑰都使用這個順序。",
+      "one": "{{names}} 使用這個順序。",
+      "two": "{{names}} 都使用這個順序。",
+      "many": "{{names}} 都使用這個順序。",
+      "locked": "{{client}} 已鎖定為 {{account}}（見「更多」）。",
+      "locked_broken": "{{client}} 已鎖定為 {{account}}，但它目前無法服務，因此請求會失敗。",
+      "locked_missing": "{{client}} 鎖定的帳號無法使用，因此請求會失敗。",
+      "refused": "{{client}} 有一條鎖定規則，但此閘道尚未執行鎖定，因此它的請求會被拒絕。",
+      "locked_other": "{{client}} 已鎖定到一個帳號（見「更多」）。"
+    },
+    "codex": {
+      "one": "Codex 自動使用它唯一的帳號，無需選擇。",
+      "many": "Codex 自動在 {{count}} 個帳號之間分擔。"
+    },
+    "profiles_unsupported": "此閘道沒有用戶端設定檔，所有用戶端金鑰都使用上面的順序。鎖定與用戶端金鑰需要較新版本的 CLIProxyAPI。",
+    "more": "更多",
+    "more_sections": {
+      "locks": "將用戶端鎖定到一個帳號",
+      "locks_note": "鎖定的用戶端不走上面的順序。它的帳號用完時會停止運作，而不是切換。",
+      "clients": "用戶端與金鑰",
+      "clients_note": "每個用戶端使用自己的用戶端金鑰，規則適用於它的所有請求。"
+    },
+    "rule": {
+      "claude": "Claude：{{rule}}",
+      "codex": "Codex：{{rule}}",
+      "follows": "依順序",
+      "only": "僅 {{account}}",
+      "only_missing": "僅一個已不存在的帳號",
+      "unknown": "本面板無法辨識的規則",
+      "strict_warning": "如果 {{account}} 用完，{{client}} 會停止運作，不會切換到備用。",
+      "broken": "{{client}} 鎖定的帳號目前無法服務，因此請求會失敗。",
+      "change": "變更",
+      "change_aria": "變更：{{client}} 的 Claude 規則",
+      "change_codex": "Codex 規則",
+      "change_codex_aria": "Codex 規則：{{client}}",
+      "automatic": "自動",
+      "codex_will_fail": "{{client}} 的 Codex 帳號目前無法服務，因此其 Codex 請求會失敗。",
+      "strict_warning_generic": "如果它的帳號用完，{{client}} 會停止運作，不會切換到備用。"
+    },
+    "keys": {
+      "none": "未連結用戶端金鑰",
+      "count": "{{count}} 個用戶端金鑰",
+      "manage": "金鑰",
+      "manage_aria": "金鑰（{{client}}）",
+      "new_client": "新增用戶端"
+    },
+    "follow_tie": "{{accounts}} 的優先順序相同，因此由 {{account}} 勝出。把其中一個移到最上面即可設定明確的順序。",
+    "title_all_off": "所有 Claude 帳號都已關閉。",
+    "follow_all_off": "在「帳號」中開啟一個，新對話就會使用它。",
+    "off_list_label": "已關閉的 Claude 帳號",
+    "save_partial": "新順序只儲存了一部分（{{message}}）。現在優先使用 {{account}}。",
+    "save_partial_unknown": "新順序只儲存了一部分（{{message}}）。請重新整理查看閘道目前的設定。",
+    "undo": "復原",
+    "profiles_incompatible": "此閘道使用本面板無法辨識的用戶端設定檔 API 版本，因此已隱藏鎖定與用戶端金鑰。上面的順序仍然有效。",
+    "accounts_failed": "無法載入帳號，因此無法顯示順序。",
+    "save_unconfirmed": "無法確認新順序是否已儲存；下面顯示的是閘道目前的設定。"
   }
 }

@@ -13,4 +13,11 @@ export interface Notification {
   message: string;
   type: NotificationType;
   duration?: number;
+  /** One optional inline action, e.g. Undo. Clicking it runs `onAction` and dismisses. */
+  action?: NotificationAction;
+}
+
+export interface NotificationAction {
+  label: string;
+  onAction: () => void;
 }

@@ -97,39 +97,35 @@
     "status": "Connection Status:"
   },
   "nav": {
-    "dashboard": "Dashboard",
     "quick_start": "Quick Start",
     "ai_providers": "AI Providers",
     "auth_files": "Accounts",
-    "client_routes": "Client routes",
+    "client_routes": "Routing",
     "oauth": "OAuth Login",
     "quota_management": "Quota Management",
     "plugins": "Plugins",
     "plugin_store": "Plugin Store",
     "config_management": "Config Panel",
     "logs": "Logs Viewer",
-    "system_info": "Management Center Info"
-  },
-  "nav_groups": {
-    "operate": "Operate",
-    "gateway": "Gateway",
-    "observe": "Observe",
-    "plugin_pages": "Plugins",
-    "control": "Control"
+    "system_info": "Management Center Info",
+    "overview": "Overview",
+    "quota": "Quota",
+    "more": "More"
   },
   "nav_meta": {
     "dashboard": "Operations overview",
     "quick_start": "APIKEY.FUN setup",
     "ai_providers": "Upstream model routing",
     "auth_files": "Accounts & credentials",
-    "client_routes": "Subscription per client",
+    "client_routes": "Who goes first, who is the backup",
     "oauth": "OAuth authorization",
     "quota_management": "API keys & limits",
     "plugins": "Plugin toggles & config",
     "plugin_store": "Discover & install plugins",
     "logs": "Request tracing",
     "config_management": "Gateway configuration",
-    "system_info": "Runtime & diagnostics"
+    "system_info": "Runtime & diagnostics",
+    "more": "Setup, logs, config and system"
   },
   "dashboard": {
     "hero_verdict_good": "All systems steady",
@@ -1955,7 +1951,8 @@
     "commercial_mode_restart_required": "Commercial mode setting changed. Please restart the service for it to take effect",
     "copy_failed": "Copy failed",
     "link_copied": "Link copied to clipboard",
-    "copied": "Copied to clipboard"
+    "copied": "Copied to clipboard",
+    "action_available": "{{action}} is available in this message."
   },
   "language": {
     "switch": "Language",
@@ -2386,28 +2383,12 @@
     "auth_error": "Authorization was refused."
   },
   "client_routes": {
-    "title": "Client routes",
-    "subtitle": "Choose which subscription each client may use. Pick a cell to change one rule.",
-    "gateway": "Rules are stored on the gateway at {{host}}",
-    "new_profile": "New profile",
-    "loading": "Loading client routes…",
     "retry": "Try again",
     "load_error_title": "Couldn't load client routes",
     "refresh_error_title": "Couldn't refresh client routes",
     "providers": {
       "claude": "Claude",
       "codex": "Codex"
-    },
-    "matrix": {
-      "caption": "Client profiles and the subscription each may use, per provider",
-      "profile_column": "Client profile",
-      "edit_profile": "Profile and keys for {{name}}",
-      "cell_context": "{{profile}}:",
-      "cell_change": "Change rule",
-      "keys_count_one": "{{count}} client key",
-      "keys_count_other": "{{count}} client keys",
-      "no_keys": "No client keys linked",
-      "footnote": "A rule covers every request for that provider made with the profile's client keys. Claude and Codex rules are independent."
     },
     "pill": {
       "automatic": "Automatic",
@@ -2441,25 +2422,12 @@
       "body": "The gateway stores these rules, but strict routing arrives in a later gateway update. Until then, requests made with a client key whose profile has an Only rule are rejected (HTTP 503). Keys on profiles where every rule is Automatic keep working as before.",
       "short": "Strict routing isn't enforced by this gateway yet. Until it is, requests from clients with an Only rule are rejected (HTTP 503) instead of being routed."
     },
-    "unsupported": {
-      "title": "This gateway doesn't support client routes",
-      "body": "Client routes need a CLIProxyAPI version with the client profile API. Nothing can be saved here, and existing routing is unchanged.",
-      "incompatible": "This gateway uses a client profile API version this dashboard doesn't understand, so editing is turned off."
-    },
-    "empty": {
-      "title": "No client profiles yet",
-      "body": "A profile is the identity a client connects with. Create one, then link a client key to it."
-    },
     "shared_band": {
       "label": "Shared pool",
       "loading": "Loading…",
       "affinity_on": "Conversations kept on one account",
       "affinity_on_ttl": "Conversations kept on one account for {{ttl}}",
       "affinity_off": "Conversations not kept on one account",
-      "edit": "Edit",
-      "hide": "Hide",
-      "edit_aria": "Edit shared pool settings",
-      "hide_aria": "Hide shared pool settings",
       "locked": "Save or discard the shared pool changes to collapse it."
     },
     "connection": {
@@ -2640,5 +2608,126 @@
       "enroll_first": "Prepare {{account}} for strict routing before choosing clients.",
       "unsupported": "This credential can't be used for strict routing."
     }
+  },
+  "routing": {
+    "eyebrow": "Claude",
+    "loading": "Loading routing…",
+    "title_first": "New conversations go to {{account}}.",
+    "follow_backup": "If {{account}} runs out, they switch to {{backup}} automatically.",
+    "follow_no_backup": "There is no backup right now.",
+    "title_shared": "New conversations are shared between {{accounts}}.",
+    "follow_shared": "If one runs out, the others carry on.",
+    "title_fallback": "{{out}} is out, so new conversations go to {{account}}.",
+    "follow_back_at": "They move back to {{out}} {{when}}.",
+    "follow_back_later": "They move back to {{out}} when it has room again.",
+    "follow_preview": "This is a preview. Nothing has changed.",
+    "title_none": "No Claude account has room right now.",
+    "follow_none": "New conversations will fail until one recovers.",
+    "title_empty": "No Claude accounts yet.",
+    "follow_empty": "Sign in with Claude under OAuth Login and it will show up here.",
+    "rank": {
+      "first": "First",
+      "backup": "Backup",
+      "shared": "Shared",
+      "off": "Off"
+    },
+    "health": {
+      "available": "Available",
+      "attention": "Available, a few recent errors",
+      "cooling": "Cooling down",
+      "cooling_until": "Cooling down until {{when}}",
+      "limit": "At its limit",
+      "limit_until": "At its limit until {{when}}",
+      "disabled": "Turned off",
+      "unknown": "Status unknown",
+      "preview_out": "Out of room (preview)"
+    },
+    "quota": {
+      "week_left": "{{percent}}% left this week",
+      "week_left_reset": "{{percent}}% left this week · resets {{when}}",
+      "checking": "Checking what’s left…",
+      "meter_label": "{{account}}: weekly quota left"
+    },
+    "when": {
+      "today": "today at {{time}}",
+      "tomorrow": "tomorrow at {{time}}",
+      "other": "{{day}} {{time}}"
+    },
+    "hint": {
+      "sooner_bad": "{{account}} resets sooner ({{when}}), so its {{percent}}% left is lost unless it goes first.",
+      "sooner_good": "{{account}} resets sooner ({{when}}), so using it first wastes nothing.",
+      "drag": "Drag an account, or focus it and press ↑ or ↓, to change who goes first.",
+      "single": "Add a second Claude account to have a backup."
+    },
+    "make_first": "Make {{account}} first",
+    "preview_start": "Preview: {{account}} runs out",
+    "preview_end": "End preview",
+    "list_label": "Claude accounts in order",
+    "card_label": "{{rank}}: {{account}}. {{status}}",
+    "reorder_hint": "Press up or down arrow to move it. Home makes it first.",
+    "hub": "Gateway",
+    "all_clients": "All clients",
+    "saving": "Saving the new order…",
+    "saved": "{{account}} goes first now.",
+    "save_failed": "Couldn’t save the new order, so it was put back.",
+    "save_failed_detail": "Couldn’t save the new order ({{message}}), so it was put back.",
+    "clients": {
+      "none": "No clients are set up yet; every client key uses this order.",
+      "one": "{{names}} uses this order.",
+      "two": "{{names}} both use this order.",
+      "many": "{{names}} all use this order.",
+      "locked": "{{client}} is locked to {{account}} (see More).",
+      "locked_broken": "{{client}} is locked to {{account}}, which can’t serve right now, so its requests fail.",
+      "locked_missing": "{{client}} is locked to an account that can’t be used, so its requests fail.",
+      "refused": "{{client}} has a locked rule this gateway doesn’t enforce yet, so its requests are refused.",
+      "locked_other": "{{client}} is locked to one account (see More)."
+    },
+    "codex": {
+      "one": "Codex uses its one account automatically. Nothing to choose.",
+      "many": "Codex shares its {{count}} accounts automatically."
+    },
+    "profiles_unsupported": "This gateway has no client profiles, so every client key uses the order above. Locks and client keys need a newer CLIProxyAPI.",
+    "more": "More",
+    "more_sections": {
+      "locks": "Lock a client to one account",
+      "locks_note": "A locked client skips the order. If its account runs out, it stops instead of switching.",
+      "clients": "Clients and keys",
+      "clients_note": "Each client uses its own client keys, so its rules apply to every request it makes."
+    },
+    "rule": {
+      "claude": "Claude: {{rule}}",
+      "codex": "Codex: {{rule}}",
+      "follows": "follows the order",
+      "only": "only {{account}}",
+      "only_missing": "only an account that’s gone",
+      "unknown": "a rule this panel can’t read",
+      "strict_warning": "If {{account}} runs out, {{client}} stops working instead of falling back.",
+      "broken": "{{client}}’s locked account can’t serve right now, so its requests fail.",
+      "change": "Change",
+      "change_aria": "Change: Claude rule for {{client}}",
+      "change_codex": "Codex rule",
+      "change_codex_aria": "Codex rule for {{client}}",
+      "automatic": "automatic",
+      "codex_will_fail": "{{client}}’s Codex account can’t serve right now, so its Codex requests fail.",
+      "strict_warning_generic": "If its account runs out, {{client}} stops working instead of falling back."
+    },
+    "keys": {
+      "none": "No client keys linked",
+      "count_one": "{{count}} client key",
+      "count_other": "{{count}} client keys",
+      "manage": "Keys",
+      "manage_aria": "Keys and profile for {{client}}",
+      "new_client": "New client"
+    },
+    "follow_tie": "{{accounts}} have the same priority, so {{account}} wins the tie. Move one to the top to set a clear order.",
+    "title_all_off": "Every Claude account is turned off.",
+    "follow_all_off": "Turn one on under Accounts and new conversations will go to it.",
+    "off_list_label": "Turned-off Claude accounts",
+    "save_partial": "Only part of the new order was saved ({{message}}). {{account}} goes first now.",
+    "save_partial_unknown": "Only part of the new order was saved ({{message}}). Refresh to see what the gateway has now.",
+    "undo": "Undo",
+    "profiles_incompatible": "This gateway uses a client profile API version this panel doesn’t understand, so locks and client keys are hidden. The order above still works.",
+    "accounts_failed": "Couldn’t load the accounts, so the order can’t be shown.",
+    "save_unconfirmed": "Couldn’t confirm the new order; showing what the gateway has now."
   }
 }

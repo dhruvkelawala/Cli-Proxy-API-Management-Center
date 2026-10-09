@@ -34,7 +34,14 @@ function NotificationCard({
   const removeNotification = useNotificationStore((state) => state.removeNotification);
   const timerRef = useRef<ReturnType<typeof createNotificationTimer> | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const { id, type, message, duration = NOTIFICATION_DURATION_MS, isExiting } = notification;
+  const {
+    id,
+    type,
+    message,
+    duration = NOTIFICATION_DURATION_MS,
+    isExiting,
+    action,
+  } = notification;
   const Icon = notificationIcons[type];
 
   useEffect(() => {
@@ -63,7 +70,7 @@ function NotificationCard({
       const buttons = Array.from(
         card.parentElement?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)') ?? []
       );
-      const index = buttons.indexOf(card.querySelector('button')!);
+      const index = buttons.indexOf(card.querySelector<HTMLButtonElement>('button:last-of-type')!);
       const target = buttons[index + 1] ?? buttons[index - 1] ?? returnFocusRef.current;
       if (target?.isConnected) target.focus({ preventScroll: true });
     }
@@ -104,7 +111,26 @@ function NotificationCard({
       >
         <span className={styles.srOnly}>{t(`notification.type_${type}`)}: </span>
         {message}
+        {action ? (
+          <span className={styles.srOnly}>
+            {' '}
+            {t('notification.action_available', { action: action.label })}
+          </span>
+        ) : null}
       </div>
+      {action ? (
+        <button
+          type="button"
+          className={styles.actionButton}
+          disabled={isExiting}
+          onClick={(event) => {
+            action.onAction();
+            dismiss(event.detail === 0);
+          }}
+        >
+          {action.label}
+        </button>
+      ) : null}
       <button
         type="button"
         className={styles.closeButton}
