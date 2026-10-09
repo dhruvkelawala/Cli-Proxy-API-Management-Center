@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { authFilesApi } from '@/services/api';
+import { apiClient, authFilesApi } from '@/services/api';
 import { useAuthStore, useConfigStore, useModelsStore } from '@/stores';
 import { useApiKeysForModels } from '@/hooks/useApiKeysForModels';
 import { useProviderRecentRequests } from '@/components/providers/hooks/useProviderRecentRequests';
@@ -18,6 +18,23 @@ import {
   type ProviderTraffic,
   type TrafficWindow,
 } from '../types';
+
+export interface AccountListState {
+  /** The last list read successfully; null until one succeeds. */
+  files: AuthFileItem[] | null;
+  /** The latest read failed. */
+  failed: boolean;
+}
+
+/**
+ * A failed read keeps the last good list (marked failed) instead of dropping it, so Overview
+ * never falls back to "Checking the gateway…" because one refresh failed.
+ */
+export const applyAccountListRead = (
+  previous: AccountListState,
+  read: { ok: true; files: AuthFileItem[] } | { ok: false }
+): AccountListState =>
+  read.ok ? { files: read.files, failed: false } : { files: previous.files, failed: true };
 
 const EMPTY_TRAFFIC: TrafficWindow = {
   buckets: [],
@@ -152,15 +169,30 @@ export function useDashboardOverview() {
     enabled: connected,
   });
 
-  const [authFiles, setAuthFiles] = useState<AuthFileItem[] | null>(null);
+  const [accountList, setAccountList] = useState<AccountListState>({
+    files: null,
+    failed: false,
+  });
+  const authFiles = accountList.files;
+  const authFilesFailed = accountList.failed;
+
+  // A new connection starts empty: the old gateway's accounts must not show for the new one.
+  useEffect(() => {
+    setAccountList({ files: null, failed: false });
+  }, [apiBase]);
 
   const loadAuthFiles = useCallback(async () => {
     if (!connected) return;
+    const connection = apiClient.getConnectionRevision();
     try {
       const response = await authFilesApi.list();
-      setAuthFiles(response.files);
+      if (connection !== apiClient.getConnectionRevision()) return;
+      setAccountList((previous) =>
+        applyAccountListRead(previous, { ok: true, files: response.files })
+      );
     } catch {
-      setAuthFiles(null);
+      if (connection !== apiClient.getConnectionRevision()) return;
+      setAccountList((previous) => applyAccountListRead(previous, { ok: false }));
     }
   }, [connected]);
 
@@ -295,6 +327,7 @@ export function useDashboardOverview() {
     credentials,
     /** The raw account list (null until loaded or after a failed read). */
     authFiles,
+    authFilesFailed,
     reloadAuthFiles: loadAuthFiles,
     refresh,
   };

@@ -2804,7 +2804,9 @@
       "attention_one": "{{names}} 需要查看。",
       "attention_many": "{{names}} 需要查看。",
       "nearly_out_one": "{{names}} 即将用完。",
-      "nearly_out_many": "{{names}} 即将用完。"
+      "nearly_out_many": "{{names}} 即将用完。",
+      "unreadable": "暂时无法读取账号。",
+      "unreadable_follow": "网关有响应，但账号列表没有加载出来，稍后会自动重试。"
     },
     "line": {
       "none": "{{provider}} 没有可用的账号。",
@@ -2861,6 +2863,11 @@
       "traffic": "吞吐量",
       "gateway": "网关",
       "elsewhere": "其他页面"
+    },
+    "stale": {
+      "kept": "刚才没能刷新，显示的是上次读取的内容。",
+      "none": "账号列表没有加载出来。",
+      "retry": "重试"
     }
   }
 }

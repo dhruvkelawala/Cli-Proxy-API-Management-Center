@@ -41,8 +41,16 @@ export function OverviewPage() {
   const apiBase = useAuthStore((state) => state.apiBase);
   const serverVersion = useAuthStore((state) => state.serverVersion);
   const dashboard = useDashboardOverview();
-  const { connectionStatus, connected, config, traffic, authFiles, reloadAuthFiles, refresh } =
-    dashboard;
+  const {
+    connectionStatus,
+    connected,
+    config,
+    traffic,
+    authFiles,
+    authFilesFailed,
+    reloadAuthFiles,
+    refresh,
+  } = dashboard;
 
   useHeaderRefresh(refresh, connected);
   useInterval(() => void reloadAuthFiles(), connected ? LIVE_REFRESH_MS : null);
@@ -74,6 +82,7 @@ export function OverviewPage() {
     providerLabel: labelFor,
     formatWhen,
     join,
+    filesFailed: authFilesFailed,
   });
   const title = joinSentences(sentence.title.map(text), locale);
   const subtitle = joinSentences(sentence.subtitle.map(text), locale);
@@ -114,6 +123,19 @@ export function OverviewPage() {
         subtitle={subtitle || undefined}
         live
       />
+
+      {authFilesFailed && connected && (
+        <p className={styles.staleNote} role="status">
+          <span>{authFiles ? t('overview.stale.kept') : t('overview.stale.none')}</span>
+          <button
+            type="button"
+            className={styles.textButton}
+            onClick={() => void reloadAuthFiles()}
+          >
+            {t('overview.stale.retry')}
+          </button>
+        </p>
+      )}
 
       {flowProviders.length > 0 && (
         <section className={styles.flow} aria-label={t('overview.flow.section')}>

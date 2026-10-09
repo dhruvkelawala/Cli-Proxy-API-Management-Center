@@ -2824,7 +2824,9 @@
       "attention_one": "{{names}} cần được xem.",
       "attention_many": "{{names}} cần được xem.",
       "nearly_out_one": "{{names}} sắp hết hạn mức.",
-      "nearly_out_many": "{{names}} sắp hết hạn mức."
+      "nearly_out_many": "{{names}} sắp hết hạn mức.",
+      "unreadable": "Hiện không đọc được tài khoản.",
+      "unreadable_follow": "Gateway có phản hồi nhưng danh sách tài khoản chưa tải được. Sẽ thử lại."
     },
     "line": {
       "none": "{{provider}} không có tài khoản nào phục vụ được.",
@@ -2884,6 +2886,11 @@
       "traffic": "Thông lượng",
       "gateway": "Gateway",
       "elsewhere": "Trang khác"
+    },
+    "stale": {
+      "kept": "Chưa làm mới được; đang hiện dữ liệu đọc lần trước.",
+      "none": "Danh sách tài khoản chưa tải được.",
+      "retry": "Thử lại"
     }
   }
 }

@@ -64,6 +64,49 @@
   letter-spacing: 0.02em;
 }
 
+.staleNote {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  margin: 20px 0 0;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+
+  &::before {
+    content: '';
+    align-self: center;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--amber-color);
+  }
+}
+
+.textButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--hairline);
+  text-underline-offset: 4px;
+
+  &:hover {
+    color: var(--text-primary);
+    text-decoration-color: currentColor;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-indigo);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+}
+
 // Flow hero
 .flow {
   margin-top: 44px;

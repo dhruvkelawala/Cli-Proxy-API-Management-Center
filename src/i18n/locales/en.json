@@ -2818,7 +2818,9 @@
       "attention_one": "{{names}} needs a look.",
       "attention_many": "{{names}} need a look.",
       "nearly_out_one": "{{names}} is about to run out.",
-      "nearly_out_many": "{{names}} are about to run out."
+      "nearly_out_many": "{{names}} are about to run out.",
+      "unreadable": "Can’t read the accounts right now.",
+      "unreadable_follow": "The gateway answered, but the account list didn’t load. It will try again."
     },
     "line": {
       "none": "{{provider}} has no account that can serve.",
@@ -2878,6 +2880,11 @@
       "traffic": "Throughput",
       "gateway": "Gateway",
       "elsewhere": "Elsewhere"
+    },
+    "stale": {
+      "kept": "Couldn’t refresh just now; showing what was last read.",
+      "none": "The account list didn’t load.",
+      "retry": "Try again"
     }
   }
 }

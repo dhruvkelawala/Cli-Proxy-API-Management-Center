@@ -137,8 +137,10 @@ export type ConnectionState = 'connected' | 'connecting' | 'disconnected' | 'err
 
 export interface DescribeOverviewInput {
   connection: ConnectionState;
-  /** null while the account list is loading. */
+  /** null while the account list is loading (or could never be read). */
   groups: ProviderGroup[] | null;
+  /** The latest account-list read failed. */
+  filesFailed?: boolean;
   providerLabel: (provider: string) => string;
   formatWhen: FormatWhen;
   join: JoinNames;
@@ -234,6 +236,7 @@ export const describeOverview = ({
   providerLabel,
   formatWhen,
   join,
+  filesFailed = false,
 }: DescribeOverviewInput): OverviewSentence => {
   if (connection === 'connecting') {
     return { tone: 'idle', title: [{ key: `${O}.hero.connecting` }], subtitle: [] };
@@ -246,7 +249,13 @@ export const describeOverview = ({
     };
   }
   if (groups === null) {
-    return { tone: 'idle', title: [{ key: `${O}.hero.loading` }], subtitle: [] };
+    return filesFailed
+      ? {
+          tone: 'bad',
+          title: [{ key: `${O}.hero.unreadable` }],
+          subtitle: [{ key: `${O}.hero.unreadable_follow` }],
+        }
+      : { tone: 'idle', title: [{ key: `${O}.hero.loading` }], subtitle: [] };
   }
   if (groups.length === 0) {
     return {

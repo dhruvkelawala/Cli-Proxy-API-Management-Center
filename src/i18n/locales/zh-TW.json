@@ -2830,7 +2830,9 @@
       "attention_one": "{{names}} 需要查看。",
       "attention_many": "{{names}} 需要查看。",
       "nearly_out_one": "{{names}} 即將用完。",
-      "nearly_out_many": "{{names}} 即將用完。"
+      "nearly_out_many": "{{names}} 即將用完。",
+      "unreadable": "暫時無法讀取帳號。",
+      "unreadable_follow": "閘道有回應，但帳號清單沒有載入，稍後會自動重試。"
     },
     "line": {
       "none": "{{provider}} 沒有可用的帳號。",
@@ -2887,6 +2889,11 @@
       "traffic": "吞吐量",
       "gateway": "閘道",
       "elsewhere": "其他頁面"
+    },
+    "stale": {
+      "kept": "剛才沒能重新整理，顯示的是上次讀取的內容。",
+      "none": "帳號清單沒有載入。",
+      "retry": "重試"
     }
   }
 }
