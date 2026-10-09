@@ -9,12 +9,13 @@ import { Select } from '@/components/ui/Select';
 import { SelectionCheckbox } from '@/components/ui/SelectionCheckbox';
 import { IconEye, IconEyeOff } from '@/components/ui/icons';
 import { useAuthStore, useLanguageStore, useNotificationStore } from '@/stores';
-import { detectApiBaseFromLocation, normalizeApiBase } from '@/utils/connection';
+import { detectApiBaseFromLocation } from '@/utils/connection';
 import { LANGUAGE_LABEL_KEYS, LANGUAGE_ORDER } from '@/utils/constants';
 import { isSupportedLanguage } from '@/utils/language';
 import { INLINE_LOGO_JPEG } from '@/assets/logoInline';
 import type { ApiError } from '@/types';
 import { LegacyBackendError } from '@/services/api/legacyBackendProbe';
+import { isConnectionError, resolveLoginBase, startsWithCustomBase } from './loginConnection';
 import styles from './LoginPage.module.scss';
 
 /**
@@ -102,6 +103,7 @@ export function LoginPage() {
   const [apiBase, setApiBase] = useState('');
   const [managementKey, setManagementKey] = useState('');
   const [showCustomBase, setShowCustomBase] = useState(false);
+  const [connectionOpen, setConnectionOpen] = useState(false);
   const [showKey, setShowKey] = useState(false);
   const [rememberPassword, setRememberPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -141,6 +143,9 @@ export function LoginPage() {
           }, 1500);
         } else {
           setApiBase(storedBase || detectedBase);
+          // A saved address that is not this page's own was a custom one: keep it ticked so the
+          // address shown is the address used.
+          setShowCustomBase(startsWithCustomBase(storedBase, detectedBase));
           setManagementKey(storedKey || '');
           setRememberPassword(storedRememberPassword || Boolean(storedKey));
         }
@@ -160,7 +165,11 @@ export function LoginPage() {
       return;
     }
 
-    const baseToUse = apiBase ? normalizeApiBase(apiBase) : detectedBase;
+    const baseToUse = resolveLoginBase({
+      custom: showCustomBase,
+      customBase: apiBase,
+      detectedBase,
+    });
     setLoading(true);
     setError('');
     try {
@@ -174,6 +183,8 @@ export function LoginPage() {
     } catch (err: unknown) {
       const message = getLocalizedErrorMessage(err, t);
       setError(message);
+      // Wrong-address errors open the connection details so the address can be checked.
+      if (isConnectionError(err)) setConnectionOpen(true);
       showNotification(`${t('notification.login_failed')}: ${message}`, 'error');
     } finally {
       setLoading(false);
@@ -207,7 +218,11 @@ export function LoginPage() {
   // 显示启动动画（自动登录中或自动登录成功）
   const showSplash = autoLoading || autoLoginSuccess;
 
-  const connectionUrl = (showCustomBase && apiBase.trim()) || detectedBase;
+  const connectionUrl = resolveLoginBase({
+    custom: showCustomBase,
+    customBase: apiBase,
+    detectedBase,
+  });
 
   return (
     <div className={styles.container}>
@@ -301,38 +316,41 @@ export function LoginPage() {
                 <span>{error}</span>
               </p>
             )}
-          </form>
 
-          <div className={styles.more}>
-            <MoreDisclosure
-              label={t('login.flow.more')}
-              summary={connectionUrl}
-              forcedOpen={showCustomBase && !apiBase.trim()}
-              forcedNote={t('login.flow.more_forced')}
-            >
-              <div className={styles.connection}>
-                <p className={flow.quiet}>{t('login.connection_auto_hint')}</p>
-                <div className={styles.toggleAdvanced}>
-                  <SelectionCheckbox
-                    checked={showCustomBase}
-                    onChange={setShowCustomBase}
-                    ariaLabel={t('login.custom_connection_label')}
-                    label={t('login.custom_connection_label')}
-                    labelClassName={styles.toggleLabel}
-                  />
+            {/* Inside the form so Enter in the address field submits too. */}
+            <div className={styles.more}>
+              <MoreDisclosure
+                label={t('login.flow.more')}
+                open={connectionOpen}
+                onOpenChange={setConnectionOpen}
+                summary={connectionUrl}
+                forcedOpen={showCustomBase && !apiBase.trim()}
+                forcedNote={t('login.flow.more_forced')}
+              >
+                <div className={styles.connection}>
+                  <p className={flow.quiet}>{t('login.connection_auto_hint')}</p>
+                  <div className={styles.toggleAdvanced}>
+                    <SelectionCheckbox
+                      checked={showCustomBase}
+                      onChange={setShowCustomBase}
+                      ariaLabel={t('login.custom_connection_label')}
+                      label={t('login.custom_connection_label')}
+                      labelClassName={styles.toggleLabel}
+                    />
+                  </div>
+                  {showCustomBase && (
+                    <Input
+                      label={t('login.custom_connection_label')}
+                      placeholder={t('login.custom_connection_placeholder')}
+                      value={apiBase}
+                      onChange={(e) => setApiBase(e.target.value)}
+                      hint={t('login.custom_connection_hint')}
+                    />
+                  )}
                 </div>
-                {showCustomBase && (
-                  <Input
-                    label={t('login.custom_connection_label')}
-                    placeholder={t('login.custom_connection_placeholder')}
-                    value={apiBase}
-                    onChange={(e) => setApiBase(e.target.value)}
-                    hint={t('login.custom_connection_hint')}
-                  />
-                )}
-              </div>
-            </MoreDisclosure>
-          </div>
+              </MoreDisclosure>
+            </div>
+          </form>
         </main>
       )}
     </div>
