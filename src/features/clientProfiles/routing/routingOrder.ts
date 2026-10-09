@@ -61,6 +61,8 @@ export interface OrderAccount {
   retryAt: number | null;
   /** Previewed as out of room; nothing was changed. */
   simulatedOut: boolean;
+  /** Weighted round robin with weight <= 0: the backend never picks it. */
+  weightExcluded: boolean;
   priority: number;
   role: AccountRole;
   /** 0 = top level. Accounts on one level share a rank. */
@@ -189,6 +191,8 @@ export const buildOrder = ({
           ? 'unavailable'
           : 'available',
       priority: account.priority,
+      // Weighted round robin drops weight <= 0 accounts entirely, like the backend.
+      weight: typeof account.file.weight === 'number' ? account.file.weight : null,
     })),
   });
   const levels = Array.from(
@@ -202,10 +206,16 @@ export const buildOrder = ({
       let role: AccountRole;
       if (account.health === 'disabled') role = 'off';
       else if (account.simulatedOut || !isUsable(account.health)) role = 'resting';
+      else if (item?.reason === 'non-positive-weight') role = 'resting';
       else if (share !== null && share > 0) role = 'active';
       else if (item?.reason === 'standby') role = 'next';
       else role = 'backup';
-      return { ...account, role, rank: Math.max(0, levels.indexOf(account.priority)) };
+      return {
+        ...account,
+        role,
+        weightExcluded: role === 'resting' && item?.reason === 'non-positive-weight',
+        rank: Math.max(0, levels.indexOf(account.priority)),
+      };
     })
     .sort(byOrder);
   const order = all.filter((account) => account.role !== 'off');
@@ -387,7 +397,9 @@ export const describeServing = (
       },
     };
   }
-  const out = order.find((account) => account.rank < now.rank && account.role === 'resting');
+  const out = order.find(
+    (account) => account.rank < now.rank && account.role === 'resting' && !account.weightExcluded
+  );
   if (out) {
     const previewing = out.simulatedOut;
     return {
@@ -424,6 +436,7 @@ export const rankKey = (account: OrderAccount, place: number, shared: boolean): 
 /** Health in plain words. */
 export const healthCopy = (account: OrderAccount, formatWhen: FormatWhen): Copy => {
   if (account.simulatedOut) return { key: `${R}.health.preview_out` };
+  if (account.weightExcluded) return { key: `${R}.health.weight_excluded` };
   switch (account.health) {
     case 'available':
       return { key: `${R}.health.available` };
@@ -446,6 +459,7 @@ export const healthCopy = (account: OrderAccount, formatWhen: FormatWhen): Copy 
 
 export const healthTone = (account: OrderAccount): 'ok' | 'warn' | 'bad' | 'off' | 'unknown' => {
   if (account.simulatedOut) return 'warn';
+  if (account.weightExcluded) return 'off';
   switch (account.health) {
     case 'available':
     case 'attention':

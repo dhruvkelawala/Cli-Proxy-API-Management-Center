@@ -2698,7 +2698,8 @@
       "limit_until": "At its limit until {{when}}",
       "disabled": "Turned off",
       "unknown": "Status unknown",
-      "preview_out": "Out of room (preview)"
+      "preview_out": "Out of room (preview)",
+      "weight_excluded": "Not used: weight is 0"
     },
     "quota": {
       "week_left": "{{percent}}% left this week",

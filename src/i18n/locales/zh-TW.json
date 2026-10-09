@@ -2711,7 +2711,8 @@
       "limit_until": "已達上限，{{when}}恢復",
       "disabled": "已關閉",
       "unknown": "狀態未知",
-      "preview_out": "額度用完（預覽）"
+      "preview_out": "額度用完（預覽）",
+      "weight_excluded": "未使用：權重為 0"
     },
     "quota": {
       "week_left": "本週剩餘 {{percent}}%",

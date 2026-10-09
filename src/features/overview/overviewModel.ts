@@ -157,7 +157,7 @@ const situationOf = (group: ProviderGroup): Situation => {
   if (!now) return { kind: 'none', group };
   if (!model.shared) {
     const out = model.order.find(
-      (account) => account.rank < now.rank && account.role === 'resting'
+      (account) => account.rank < now.rank && account.role === 'resting' && !account.weightExcluded
     );
     if (out) return { kind: 'switched', group, out, serving: now };
   }
@@ -182,6 +182,7 @@ const attentionNames = (situations: Situation[]): string[] =>
         (account) =>
           account.health === 'attention' ||
           (account.role === 'resting' &&
+            !account.weightExcluded &&
             !(situation.kind === 'switched' && situation.out.id === account.id))
       )
       .map((account) => account.label)
@@ -394,6 +395,7 @@ export const flowStateOf = (account: OrderAccount): FlowAccountState => {
   if (account.role === 'off') return 'off';
   if (account.role === 'active') return 'live';
   if (account.health === 'cooling' || account.health === 'limit') return 'warn';
+  if (account.weightExcluded) return 'off';
   if (account.role === 'resting') return 'bad';
   return 'idle';
 };

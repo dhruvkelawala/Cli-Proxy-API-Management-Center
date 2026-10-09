@@ -2704,7 +2704,8 @@
       "limit_until": "Chạm giới hạn đến {{when}}",
       "disabled": "Đã tắt",
       "unknown": "Không rõ trạng thái",
-      "preview_out": "Hết hạn mức (xem trước)"
+      "preview_out": "Hết hạn mức (xem trước)",
+      "weight_excluded": "Không dùng: trọng số bằng 0"
     },
     "quota": {
       "week_left": "Còn {{percent}}% tuần này",

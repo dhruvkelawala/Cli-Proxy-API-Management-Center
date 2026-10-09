@@ -2685,7 +2685,8 @@
       "limit_until": "已达上限，{{when}}恢复",
       "disabled": "已关闭",
       "unknown": "状态未知",
-      "preview_out": "额度用完（预览）"
+      "preview_out": "额度用完（预览）",
+      "weight_excluded": "未使用：权重为 0"
     },
     "quota": {
       "week_left": "本周剩余 {{percent}}%",
