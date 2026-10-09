@@ -11,7 +11,7 @@ import {
   flattenNavItems,
   type SidebarIconKey,
 } from '@/components/layout/navModel';
-import { RoutingHero } from '@/features/clientProfiles/routing/RoutingHero';
+import { RoutingSection } from '@/features/clientProfiles/routing/RoutingSection';
 import { RoutingMore } from '@/features/clientProfiles/routing/RoutingMore';
 import { RoutingPage } from '@/features/clientProfiles/RoutingPage';
 import {
@@ -106,17 +106,19 @@ const model = (simulateOut: string | null = null) =>
     simulateOut,
   });
 
-const hero = (overrides: Partial<Parameters<typeof RoutingHero>[0]> = {}) => {
+const hero = (overrides: Partial<Parameters<typeof RoutingSection>[0]> = {}) => {
   const m = overrides.model ?? model();
   return render(
-    createElement(RoutingHero, {
+    createElement(RoutingSection, {
+      provider: 'claude',
+      name: 'Claude',
+      primary: true,
       model: m,
       routes: describeClientRoutes(
         { ...snapshot, profiles: [snapshot.profiles[0]] },
         'claude',
         m.order
       ),
-      otherLine: { key: 'routing.codex.one' },
       hubLabel: 'Gateway',
       saving: false,
       simulateOut: null,
@@ -149,7 +151,9 @@ describe('Routing hero', () => {
 
   test('accounts are an ordered, keyboard-reorderable list with health and weekly quota', () => {
     const markup = hero();
-    expect(markup).toContain(`role="list" aria-label="${t('routing.list_label')}"`);
+    expect(markup).toContain(
+      `role="list" aria-label="${t('routing.list_label', { provider: 'Claude' })}"`
+    );
     expect(markup.match(/role="listitem"/g)).toHaveLength(2);
     expect(markup.match(/tabindex="0"/g)?.length).toBeGreaterThanOrEqual(2);
     expect(markup).toContain(t('routing.reorder_hint'));
@@ -174,10 +178,10 @@ describe('Routing hero', () => {
     expect(previewing).toContain('aria-pressed="true"');
   });
 
-  test('one line for clients following the order and one quiet Codex line', () => {
+  test('one line for clients following the order; the old one-line Codex text is gone', () => {
     const markup = hero();
     expect(markup).toContain(t('routing.clients.one', { names: 'Mini' }));
-    expect(markup).toContain(t('routing.codex.one'));
+    expect(markup).not.toContain('Nothing to choose');
   });
 
   test('a locked client is listed with its account', () => {
@@ -351,7 +355,7 @@ describe('review fixes: rendering', () => {
     });
     const markup = hero({ model: m });
     expect(markup.match(/role="listitem"/g)).toHaveLength(2);
-    expect(markup).toContain(`aria-label="${t('routing.off_list_label')}"`);
+    expect(markup).toContain(`aria-label="${t('routing.off_list_label', { provider: 'Claude' })}"`);
     expect(markup).toMatch(/Off<\/span><span[^>]*>Old<\/span>/);
   });
 
@@ -369,9 +373,15 @@ describe('review fixes: rendering', () => {
     );
   });
 
-  test('notices render in the main view (hero), not only inside More', () => {
-    const markup = hero({ notices: createElement('p', null, 'QUIET NOTICE') });
-    expect(markup).toContain('QUIET NOTICE');
+  test('notices render in the main view, after the provider sections, not inside More', () => {
+    const page = readFileSync(
+      new URL('../src/features/clientProfiles/RoutingPage.tsx', import.meta.url),
+      'utf8'
+    );
+    expect(page).toContain('<div className={styles.notices}>{notices}</div>');
+    expect(page.indexOf('<div className={styles.notices}>{notices}</div>')).toBeLessThan(
+      page.indexOf('<MoreDisclosure')
+    );
   });
 
   test('More flags a Codex Only rule that will fail', () => {
@@ -412,8 +422,7 @@ describe('review fixes: rendering', () => {
       new URL('../src/features/clientProfiles/RoutingPage.tsx', import.meta.url),
       'utf8'
     );
-    // Notices go to the hero (main view); More no longer takes a notices prop.
-    expect(page).toContain('notices={notices}');
+    // Notices go to the main view; More takes no notices prop.
     expect(page.slice(page.indexOf('<RoutingMore'))).not.toContain('notices=');
   });
 });

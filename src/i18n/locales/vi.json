@@ -2837,7 +2837,6 @@
     }
   },
   "routing": {
-    "eyebrow": "Claude",
     "loading": "Đang tải định tuyến…",
     "title_first": "Cuộc trò chuyện mới dùng {{account}}.",
     "follow_backup": "Nếu {{account}} hết, chúng sẽ tự chuyển sang {{backup}}.",
@@ -2848,15 +2847,16 @@
     "follow_back_at": "Chúng sẽ quay lại {{out}} {{when}}.",
     "follow_back_later": "Chúng sẽ quay lại {{out}} khi có hạn mức trở lại.",
     "follow_preview": "Đây chỉ là xem trước. Không có gì thay đổi.",
-    "title_none": "Hiện không tài khoản Claude nào còn hạn mức.",
+    "title_none": "Hiện không tài khoản {{provider}} nào còn hạn mức.",
     "follow_none": "Cuộc trò chuyện mới sẽ lỗi cho đến khi có tài khoản phục hồi.",
-    "title_empty": "Chưa có tài khoản Claude nào.",
-    "follow_empty": "Đăng nhập Claude trong mục Đăng nhập OAuth và tài khoản sẽ xuất hiện ở đây.",
+    "title_empty": "Chưa có tài khoản nào để định tuyến.",
+    "follow_empty": "Đăng nhập trong mục Đăng nhập OAuth và tài khoản sẽ xuất hiện ở đây.",
     "rank": {
       "first": "Ưu tiên",
       "backup": "Dự phòng",
       "shared": "Dùng chung",
-      "off": "Đã tắt"
+      "off": "Đã tắt",
+      "only": "Duy nhất"
     },
     "health": {
       "available": "Sẵn sàng",
@@ -2885,13 +2885,12 @@
     "hint": {
       "sooner_bad": "{{account}} đặt lại sớm hơn ({{when}}), nên {{percent}}% còn lại sẽ mất nếu không dùng nó trước.",
       "sooner_good": "{{account}} đặt lại sớm hơn ({{when}}), nên dùng nó trước không lãng phí gì.",
-      "drag": "Kéo một tài khoản, hoặc chọn nó và nhấn ↑ hay ↓, để đổi thứ tự.",
-      "single": "Thêm tài khoản Claude thứ hai để có dự phòng."
+      "drag": "Kéo một tài khoản, hoặc chọn nó và nhấn ↑ hay ↓, để đổi thứ tự."
     },
     "make_first": "Dùng {{account}} trước",
     "preview_start": "Xem trước: {{account}} hết hạn mức",
     "preview_end": "Kết thúc xem trước",
-    "list_label": "Các tài khoản Claude theo thứ tự",
+    "list_label": "Các tài khoản {{provider}} theo thứ tự",
     "card_label": "{{rank}}: {{account}}. {{status}}",
     "reorder_hint": "Nhấn mũi tên lên hoặc xuống để di chuyển. Home đưa lên đầu.",
     "hub": "Cổng",
@@ -2909,11 +2908,10 @@
       "locked_broken": "{{client}} bị khóa vào {{account}}, nhưng tài khoản này hiện không phục vụ được nên yêu cầu sẽ lỗi.",
       "locked_missing": "{{client}} bị khóa vào một tài khoản không dùng được nên yêu cầu sẽ lỗi.",
       "refused": "{{client}} có quy tắc khóa mà cổng này chưa áp dụng, nên yêu cầu của nó bị từ chối.",
-      "locked_other": "{{client}} bị khóa vào một tài khoản (xem Thêm)."
-    },
-    "codex": {
-      "one": "Codex tự dùng tài khoản duy nhất của nó. Không cần chọn gì.",
-      "many": "Codex tự chia giữa {{count}} tài khoản của nó."
+      "locked_other": "{{client}} bị khóa vào một tài khoản (xem Thêm).",
+      "single_one": "{{names}} dùng tài khoản này.",
+      "single_two": "{{names}} đều dùng tài khoản này.",
+      "single_many": "{{names}} đều dùng tài khoản này."
     },
     "profiles_unsupported": "Cổng này không có hồ sơ máy khách nên mọi khóa máy khách dùng thứ tự ở trên. Khóa và khóa máy khách cần phiên bản CLIProxyAPI mới hơn.",
     "more": "Thêm",
@@ -2949,15 +2947,17 @@
       "new_client": "Máy khách mới"
     },
     "follow_tie": "{{accounts}} có cùng mức ưu tiên nên {{account}} thắng. Đưa một tài khoản lên đầu để đặt thứ tự rõ ràng.",
-    "title_all_off": "Mọi tài khoản Claude đều đã tắt.",
+    "title_all_off": "Mọi tài khoản {{provider}} đều đã tắt.",
     "follow_all_off": "Bật một tài khoản trong mục Tài khoản và cuộc trò chuyện mới sẽ dùng nó.",
-    "off_list_label": "Các tài khoản Claude đã tắt",
+    "off_list_label": "Các tài khoản {{provider}} đã tắt",
     "save_partial": "Chỉ lưu được một phần thứ tự mới ({{message}}). Giờ {{account}} được dùng trước.",
     "save_partial_unknown": "Chỉ lưu được một phần thứ tự mới ({{message}}). Hãy làm mới để xem cổng hiện có gì.",
     "undo": "Hoàn tác",
     "profiles_incompatible": "Cổng này dùng phiên bản API hồ sơ máy khách mà bảng điều khiển không hiểu, nên khóa và khóa máy khách bị ẩn. Thứ tự ở trên vẫn hoạt động.",
     "accounts_failed": "Không tải được tài khoản nên không thể hiển thị thứ tự.",
-    "save_unconfirmed": "Không xác nhận được thứ tự mới; đang hiển thị những gì cổng hiện có."
+    "save_unconfirmed": "Không xác nhận được thứ tự mới; đang hiển thị những gì cổng hiện có.",
+    "title_single": "{{provider}} dùng {{account}}.",
+    "follow_single": "Đây là tài khoản {{provider}} duy nhất nên không có dự phòng nếu nó hết."
   },
   "overview": {
     "eyebrow": "Tổng quan",

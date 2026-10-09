@@ -143,12 +143,13 @@ describe('quota re-reads while a page is open', () => {
   test('the loader reports a skipped batch and both pages release on it; Overview/Accounts re-read on a timer', () => {
     const loader = readFileSync('src/features/quota/hooks/useQuotaBatchLoader.ts', 'utf8');
     expect(loader).toContain('if (loadingRef.current) return false;');
-    for (const path of [
-      'src/features/quota/hooks/useAccountQuota.ts',
-      'src/features/clientProfiles/routing/useRoutingOrder.ts',
-    ]) {
-      expect(readFileSync(path, 'utf8')).toContain('if (!started) releaseQuotaTargets(');
-    }
+    expect(readFileSync('src/features/quota/hooks/useAccountQuota.ts', 'utf8')).toContain(
+      'if (!started) releaseQuotaTargets('
+    );
+    // Routing reads quota through that same hook (every provider section).
+    expect(
+      readFileSync('src/features/clientProfiles/routing/useRoutingOrder.ts', 'utf8')
+    ).toContain('useAccountQuota(files)');
     const hook = readFileSync('src/features/quota/hooks/useAccountQuota.ts', 'utf8');
     expect(hook).toContain('useInterval(');
     expect(hook).toContain('quotaWindowPassed(stateFor(file), at)');

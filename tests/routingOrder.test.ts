@@ -7,7 +7,6 @@ import {
   describeServing,
   healthCopy,
   orderWithFirst,
-  otherProviderLine,
   planMoveToFirst,
   planOrderPriorities,
   planReorder,
@@ -191,9 +190,10 @@ describe('fallback description and preview', () => {
     expect(healthCopy(model.order[0], when).key).toBe('routing.health.preview_out');
   });
 
-  test('a single account has no backup', () => {
-    expect(describeServing(build([work]), join, when).follow).toEqual({
-      key: 'routing.follow_no_backup',
+  test('a single account is named plainly, with no backup', () => {
+    expect(describeServing(build([work]), join, when, 'Claude')).toEqual({
+      title: { key: 'routing.title_single', values: { provider: 'Claude', account: 'Work' } },
+      follow: { key: 'routing.follow_single', values: { provider: 'Claude' } },
     });
   });
 });
@@ -423,8 +423,6 @@ describe('clients and locks', () => {
   test('short names, the Codex line and the empty case', () => {
     expect(shortClientName('Mini · Claude')).toBe('Mini');
     expect(shortClientName('Laptop')).toBe('Laptop');
-    expect(otherProviderLine([work, codex], 'codex')).toEqual({ key: 'routing.codex.one' });
-    expect(otherProviderLine([work], 'codex')).toBeNull();
     expect(describeClientsLine([], join).copies).toEqual([{ key: 'routing.clients.none' }]);
   });
 });
@@ -724,12 +722,17 @@ describe('review fixes: hint, locks, quota freshness', () => {
     expect(fresh.pending.size).toBe(1);
   });
 
-  test('the page passes its ticking clock into the quota summary', () => {
+  test('the page reads quota through the shared, self-refreshing account quota hook', () => {
     const source = readFileSync(
       new URL('../src/features/clientProfiles/routing/useRoutingOrder.ts', import.meta.url),
       'utf8'
     );
-    expect(source).toContain('const now = useNow();');
-    expect(source).toContain('summarizeClaudeQuota(claudeQuota[getQuotaCacheKey(file)], now)');
+    expect(source).toContain('const { quotaFor } = useAccountQuota(files);');
+    const hook = readFileSync(
+      new URL('../src/features/quota/hooks/useAccountQuota.ts', import.meta.url),
+      'utf8'
+    );
+    expect(hook).toContain('const now = useNow();');
+    expect(hook).toContain('summarizeQuota(stateFor(file), now)');
   });
 });

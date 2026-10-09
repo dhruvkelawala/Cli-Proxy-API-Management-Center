@@ -10,7 +10,6 @@
 import { buildRoutingPresentation } from '@/features/config/routing/routingPresentation';
 import {
   accountProviderKey,
-  isAccountDisabled,
   resolveAccountAvailability,
 } from '@/features/authFiles/accountPresentation';
 import { deriveAccountTitle } from '@/features/authFiles/identity';
@@ -267,6 +266,13 @@ export interface PriorityChange {
 
 type Ranked = Pick<OrderAccount, 'id' | 'name' | 'priority'>;
 
+/** `next` holds exactly the ids of `current`, each once, in any order. */
+export const isPermutationOf = (current: readonly string[], next: readonly string[]): boolean => {
+  if (current.length !== next.length) return false;
+  const pool = new Set(current);
+  return pool.size === current.length && next.every((id) => pool.delete(id));
+};
+
 /** True when `nextIds` only moves one account to the front and keeps the rest in order. */
 export const movedToFirst = (currentIds: readonly string[], nextIds: readonly string[]) => {
   const [first] = nextIds;
@@ -353,6 +359,10 @@ export const priorityChanges = (
  */
 export const planReorder = (order: readonly Ranked[], nextIds: readonly string[]) => {
   const currentIds = order.map((account) => account.id);
+  // Only a reordering of exactly these accounts is planned. Anything else (an id from another
+  // provider, a missing or repeated one) writes nothing, so a section can never touch another
+  // provider's priorities.
+  if (!isPermutationOf(currentIds, nextIds)) return [];
   if (currentIds.join('\n') === nextIds.join('\n')) return [];
   const first = movedToFirst(currentIds, nextIds);
   if (first) return planMoveToFirst(order, first);
@@ -385,16 +395,30 @@ export const backupFor = (model: OrderModel, current: OrderAccount): OrderAccoun
 export const describeServing = (
   model: OrderModel,
   join: JoinNames,
-  formatWhen: FormatWhen
+  formatWhen: FormatWhen,
+  /** Provider name for sentences such as "Codex uses …" ("Claude", "Codex", …). */
+  provider = 'Claude'
 ): { title: Copy; follow: Copy } => {
   const { order, serving } = model;
   if (order.length === 0) {
     return model.off.length > 0
-      ? { title: { key: `${R}.title_all_off` }, follow: { key: `${R}.follow_all_off` } }
+      ? {
+          title: { key: `${R}.title_all_off`, values: { provider } },
+          follow: { key: `${R}.follow_all_off` },
+        }
       : { title: { key: `${R}.title_empty` }, follow: { key: `${R}.follow_empty` } };
   }
   if (serving.length === 0) {
-    return { title: { key: `${R}.title_none` }, follow: { key: `${R}.follow_none` } };
+    return {
+      title: { key: `${R}.title_none`, values: { provider } },
+      follow: { key: `${R}.follow_none` },
+    };
+  }
+  if (isSingleAccount(model) && serving[0] === order[0] && !order[0].simulatedOut) {
+    return {
+      title: { key: `${R}.title_single`, values: { provider, account: order[0].label } },
+      follow: { key: `${R}.follow_single`, values: { provider } },
+    };
   }
   if (model.shared) {
     return {
@@ -442,8 +466,14 @@ export const describeServing = (
  * Short label of a card's position: First or Backup; Shared only when the strategy really
  * spreads new conversations over several accounts; Off for turned-off accounts.
  */
-export const rankKey = (account: OrderAccount, place: number, shared: boolean): string => {
+export const rankKey = (
+  account: OrderAccount,
+  place: number,
+  shared: boolean,
+  single = false
+): string => {
   if (account.role === 'off') return `${R}.rank.off`;
+  if (single) return `${R}.rank.only`;
   if (shared) return `${R}.rank.shared`;
   return place === 0 ? `${R}.rank.first` : `${R}.rank.backup`;
 };
@@ -593,12 +623,15 @@ export interface ClientRoute {
  */
 export const describeClientRoutes = (
   snapshot: Pick<ClientProfilesSnapshot, 'profiles' | 'accounts' | 'targetStates'>,
-  provider: ClientProfileProvider,
+  provider: string,
   accounts: readonly OrderAccount[],
   enforced: boolean | null = true
 ): ClientRoute[] =>
   snapshot.profiles.map((profile) => {
-    const policy = profile.policies[provider];
+    // Profiles only carry Claude and Codex rules; for any other provider every client follows.
+    const policy = isProfileProvider(provider)
+      ? profile.policies[provider]
+      : ({ mode: 'automatic' } as const);
     const shortName = shortClientName(profile.label);
     const refused =
       enforced === false &&
@@ -610,11 +643,14 @@ export const describeClientRoutes = (
       return { profile, shortName, locked: true, target: null, broken: true, refused };
     }
     const target = accounts.find((account) => account.inventory?.accountRef === policy.accountRef);
-    const reported = snapshot.targetStates[profile.profileRef]?.[provider];
+    const reported = isProfileProvider(provider)
+      ? snapshot.targetStates[profile.profileRef]?.[provider]
+      : undefined;
     const state =
       reported && reported !== 'unknown'
         ? reported
-        : resolveTargetState(provider, policy, snapshot.accounts);
+        : // Only Claude and Codex rules can be "only" (others were treated as automatic above).
+          resolveTargetState(provider as ClientProfileProvider, policy, snapshot.accounts);
     const previewOut = target?.simulatedOut === true;
     return {
       profile,
@@ -632,14 +668,17 @@ export const describeClientRoutes = (
  */
 export const describeClientsLine = (
   routes: ClientRoute[],
-  join: JoinNames
+  join: JoinNames,
+  /** The provider has one account: clients "use this account" rather than "this order". */
+  single = false
 ): { copies: Copy[]; problem: boolean } => {
   if (routes.length === 0) return { copies: [{ key: `${R}.clients.none` }], problem: false };
   const following = routes.filter((route) => !route.locked && !route.refused);
   const copies: Copy[] = [];
   if (following.length > 0) {
     const names = join(following.map((route) => route.shortName));
-    const key = following.length === 1 ? 'one' : following.length === 2 ? 'two' : 'many';
+    const count = following.length === 1 ? 'one' : following.length === 2 ? 'two' : 'many';
+    const key = single ? `single_${count}` : count;
     copies.push({ key: `${R}.clients.${key}`, values: { names } });
   }
   routes
@@ -677,11 +716,35 @@ export const profilesSupportNoticeKey = (
     : `${R}.profiles_unsupported`;
 };
 
-/** Accounts of another provider, for the one quiet line (e.g. Codex). */
-export const otherProviderLine = (files: AuthFileItem[], provider: string): Copy | null => {
-  const count = files.filter(
-    (file) => accountProviderKey(file) === provider && !isAccountDisabled(file)
-  ).length;
-  if (count === 0) return null;
-  return count === 1 ? { key: `${R}.codex.one` } : { key: `${R}.codex.many`, values: { count } };
+/* ------------------------------------------------------------------ */
+/* Provider sections                                                   */
+/* ------------------------------------------------------------------ */
+
+/** Providers that always lead, in this order; any others follow alphabetically. */
+export const LEADING_PROVIDERS = ['claude', 'codex'] as const;
+
+const isProfileProvider = (provider: string): provider is ClientProfileProvider =>
+  (CLIENT_PROFILE_PROVIDERS as readonly string[]).includes(provider);
+
+/**
+ * The providers the Routing page shows a section for: every provider with at least one account
+ * (turned-off ones count, so they can be listed as Off), Claude first, then Codex, then the rest
+ * alphabetically. Accounts with no recognisable provider are left out.
+ */
+export const routingProviders = (files: readonly AuthFileItem[]): string[] => {
+  const present = new Set(
+    files.map((file) => accountProviderKey(file)).filter((key) => key && key !== 'unknown')
+  );
+  const leading = LEADING_PROVIDERS.filter((provider) => present.has(provider));
+  const rest = [...present]
+    .filter((provider) => !(LEADING_PROVIDERS as readonly string[]).includes(provider))
+    .sort((a, b) => a.localeCompare(b));
+  return [...leading, ...rest];
 };
+
+/**
+ * One enabled account: a single solid path, no backup, nothing to reorder or preview.
+ * (Turned-off accounts are listed apart and do not count.)
+ */
+export const isSingleAccount = (model: Pick<OrderModel, 'order'>): boolean =>
+  model.order.length === 1;
