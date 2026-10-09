@@ -15,6 +15,8 @@ import {
   describeServing,
   healthCopy,
   isSingleAccount,
+  canReorder,
+  hasFixedAccounts,
   healthTone,
   quotaCopy,
   rankKey,
@@ -81,9 +83,13 @@ export function RoutingSection({
   const titleId = useId();
   const text = (copy: Copy) => t(copy.key, copy.values);
   const single = isSingleAccount(model);
+  // Runtime-only channels cannot have their priority written: show the order, don't offer to
+  // change it.
+  const reorderable = canReorder(model);
+  const fixed = !single && hasFixedAccounts(model);
   const serving = describeServing(model, joinNames, formatWhen, name);
   const hint = resetHint(model, formatWhen);
-  const clients = describeClientsLine(routes ?? [], joinNames, single);
+  const clients = describeClientsLine(routes ?? [], joinNames, single, name);
   const [first] = model.order;
 
   const sources: FlowSource[] =
@@ -138,8 +144,8 @@ export function RoutingSection({
             label={t('routing.list_label', { provider: name })}
             hubLabel={hubLabel}
             // One account: one solid path and nothing to move.
-            reorderHint={single ? undefined : t('routing.reorder_hint')}
-            onReorder={single ? undefined : onReorder}
+            reorderHint={reorderable ? t('routing.reorder_hint') : undefined}
+            onReorder={reorderable ? onReorder : undefined}
             reorderDisabled={saving}
             destinationLabel={(card, place) =>
               t('routing.card_label', {
@@ -187,11 +193,17 @@ export function RoutingSection({
         </ul>
       )}
 
-      {cards.length > 1 && (
+      {(cards.length > 1 || simulateOut !== null) && (
         <div className={styles.below}>
           <p className={styles.hint}>
-            <span>{hint ? text(hint.copy) : t('routing.hint.drag')}</span>
-            {hint?.account && (
+            <span>
+              {fixed
+                ? t('routing.fixed_note', { provider: name })
+                : hint
+                  ? text(hint.copy)
+                  : t('routing.hint.drag')}
+            </span>
+            {reorderable && hint?.account && (
               <button
                 type="button"
                 className={styles.textButton}
@@ -203,7 +215,8 @@ export function RoutingSection({
             )}
           </p>
           <div className={styles.actionsRow}>
-            {first && (simulateOut || first.role === 'active') && (
+            {/* "End preview" stays reachable whenever a preview is on. */}
+            {first && (simulateOut !== null || (cards.length > 1 && first.role === 'active')) && (
               <button
                 type="button"
                 className={styles.textButton}

@@ -10,6 +10,8 @@ import type { AuthFileItem } from '@/types';
 import { useClientRoutesData } from '../hooks/useClientRoutesData';
 import {
   buildOrder,
+  isSingleAccount,
+  overridesLanded,
   routingProviders,
   type FormatWhen,
   type JoinNames,
@@ -79,6 +81,15 @@ export interface RoutingSection {
 }
 
 type PerProvider<T> = Record<string, T>;
+
+/**
+ * Providers whose fallback preview must end: the section is down to one account (or none), so
+ * there is no backup to preview and no "End preview" control.
+ */
+export const stalePreviews = (sections: readonly RoutingSection[]): string[] =>
+  sections
+    .filter((section) => section.simulateOut !== null && isSingleAccount(section.model))
+    .map((section) => section.provider);
 
 /**
  * Account order per provider for the Routing page, with real priority writes (see
@@ -168,9 +179,34 @@ export function useRoutingOrder() {
     setSimulateOut((prev) => ({ ...prev, [provider]: accountId }));
   }, []);
 
-  const setOrderRef = useRef<(provider: string, ids: string[]) => Promise<void>>(async () => {});
+  // An optimistic order whose reload was superseded (another section reloaded later) is
+  // dropped once the list on screen shows its priorities, so it never flickers back.
+  useEffect(() => {
+    if (!files) return;
+    setOverrides((prev) => {
+      const landed = Object.entries(prev).filter(
+        ([, value]) => value !== null && overridesLanded(value, files)
+      );
+      if (landed.length === 0) return prev;
+      const next = { ...prev };
+      landed.forEach(([provider]) => {
+        next[provider] = null;
+      });
+      return next;
+    });
+  }, [files]);
+
+  // A section that dropped to one account has nothing left to preview.
+  useEffect(() => {
+    if (!sections) return;
+    stalePreviews(sections).forEach((provider) => setPreview(provider, null));
+  }, [sections, setPreview]);
+
+  const setOrderRef = useRef<
+    (provider: string, ids: string[], options?: { isUndo?: boolean }) => Promise<void>
+  >(async () => {});
   const setOrder = useCallback(
-    async (provider: string, ids: string[]) => {
+    async (provider: string, ids: string[], options: { isUndo?: boolean } = {}) => {
       const section = sections?.find((item) => item.provider === provider);
       if (!section) return;
       const { model } = section;
@@ -193,14 +229,14 @@ export function useRoutingOrder() {
       const undo = makeGuardedUndo({
         connectionRevision: () => apiClient.getConnectionRevision(),
         isPageOpen: () => mountedRef.current,
-        apply: () => setOrderRef.current(provider, previous),
+        apply: () => setOrderRef.current(provider, previous, { isUndo: true }),
         scope: provider,
       });
       setPreview(provider, null);
       // One reorder per connection and provider at a time, even across page visits.
       await runExclusiveReorder(
         revision,
-        () => runReorder(model.order, ids, fx, () => void undo()),
+        () => runReorder(model.order, ids, fx, () => void undo(), options),
         provider
       );
     },

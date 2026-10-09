@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
+import { readFileSync } from 'node:fs';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
@@ -10,6 +11,7 @@ import {
   describeClientsLine,
   describeServing,
   isSingleAccount,
+  overridesLanded,
   planReorder,
   routingProviders,
   type QuotaSummary,
@@ -22,6 +24,7 @@ import {
   type ReorderEffects,
 } from '@/features/clientProfiles/routing/reorderFlow';
 import { credentialRefForAuthFile } from '@/features/clientProfiles/model';
+import { stalePreviews } from '@/features/clientProfiles/routing/useRoutingOrder';
 import type { AuthFileItem } from '@/types';
 import type { ClientProfilesSnapshot } from '@/types/clientProfiles';
 
@@ -370,5 +373,213 @@ describe('Routing section rendering', () => {
       ['Mini', false],
       ['MacBook', false],
     ]);
+  });
+});
+
+describe('review notes', () => {
+  const strictSnapshot: ClientProfilesSnapshot = {
+    revision: '"r"',
+    profiles: [
+      {
+        profileRef: 'p-mini',
+        label: 'Mini · Claude',
+        revision: 1,
+        policies: { claude: { mode: 'automatic' }, codex: { mode: 'automatic' } },
+      },
+      {
+        profileRef: 'p-mbp',
+        label: 'MacBook · Claude',
+        revision: 1,
+        policies: { claude: { mode: 'automatic' }, codex: { mode: 'only', accountRef: 'x' } },
+      },
+    ],
+    keys: [],
+    accounts: [],
+    targetStates: {},
+  };
+
+  test('a strict client is refused for providers without a profile rule, with honest copy', () => {
+    const routes = describeClientRoutes(strictSnapshot, 'gemini', []);
+    expect(routes.map((r) => [r.shortName, r.refused, r.refusedReason])).toEqual([
+      ['Mini', false, null],
+      ['MacBook', true, 'no_policy'],
+    ]);
+    const line = describeClientsLine(routes, join, false, 'Gemini');
+    expect(line.copies).toEqual([
+      { key: 'routing.clients.one', values: { names: 'Mini' } },
+      {
+        key: 'routing.clients.refused_provider',
+        values: { client: 'MacBook', provider: 'Gemini' },
+      },
+    ]);
+    expect(line.problem).toBe(true);
+    expect(
+      i18n.t('routing.clients.refused_provider', { client: 'MacBook', provider: 'Gemini' })
+    ).toBe('MacBook has a locked account, so it can’t use Gemini.');
+    // Claude has a rule for MacBook (Automatic): it is not refused there.
+    expect(describeClientRoutes(strictSnapshot, 'claude', [])[1].refused).toBe(false);
+    // With enforcement off the whole profile is refused, for every provider.
+    expect(describeClientRoutes(strictSnapshot, 'claude', [], false)[1].refusedReason).toBe(
+      'not_enforced'
+    );
+  });
+
+  const runtime = account('codex-runtime', 'codex', 'Runtime channel', { runtime_only: true });
+
+  test('a section with a runtime-only account shows its order but offers no reorder', async () => {
+    const model = orderOf([codexA, runtime], 'codex');
+    expect(model.order.map((a) => [a.label, a.fixed])).toEqual([
+      ['dhruv@example.test', false],
+      ['Runtime channel', true],
+    ]);
+    const patches: unknown[] = [];
+    const outcome = await runReorder(model.order, ['codex-runtime', 'codex-a.json'], {
+      connectionRevision: () => 1,
+      patchAccount: async (name) => {
+        patches.push(name);
+      },
+      isPageOpen: () => true,
+      setOverrides: noop,
+      setSaving: noop,
+      reloadFiles: async () => null,
+      notifyAccountsChanged: noop,
+      notify: noop,
+      t: (key) => key,
+      firstLabelIn: () => null,
+    });
+    expect(outcome).toBe('noop');
+    expect(patches).toEqual([]);
+  });
+
+  test('Undo after the account set changed says so instead of doing nothing', async () => {
+    const notes: [string, string][] = [];
+    const patches: unknown[] = [];
+    const codex = orderOf([codexA, codexB, account('codex-c.json', 'codex', 'New')], 'codex');
+    const outcome = await runReorder(
+      codex.order,
+      ['codex-b.json', 'codex-a.json'],
+      {
+        connectionRevision: () => 1,
+        patchAccount: async (name) => {
+          patches.push(name);
+        },
+        isPageOpen: () => true,
+        setOverrides: noop,
+        setSaving: noop,
+        reloadFiles: async () => null,
+        notifyAccountsChanged: noop,
+        notify: (message, type) => notes.push([message, type]),
+        t: (key) => key,
+        firstLabelIn: () => null,
+      },
+      undefined,
+      { isUndo: true }
+    );
+    expect(outcome).toBe('changed');
+    expect(notes).toEqual([['routing.undo_changed', 'info']]);
+    expect(patches).toEqual([]);
+    expect(i18n.t('routing.undo_changed')).toBe(
+      'The accounts changed, so the old order can’t be restored.'
+    );
+  });
+
+  test('the optimistic order stays until a reload that includes the write lands', async () => {
+    const run = async (reloaded: AuthFileItem[] | null) => {
+      const overrides: unknown[] = [];
+      await runReorder(orderOf(ALL, 'codex').order, ['codex-b.json', 'codex-a.json'], {
+        connectionRevision: () => 1,
+        patchAccount: async () => undefined,
+        isPageOpen: () => true,
+        setOverrides: (value) => overrides.push(value),
+        setSaving: noop,
+        reloadFiles: async () => reloaded,
+        notifyAccountsChanged: noop,
+        notify: noop,
+        t: (key) => key,
+        firstLabelIn: () => null,
+      });
+      return overrides;
+    };
+    // Superseded by another section's reload: keep it (no flicker back).
+    expect(await run(null)).toEqual([{ 'codex-b.json': 20 }]);
+    // Its own reload landed: drop it.
+    expect(await run(ALL)).toEqual([{ 'codex-b.json': 20 }, null]);
+    // The page drops a kept override once the list on screen shows it.
+    expect(overridesLanded({ 'codex-b.json': 20 }, ALL)).toBe(false);
+    expect(overridesLanded({ 'codex-b.json': 20 }, [codexA, { ...codexB, priority: 20 }])).toBe(
+      true
+    );
+  });
+
+  test('a preview ends when its section drops to one account; End preview stays reachable', () => {
+    const single = buildOrder({
+      files: [codexA],
+      provider: 'codex',
+      strategy: 'fill-first',
+      sessionAffinity: true,
+    });
+    const multi = orderOf(ALL, 'codex');
+    expect(
+      stalePreviews([
+        { provider: 'codex', name: 'Codex', model: single, saving: false, simulateOut: 'x' },
+        { provider: 'claude', name: 'Claude', model: multi, saving: false, simulateOut: 'y' },
+        { provider: 'gemini', name: 'Gemini', model: single, saving: false, simulateOut: null },
+      ])
+    ).toEqual(['codex']);
+    const markup = render(
+      createElement(RoutingSection, {
+        provider: 'codex',
+        name: 'Codex',
+        primary: false,
+        model: single,
+        routes: null,
+        saving: false,
+        simulateOut: 'codex-a.json',
+        formatWhen: when,
+        joinNames: join,
+        onReorder: noop,
+        onPreview: noop,
+      })
+    );
+    expect(markup).toContain(t('routing.preview_end'));
+  });
+
+  test('a runtime-only account turns the reorder controls into one quiet line', () => {
+    const markup = render(
+      createElement(RoutingSection, {
+        provider: 'codex',
+        name: 'Codex',
+        primary: false,
+        model: orderOf([codexA, runtime], 'codex'),
+        routes: null,
+        saving: false,
+        simulateOut: null,
+        formatWhen: when,
+        joinNames: join,
+        onReorder: noop,
+        onPreview: noop,
+      })
+    );
+    expect(markup).not.toContain('data-grip');
+    expect(markup).not.toContain(t('routing.hint.drag'));
+    expect(markup).not.toContain('Make ');
+    expect(markup).toContain(t('routing.fixed_note', { provider: 'Codex' }));
+  });
+
+  test('the hook passes the provider into the save slot, Undo and remount restore', () => {
+    const source = readFileSync(
+      new URL('../src/features/clientProfiles/routing/useRoutingOrder.ts', import.meta.url),
+      'utf8'
+    );
+    expect(source).toMatch(
+      /runExclusiveReorder\(\s*revision,\s*\(\) => runReorder\(model\.order, ids, fx, \(\) => void undo\(\), options\),\s*provider\s*\)/
+    );
+    expect(source).toMatch(/makeGuardedUndo\(\{[\s\S]*?scope: provider,[\s\S]*?\}\)/);
+    expect(source).toMatch(
+      /apply: \(\) => setOrderRef\.current\(provider, previous, \{ isUndo: true \}\)/
+    );
+    expect(source).toMatch(
+      /reordersInFlight\(apiClient\.getConnectionRevision\(\)\)\.forEach\(\(\{ scope, done \}\) =>[\s\S]*?\[scope\]: true[\s\S]*?\[scope\]: false/
+    );
   });
 });

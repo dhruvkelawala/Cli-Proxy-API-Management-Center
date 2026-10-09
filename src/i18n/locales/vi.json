@@ -2911,7 +2911,8 @@
       "locked_other": "{{client}} bị khóa vào một tài khoản (xem Thêm).",
       "single_one": "{{names}} dùng tài khoản này.",
       "single_two": "{{names}} đều dùng tài khoản này.",
-      "single_many": "{{names}} đều dùng tài khoản này."
+      "single_many": "{{names}} đều dùng tài khoản này.",
+      "refused_provider": "{{client}} đã bị khóa vào một tài khoản nên không thể dùng {{provider}}."
     },
     "profiles_unsupported": "Cổng này không có hồ sơ máy khách nên mọi khóa máy khách dùng thứ tự ở trên. Khóa và khóa máy khách cần phiên bản CLIProxyAPI mới hơn.",
     "more": "Thêm",
@@ -2957,7 +2958,9 @@
     "accounts_failed": "Không tải được tài khoản nên không thể hiển thị thứ tự.",
     "save_unconfirmed": "Không xác nhận được thứ tự mới; đang hiển thị những gì cổng hiện có.",
     "title_single": "{{provider}} dùng {{account}}.",
-    "follow_single": "Đây là tài khoản {{provider}} duy nhất nên không có dự phòng nếu nó hết."
+    "follow_single": "Đây là tài khoản {{provider}} duy nhất nên không có dự phòng nếu nó hết.",
+    "undo_changed": "Các tài khoản đã thay đổi nên không thể khôi phục thứ tự cũ.",
+    "fixed_note": "Một số tài khoản {{provider}} do cổng quản lý khi chạy nên không thể đổi thứ tự ở đây."
   },
   "overview": {
     "eyebrow": "Tổng quan",

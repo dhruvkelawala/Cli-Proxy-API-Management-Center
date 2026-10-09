@@ -2905,7 +2905,8 @@
       "locked_other": "{{client}} is locked to one account (see More).",
       "single_one": "{{names}} uses this account.",
       "single_two": "{{names}} both use this account.",
-      "single_many": "{{names}} all use this account."
+      "single_many": "{{names}} all use this account.",
+      "refused_provider": "{{client}} has a locked account, so it can’t use {{provider}}."
     },
     "profiles_unsupported": "This gateway has no client profiles, so every client key uses the order above. Locks and client keys need a newer CLIProxyAPI.",
     "more": "More",
@@ -2951,7 +2952,9 @@
     "accounts_failed": "Couldn’t load the accounts, so the order can’t be shown.",
     "save_unconfirmed": "Couldn’t confirm the new order; showing what the gateway has now.",
     "title_single": "{{provider}} uses {{account}}.",
-    "follow_single": "It is the only {{provider}} account, so there is no backup if it runs out."
+    "follow_single": "It is the only {{provider}} account, so there is no backup if it runs out.",
+    "undo_changed": "The accounts changed, so the old order can’t be restored.",
+    "fixed_note": "Some {{provider}} accounts are managed by the gateway at runtime, so their order can’t be changed here."
   },
   "overview": {
     "eyebrow": "Overview",

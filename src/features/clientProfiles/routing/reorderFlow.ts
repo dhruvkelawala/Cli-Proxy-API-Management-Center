@@ -16,7 +16,12 @@ import {
   saveAccountTunings,
   type RoutingSaveDeps,
 } from '@/features/config/routing/routingSettingsState';
-import { planReorder, type OrderAccount, type PriorityChange } from './routingOrder';
+import {
+  isPermutationOf,
+  planReorder,
+  type OrderAccount,
+  type PriorityChange,
+} from './routingOrder';
 
 export type OrderSaveResult =
   | { kind: 'stale' }
@@ -69,7 +74,15 @@ export interface ReorderEffects {
   firstLabelIn: (files: AuthFileItem[]) => string | null;
 }
 
-export type ReorderOutcome = 'noop' | 'saved' | 'failed' | 'partial' | 'unconfirmed' | 'stale';
+export type ReorderOutcome =
+  | 'noop'
+  | 'saved'
+  | 'failed'
+  | 'partial'
+  | 'unconfirmed'
+  | 'stale'
+  /** Undo could not apply: the provider's accounts are no longer the ones it was offered for. */
+  | 'changed';
 
 /** Statuses after which a write may or may not have been applied by the gateway. */
 const UNCERTAIN_STATUSES = new Set([408, 502, 503, 504]);
@@ -169,8 +182,22 @@ export const runReorder = async (
   nextIds: readonly string[],
   fx: ReorderEffects,
   /** Shown as Undo on the success toast; writes the previous order through this same path. */
-  undo?: () => void
+  undo?: () => void,
+  options: { isUndo?: boolean } = {}
 ): Promise<ReorderOutcome> => {
+  if (
+    options.isUndo &&
+    !isPermutationOf(
+      order.map((account) => account.id),
+      nextIds
+    )
+  ) {
+    // An account was added, removed or turned off since: say so instead of doing nothing.
+    fx.notify(fx.t('routing.undo_changed'), 'info');
+    return 'changed';
+  }
+  // Runtime-only channels cannot be patched; never start a write that would half-apply.
+  if (order.some((account) => account.fixed)) return 'noop';
   const changes = planReorder(order, nextIds);
   if (changes.length === 0) return 'noop';
   const first = order.find((account) => account.id === nextIds[0]);
@@ -237,8 +264,11 @@ export const runReorder = async (
   }
 
   fx.notifyAccountsChanged();
-  await fx.reloadFiles();
-  fx.setOverrides(null);
+  // Keep the optimistic order until a list that includes this write is in place. A reload that
+  // was superseded by another section's (latest wins) returns null; the page then drops the
+  // override once the newer list shows these priorities (overridesLanded).
+  const fresh = await fx.reloadFiles();
+  if (fresh) fx.setOverrides(null);
   const open = fx.isPageOpen();
   if (open) fx.setSaving(false);
   if (first) {

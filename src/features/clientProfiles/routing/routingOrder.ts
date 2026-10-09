@@ -13,6 +13,7 @@ import {
   resolveAccountAvailability,
 } from '@/features/authFiles/accountPresentation';
 import { deriveAccountTitle } from '@/features/authFiles/identity';
+import { isRuntimeOnlyAuthFile } from '@/features/authFiles/constants';
 import type { AuthFileItem, ClaudeQuotaState } from '@/types';
 import {
   NO_QUOTA,
@@ -70,6 +71,11 @@ export interface OrderAccount {
   nearlyOut: boolean;
   /** Weighted round robin with weight <= 0: the backend never picks it. */
   weightExcluded: boolean;
+  /**
+   * A runtime-only channel: the gateway keeps it in memory only, so its priority cannot be
+   * written from here (field patches are refused for it).
+   */
+  fixed: boolean;
   priority: number;
   role: AccountRole;
   /** 0 = top level. Accounts on one level share a rank. */
@@ -187,6 +193,7 @@ export const buildOrder = ({
         retryAt,
         simulatedOut: simulateOut === id && health !== 'disabled',
         nearlyOut,
+        fixed: isRuntimeOnlyAuthFile(file),
         priority: priorityOverrides[id] ?? savedPriorityOf(file),
         quota,
       };
@@ -611,10 +618,14 @@ export interface ClientRoute {
   /** Requests with this rule fail (target unavailable, removed, unknown mode, …). */
   broken: boolean;
   /**
-   * The gateway does not enforce Only rules yet and this profile has one (for any provider):
-   * every request made with its keys is refused (HTTP 503), so it does not use the order.
+   * Requests from this client to this provider are refused, so it does not use the order.
+   * `not_enforced`: the gateway does not enforce Only rules yet and the profile has one (for any
+   * provider), so all its requests get HTTP 503. `no_policy`: the profile is strict (it has an
+   * Only rule) and has no rule for this provider at all; the gateway refuses strict requests to
+   * such providers (profile_provider_unsupported).
    */
   refused: boolean;
+  refusedReason: 'not_enforced' | 'no_policy' | null;
 }
 
 /**
@@ -628,19 +639,28 @@ export const describeClientRoutes = (
   enforced: boolean | null = true
 ): ClientRoute[] =>
   snapshot.profiles.map((profile) => {
-    // Profiles only carry Claude and Codex rules; for any other provider every client follows.
+    // Profiles only carry Claude and Codex rules. For any other provider an all-Automatic
+    // client follows the order, but a strict one (any Only rule) is refused by the gateway.
     const policy = isProfileProvider(provider)
       ? profile.policies[provider]
       : ({ mode: 'automatic' } as const);
     const shortName = shortClientName(profile.label);
-    const refused =
-      enforced === false &&
-      CLIENT_PROFILE_PROVIDERS.some((item) => profile.policies[item].mode !== 'automatic');
+    const strict = CLIENT_PROFILE_PROVIDERS.some(
+      (item) => profile.policies[item].mode !== 'automatic'
+    );
+    const refusedReason: ClientRoute['refusedReason'] =
+      strict && enforced === false
+        ? 'not_enforced'
+        : strict && !isProfileProvider(provider)
+          ? 'no_policy'
+          : null;
+    const refused = refusedReason !== null;
+    const base = { profile, shortName, refused, refusedReason };
     if (policy.mode === 'automatic') {
-      return { profile, shortName, locked: false, target: null, broken: false, refused };
+      return { ...base, locked: false, target: null, broken: false };
     }
     if (policy.mode !== 'only') {
-      return { profile, shortName, locked: true, target: null, broken: true, refused };
+      return { ...base, locked: true, target: null, broken: true };
     }
     const target = accounts.find((account) => account.inventory?.accountRef === policy.accountRef);
     const reported = isProfileProvider(provider)
@@ -653,12 +673,10 @@ export const describeClientRoutes = (
           resolveTargetState(provider as ClientProfileProvider, policy, snapshot.accounts);
     const previewOut = target?.simulatedOut === true;
     return {
-      profile,
-      shortName,
+      ...base,
       locked: true,
       target: target ?? null,
       broken: isFailingTargetState(state) || previewOut,
-      refused,
     };
   });
 
@@ -670,7 +688,9 @@ export const describeClientsLine = (
   routes: ClientRoute[],
   join: JoinNames,
   /** The provider has one account: clients "use this account" rather than "this order". */
-  single = false
+  single = false,
+  /** Provider name, for clients the gateway refuses for this provider. */
+  provider = 'Claude'
 ): { copies: Copy[]; problem: boolean } => {
   if (routes.length === 0) return { copies: [{ key: `${R}.clients.none` }], problem: false };
   const following = routes.filter((route) => !route.locked && !route.refused);
@@ -685,7 +705,9 @@ export const describeClientsLine = (
     .filter((route) => route.locked || route.refused)
     .forEach((route) => {
       const client = route.shortName;
-      if (route.refused) {
+      if (route.refusedReason === 'no_policy') {
+        copies.push({ key: `${R}.clients.refused_provider`, values: { client, provider } });
+      } else if (route.refused) {
         copies.push({ key: `${R}.clients.refused`, values: { client } });
       } else if (!route.target) {
         copies.push({
@@ -748,3 +770,27 @@ export const routingProviders = (files: readonly AuthFileItem[]): string[] => {
  */
 export const isSingleAccount = (model: Pick<OrderModel, 'order'>): boolean =>
   model.order.length === 1;
+
+/**
+ * Whether the order can be changed here: more than one account, and every account in the order
+ * can have its priority written (runtime-only channels cannot).
+ */
+export const canReorder = (model: Pick<OrderModel, 'order'>): boolean =>
+  model.order.length > 1 && model.order.every((account) => !account.fixed);
+
+/** The order includes a runtime-only channel, so it is shown but not editable. */
+export const hasFixedAccounts = (model: Pick<OrderModel, 'order'>): boolean =>
+  model.order.some((account) => account.fixed);
+
+/**
+ * True once `files` shows every optimistic priority as saved, so the override can be dropped
+ * without the order flickering back (used when another section's reload superseded this one's).
+ */
+export const overridesLanded = (
+  overrides: Readonly<Record<string, number>>,
+  files: readonly AuthFileItem[]
+): boolean =>
+  Object.entries(overrides).every(([id, priority]) => {
+    const file = files.find((item) => routingIdOf(item) === id);
+    return file !== undefined && savedPriorityOf(file) === priority;
+  });

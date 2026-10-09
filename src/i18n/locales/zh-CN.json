@@ -2892,7 +2892,8 @@
       "locked_other": "{{client}} 已锁定到一个账号（见「更多」）。",
       "single_one": "{{names}} 使用这个账号。",
       "single_two": "{{names}} 都使用这个账号。",
-      "single_many": "{{names}} 都使用这个账号。"
+      "single_many": "{{names}} 都使用这个账号。",
+      "refused_provider": "{{client}} 已锁定账号，因此无法使用 {{provider}}。"
     },
     "profiles_unsupported": "此网关没有客户端配置，所有客户端密钥都使用上面的顺序。锁定和客户端密钥需要更新版本的 CLIProxyAPI。",
     "more": "更多",
@@ -2937,7 +2938,9 @@
     "accounts_failed": "无法加载账号，因此无法显示顺序。",
     "save_unconfirmed": "无法确认新顺序是否已保存；下面显示的是网关当前的设置。",
     "title_single": "{{provider}} 使用 {{account}}。",
-    "follow_single": "这是唯一的 {{provider}} 账号，用完时没有备用。"
+    "follow_single": "这是唯一的 {{provider}} 账号，用完时没有备用。",
+    "undo_changed": "账号已发生变化，无法恢复之前的顺序。",
+    "fixed_note": "部分 {{provider}} 账号由网关在运行时管理，因此无法在这里调整顺序。"
   },
   "overview": {
     "eyebrow": "概览",

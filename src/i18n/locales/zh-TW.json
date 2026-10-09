@@ -2918,7 +2918,8 @@
       "locked_other": "{{client}} 已鎖定到一個帳號（見「更多」）。",
       "single_one": "{{names}} 使用這個帳號。",
       "single_two": "{{names}} 都使用這個帳號。",
-      "single_many": "{{names}} 都使用這個帳號。"
+      "single_many": "{{names}} 都使用這個帳號。",
+      "refused_provider": "{{client}} 已鎖定帳號，因此無法使用 {{provider}}。"
     },
     "profiles_unsupported": "此閘道沒有用戶端設定檔，所有用戶端金鑰都使用上面的順序。鎖定與用戶端金鑰需要較新版本的 CLIProxyAPI。",
     "more": "更多",
@@ -2963,7 +2964,9 @@
     "accounts_failed": "無法載入帳號，因此無法顯示順序。",
     "save_unconfirmed": "無法確認新順序是否已儲存；下面顯示的是閘道目前的設定。",
     "title_single": "{{provider}} 使用 {{account}}。",
-    "follow_single": "這是唯一的 {{provider}} 帳號，用完時沒有備用。"
+    "follow_single": "這是唯一的 {{provider}} 帳號，用完時沒有備用。",
+    "undo_changed": "帳號已有變動，無法恢復先前的順序。",
+    "fixed_note": "部分 {{provider}} 帳號由閘道在執行時管理，因此無法在這裡調整順序。"
   },
   "overview": {
     "eyebrow": "概覽",
