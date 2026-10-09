@@ -4,10 +4,6 @@
 // ─── Page Container ─────────────────────────────────────
 
 .page {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-lg;
-  width: 100%;
 }
 
 // ─── Header ─────────────────────────────────────────────
@@ -854,4 +850,149 @@
   .page {
     gap: $spacing-md;
   }
+}
+
+// ─── Flow layer (src/styles/DESIGN.md) ─────────────────
+// One column of hairline rows instead of a card grid; quiet text filters; state as words.
+
+.securityNote {
+  margin-top: 24px;
+
+  strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+}
+
+.sourceErrors {
+  display: grid;
+  gap: 4px;
+
+  strong {
+    font-weight: 600;
+  }
+}
+
+.filterChips {
+  gap: 6px 20px;
+}
+
+.filterChip {
+  padding: 2px 0;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  color: var(--text-operational-muted, var(--text-tertiary));
+  font-size: 13px;
+  font-weight: 500;
+
+  &:hover {
+    border: 0;
+    color: var(--text-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-indigo);
+    outline-offset: 3px;
+  }
+}
+
+.filterChipActive {
+  border: 0;
+  background: none;
+  color: var(--text-primary);
+  box-shadow: inset 0 -1.5px 0 var(--accent-indigo);
+}
+
+.filterChipCount {
+  min-width: 0;
+  padding: 0;
+  background: none;
+  color: var(--text-operational-muted, var(--text-tertiary));
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.cardGrid {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  margin-top: 14px;
+  border-top: 1px solid var(--hairline);
+
+  @include mobile {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.card {
+  padding: 18px 0;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+  background: none;
+
+  &:hover {
+    border-color: var(--hairline);
+    background: none;
+  }
+}
+
+.badge,
+.badgeSuccess,
+.badgeWarning,
+.badgeUntrusted {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badgeSuccess {
+  color: var(--success-color);
+}
+
+.badgeWarning,
+.badgeUntrusted {
+  color: var(--amber-color);
+}
+
+.cardBadges {
+  gap: 4px 12px;
+}
+
+.tag {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-operational-muted, var(--text-tertiary));
+
+  &::before {
+    content: '#';
+  }
+}
+
+.iconLink {
+  min-height: 0;
+  width: auto;
+  border: 0;
+  background: none;
+  color: var(--text-secondary);
+
+  &:hover {
+    border: 0;
+    background: none;
+    color: var(--text-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-indigo);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+}
+
+.toolbar :global(.form-group) {
+  max-width: none;
 }

@@ -4,10 +4,6 @@
 // ─── Page Container ─────────────────────────────────────
 
 .page {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-lg;
-  width: 100%;
 }
 
 // ─── Header ─────────────────────────────────────────────
@@ -583,5 +579,92 @@
       width: 100%;
     }
   }
+}
 
+// ─── Flow layer (src/styles/DESIGN.md) ─────────────────
+// The list is hairline rows in the reading column; state words replace boxed badges; icon links
+// lose their frames. Older rules above stay for the sheet and skeletons.
+
+.pluginList {
+  gap: 0;
+  border: 0;
+  border-top: 1px solid var(--hairline);
+  border-radius: 0;
+  background: none;
+  overflow: visible;
+}
+
+.pluginRow {
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--hairline);
+  background: none;
+
+  &:hover {
+    background: none;
+  }
+
+  @include mobile {
+    grid-template-columns: 28px minmax(0, 1fr);
+    padding: 14px 0;
+  }
+}
+
+.logoBox {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+}
+
+.badge,
+.badgeSuccess,
+.badgeWarning,
+.badgeMuted {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badgeSuccess {
+  color: var(--success-color);
+}
+
+.badgeWarning {
+  color: var(--amber-color);
+}
+
+.badgeRow {
+  gap: 4px 12px;
+}
+
+.rowActions {
+  gap: 6px 18px;
+}
+
+.iconLink {
+  min-height: 0;
+  width: auto;
+  border: 0;
+  background: none;
+  color: var(--text-secondary);
+
+  &:hover {
+    border: 0;
+    background: none;
+    color: var(--text-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-indigo);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+}
+
+.toolbar :global(.form-group) {
+  max-width: none;
 }

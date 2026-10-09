@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { MoreDisclosure, PageHeader, StatusDot } from '@/components/flow';
+import flow from '@/components/flow/flowPage.module.scss';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Input } from '@/components/ui/Input';
@@ -15,7 +17,6 @@ import {
   IconRefreshCw,
   IconSearch,
   IconSettings,
-  IconShield,
 } from '@/components/ui/icons';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { pluginStoreApi } from '@/services/api';
@@ -38,6 +39,7 @@ import {
   type PluginReleaseVersion,
 } from './pluginReleaseVersions';
 import { waitForPluginStoreState } from './pluginPolling';
+import { describeStore } from './pluginsHeadline';
 import styles from './PluginStorePage.module.scss';
 
 type StoreStatusFilter = 'all' | 'installed' | 'notInstalled' | 'updates';
@@ -983,37 +985,58 @@ export function PluginStorePage() {
     );
   };
 
-  return (
-    <div className={styles.page}>
-      {/* ── Page Header ── */}
-      <div className={styles.pageHeader}>
-        <h1 className={styles.title}>{t('plugin_store.title')}</h1>
-        <p className={styles.description}>{t('plugin_store.description')}</p>
-      </div>
+  const headline = describeStore({
+    loaded: Boolean(data),
+    failed: Boolean(error),
+    total: stats.total,
+    installed: stats.installed,
+    updates: stats.updates,
+  });
+  const searching = filter.trim().length > 0;
 
-      {/* ── Security Banner ── */}
-      <div className={styles.securityBanner} role="note">
-        <IconShield size={20} />
-        <div className={styles.securityBannerText}>
-          <strong>{t('plugin_store.security_banner_title')}</strong>
-          <p>{t('plugin_store.security_banner_text')}</p>
-        </div>
-      </div>
+  return (
+    <div className={`${flow.page} ${styles.page}`}>
+      <PageHeader
+        eyebrow={t('plugin_store.title')}
+        title={t(headline.title.key, headline.title.values)}
+        subtitle={
+          headline.subtitle ? t(headline.subtitle.key, headline.subtitle.values) : undefined
+        }
+        live
+        actions={
+          <button type="button" className={flow.textButton} onClick={() => navigate('/plugins')}>
+            {t('plugin_store.flow.open_installed')}
+          </button>
+        }
+      />
+
+      {/* Trust first: plugins run inside the gateway. */}
+      <p className={`${flow.note} ${styles.securityNote}`} role="note">
+        <span>
+          <strong>{t('plugin_store.security_banner_title')}</strong>{' '}
+          {t('plugin_store.security_banner_text')}
+        </span>
+      </p>
 
       {/* ── Alerts ── */}
       {error ? (
-        <div className={styles.errorBox}>
+        <p className={flow.note} data-tone="bad" role="alert">
           <span>{error.message}</span>
           {error.kind !== 'unsupported' ? (
-            <Button variant="secondary" size="sm" onClick={loadStore} disabled={loading}>
+            <button
+              type="button"
+              className={flow.textButton}
+              onClick={loadStore}
+              disabled={loading}
+            >
               {t('plugin_store.retry')}
-            </Button>
+            </button>
           ) : null}
-        </div>
+        </p>
       ) : null}
 
       {data?.sourceErrors.length ? (
-        <div className={styles.warningBox}>
+        <div className={`${flow.note} ${styles.sourceErrors}`}>
           <strong>{t('plugin_store.source_errors_title')}</strong>
           <ul className={styles.sourceErrorList}>
             {data.sourceErrors.map((sourceError, index) => {
@@ -1031,74 +1054,16 @@ export function PluginStorePage() {
       ) : null}
 
       {data && !data.pluginsEnabled ? (
-        <div className={styles.warningBox}>{t('plugin_store.global_disabled_hint')}</div>
+        <p className={flow.note}>{t('plugin_store.global_disabled_hint')}</p>
       ) : null}
 
       {restartNames.length > 0 ? (
-        <div className={styles.warningBox}>
+        <p className={flow.note}>
           {t('plugin_store.restart_required_banner', { plugins: restartNames.join(', ') })}
-        </div>
+        </p>
       ) : null}
 
-      {/* ── Status Bar ── */}
-      {data ? (
-        <div className={styles.statusBar}>
-          <div className={styles.statusPill}>
-            <span
-              className={`${styles.statusDot} ${
-                data.pluginsEnabled ? styles.statusDotOn : styles.statusDotOff
-              }`}
-            />
-            <span className={styles.statusLabel}>{t('plugin_store.global_status')}</span>
-            <span className={styles.statusValue}>
-              {data.pluginsEnabled
-                ? t('plugin_store.global_enabled')
-                : t('plugin_store.global_disabled')}
-            </span>
-          </div>
-
-          <span className={styles.statusDivider} />
-
-          <div className={styles.statusPill}>
-            <span className={styles.statusLabel}>{t('plugin_store.plugins_dir')}</span>
-            <span
-              className={`${styles.statusValue} ${styles.statusPathValue}`}
-              title={data.pluginsDir || 'plugins'}
-            >
-              {data.pluginsDir || 'plugins'}
-            </span>
-          </div>
-
-          <span className={styles.statusDivider} />
-
-          <div className={styles.statusPill}>
-            <span className={styles.statusLabel}>{t('plugin_store.stat_available')}</span>
-            <span className={styles.statusValue}>{stats.total}</span>
-          </div>
-        </div>
-      ) : null}
-
-      {/* ── Toolbar ── */}
-      <div className={styles.toolbar}>
-        <Input
-          type="search"
-          value={filter}
-          onChange={(event) => setFilter(event.target.value)}
-          placeholder={t('plugin_store.search_placeholder')}
-          aria-label={t('plugin_store.search_label')}
-          rightElement={<IconSearch size={16} />}
-        />
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={loadStore}
-          disabled={!connected || loading}
-          loading={loading}
-        >
-          <IconRefreshCw size={16} />
-          {t('plugin_store.refresh')}
-        </Button>
-      </div>
+      <div className={flow.lead} />
 
       {/* ── Status Filter Chips ── */}
       <div className={styles.filterChips} role="group" aria-label={t('plugin_store.filter_label')}>
@@ -1169,8 +1134,73 @@ export function PluginStorePage() {
           )
         ) : null
       ) : (
-        <div className={styles.cardGrid}>{visiblePlugins.map((entry) => renderCard(entry))}</div>
+        <div className={`${styles.cardGrid} ${flow.quietButtons}`}>
+          {visiblePlugins.map((entry) => renderCard(entry))}
+        </div>
       )}
+
+      <div className={flow.moreWrap}>
+        <MoreDisclosure
+          label={t('plugin_store.flow.more')}
+          summary={t('plugin_store.flow.more_summary', { dir: data?.pluginsDir || 'plugins' })}
+          forcedOpen={searching}
+          forcedNote={t('plugin_store.flow.more_forced')}
+        >
+          <div className={flow.moreBody}>
+            <section className={flow.moreSection}>
+              <h3 className={flow.sectionLabel}>{t('plugin_store.flow.find_title')}</h3>
+              <div className={styles.toolbar}>
+                <Input
+                  type="search"
+                  value={filter}
+                  onChange={(event) => setFilter(event.target.value)}
+                  placeholder={t('plugin_store.search_placeholder')}
+                  aria-label={t('plugin_store.search_label')}
+                  rightElement={<IconSearch size={16} />}
+                />
+              </div>
+            </section>
+            {data ? (
+              <section className={flow.moreSection}>
+                <h3 className={flow.sectionLabel}>{t('plugin_store.flow.runtime_title')}</h3>
+                <dl className={flow.facts}>
+                  <div className={flow.fact}>
+                    <dt>{t('plugin_store.global_status')}</dt>
+                    <dd>
+                      <StatusDot
+                        tone={data.pluginsEnabled ? 'ok' : 'off'}
+                        label={
+                          data.pluginsEnabled
+                            ? t('plugin_store.global_enabled')
+                            : t('plugin_store.global_disabled')
+                        }
+                      />
+                    </dd>
+                  </div>
+                  <div className={flow.fact}>
+                    <dt>{t('plugin_store.plugins_dir')}</dt>
+                    <dd className={styles.statusPathValue}>{data.pluginsDir || 'plugins'}</dd>
+                  </div>
+                  <div className={flow.fact}>
+                    <dt>{t('plugin_store.stat_available')}</dt>
+                    <dd>{stats.total}</dd>
+                  </div>
+                </dl>
+                <p className={flow.actions}>
+                  <button
+                    type="button"
+                    className={flow.textButton}
+                    onClick={loadStore}
+                    disabled={!connected || loading}
+                  >
+                    {t('plugin_store.refresh')}
+                  </button>
+                </p>
+              </section>
+            ) : null}
+          </div>
+        </MoreDisclosure>
+      </div>
 
       <PluginInstallGateModal
         open={gateOpen}
