@@ -59,10 +59,16 @@ export function PortField({
   );
 }
 
-export function ProxyUrlField({ values, disabled, onChange }: SharedFieldProps) {
+export function ProxyUrlField({
+  values,
+  disabled,
+  onChange,
+  showSponsor = true,
+}: SharedFieldProps & { showSponsor?: boolean }) {
   const { t } = useTranslation();
   // 代理 URL 较长，字段跨两列；标签下方挂赞助跳转行（数据见 sponsors.ts，空则不渲染）。
-  const sponsor = SPONSORS[0];
+  // The Common section omits the sponsored hint; the Network section keeps it.
+  const sponsor = showSponsor ? SPONSORS[0] : undefined;
   return (
     <FieldAnchor fieldId="proxyUrl" wide>
       <Input
