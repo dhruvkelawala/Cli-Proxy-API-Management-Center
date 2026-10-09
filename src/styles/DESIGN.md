@@ -1,9 +1,10 @@
 # Flow design language
 
-The management center is moving, page by page, to one calm style ("Flow"). Routing
-(`#/client-routes`) is the reference implementation; Overview (`#/`), Accounts (`#/auth-files`)
-and Quota (`#/quota`) follow it. The remaining pages follow in later phases and should reuse what
-is listed here rather than invent new pieces.
+Every page of the management center uses one calm style ("Flow"). Routing (`#/client-routes`) is
+the reference implementation; Overview (`#/`), Accounts (`#/auth-files`) and Quota (`#/quota`)
+follow it, and so do the rarely opened pages under the sidebar's More (Quick Start, AI Providers,
+OAuth, Logs, Config, Plugins, Plugin Store, Management Center info, the two model-rule editors)
+and the login screen. New pages reuse what is listed here rather than invent new pieces.
 
 ## Principles
 
@@ -40,26 +41,28 @@ is listed here rather than invent new pieces.
 
 Existing theme tokens (`src/styles/themes.scss`) stay the source of colour. Flow adds three:
 
-| Token             | Use                                               |
-| ----------------- | ------------------------------------------------- |
+| Token             | Use                                                |
+| ----------------- | -------------------------------------------------- |
 | `--accent-indigo` | the single accent (live path, serving card, focus) |
-| `--hairline`      | separators and quiet card borders                 |
-| `--dur-glide`     | movement duration (reorder glide)                 |
+| `--hairline`      | separators and quiet card borders                  |
+| `--dur-glide`     | movement duration (reorder glide)                  |
 
 ## Shared components (`src/components/flow/`)
 
-| Component        | File                 | What it is                                                                                                                                                                                                 |
-| ---------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `PageHeader`     | `PageHeader.tsx`     | Eyebrow, sentence title, quiet subtitle (optionally announced), optional actions. The title fades in softly when its sentence changes.                                                                      |
-| `FlowDiagram`    | `FlowDiagram.tsx`    | Sources → hub → destinations in order. Primary on a solid accent path, backups dashed, unusable faint; dots travel along live routes. Cards reorder by drag or ↑/↓/Home/End and glide. Generic over the card. |
-| `flowLayout`     | `flowLayout.ts`      | Pure geometry for the diagram (wide and narrow layouts, paths, drop index, `moveItem`).                                                                                                                    |
-| `QuotaRail`      | `QuotaRail.tsx`      | Hairline meter of what is left with a caption such as "54% left this week · resets Tue 9:06 PM". Unknown is never drawn as empty.                                                                         |
-| `StatusDot`      | `StatusDot.tsx`      | A coloured dot (the only colour) plus a plain-language label. Tones: ok, warn, bad, off, unknown.                                                                                                          |
-| `MoreDisclosure` | `MoreDisclosure.tsx` | The page's single "More": a button with `aria-expanded`/`aria-controls`, a labelled region with an animated height, content kept mounted (inert while closed), optional summary and forced-open note.      |
-| `DeviceGlyph`    | `DeviceGlyph.tsx`    | Laptop outline for client sources.                                                                                                                                                                         |
-| `TrafficFlow`    | `TrafficFlow.tsx`    | Gateway → providers → accounts, read-only. One time window throughout (Overview uses the last 30 minutes, labelled once): path thickness is the share of traffic, travelling dots are volume for accounts serving now (none for backups or accounts that cannot serve), red flecks are failures. Nested list for assistive technology, SVG `aria-hidden`. |
-| `trafficLayout`  | `trafficLayout.ts`   | Pure geometry for TrafficFlow (wide three-column and narrow one-column layouts, paths, `strokeFor`, `dotsFor`).                                                                                           |
-| `ActionMenu`     | `ActionMenu.tsx`     | A button that opens a short menu (`aria-haspopup="menu"`, `role="menuitem"`, ↑/↓/Home/End, Escape returns focus). `primary` for a page's one filled action (Accounts' "Add account"), `quiet` for an overflow. |
+| Component              | File                 | What it is                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ---------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `PageHeader`           | `PageHeader.tsx`     | Eyebrow, sentence title, quiet subtitle (optionally announced), optional actions. The title fades in softly when its sentence changes.                                                                                                                                                                                                                                                                                                                             |
+| `FlowDiagram`          | `FlowDiagram.tsx`    | Sources → hub → destinations in order. Primary on a solid accent path, backups dashed, unusable faint; dots travel along live routes. Cards reorder by drag or ↑/↓/Home/End and glide. Generic over the card.                                                                                                                                                                                                                                                      |
+| `flowLayout`           | `flowLayout.ts`      | Pure geometry for the diagram (wide and narrow layouts, paths, drop index, `moveItem`).                                                                                                                                                                                                                                                                                                                                                                            |
+| `QuotaRail`            | `QuotaRail.tsx`      | Hairline meter of what is left with a caption such as "54% left this week · resets Tue 9:06 PM". Unknown is never drawn as empty.                                                                                                                                                                                                                                                                                                                                  |
+| `StatusDot`            | `StatusDot.tsx`      | A coloured dot (the only colour) plus a plain-language label. Tones: ok, warn, bad, off, unknown.                                                                                                                                                                                                                                                                                                                                                                  |
+| `MoreDisclosure`       | `MoreDisclosure.tsx` | The page's single "More": a button with `aria-expanded`/`aria-controls`, a labelled region with an animated height, content kept mounted (inert while closed), optional summary and forced-open note.                                                                                                                                                                                                                                                              |
+| `DeviceGlyph`          | `DeviceGlyph.tsx`    | Laptop outline for client sources.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `TrafficFlow`          | `TrafficFlow.tsx`    | Gateway → providers → accounts, read-only. One time window throughout (Overview uses the last 30 minutes, labelled once): path thickness is the share of traffic, travelling dots are volume for accounts serving now (none for backups or accounts that cannot serve), red flecks are failures. Nested list for assistive technology, SVG `aria-hidden`.                                                                                                          |
+| `trafficLayout`        | `trafficLayout.ts`   | Pure geometry for TrafficFlow (wide three-column and narrow one-column layouts, paths, `strokeFor`, `dotsFor`).                                                                                                                                                                                                                                                                                                                                                    |
+| `StepFlow`             | `StepFlow.tsx`       | A short row of steps (OAuth: browser → sign in → account added). The step under way is indigo and one dot travels toward the next while it waits; done steps get a green check, a failed one a red cross. `<ol>` with `aria-current="step"`; drawing `aria-hidden`; reduced motion drops the dot. Pure `nodeStateOf` / `linkStateOf` in `stepFlowModel.ts`.                                                                                                        |
+| `flowPage.module.scss` | (styles)             | The shared page vocabulary: `.page` (760px column) and `.wide` (960px workspace, Logs), `.lead`, `.section`, `.sectionLabel`, `.quiet`, `.caption`, `.actions`, hairline `.list`/`.row`, definition `.facts`/`.fact`, `.textButton` (+ `.textButtonStrong`, `.textDanger`), `.textLink`, dot `.note` (`data-tone="bad"`/`"ok"`), `.moreWrap`/`.moreBody`/`.moreSection`, and `.quietButtons`, which turns legacy `<Button>`s inside a container into text buttons. |
+| `ActionMenu`           | `ActionMenu.tsx`     | A button that opens a short menu (`aria-haspopup="menu"`, `role="menuitem"`, ↑/↓/Home/End, Escape returns focus). `primary` for a page's one filled action (Accounts' "Add account"), `quiet` for an overflow.                                                                                                                                                                                                                                                     |
 
 Related: `usePrefersReducedMotion` (`src/hooks/`), and the sidebar's primary list plus one
 collapsible More group (`src/components/layout/navModel.ts`).
@@ -76,17 +79,52 @@ collapsible More group (`src/components/layout/navModel.ts`).
 ```
 
 Text buttons (underlined with a hairline, indigo when pressed) are the default action style on
-Flow pages; filled buttons are reserved for saving forms inside More or sheets, plus at most one
-primary `ActionMenu` per page.
+Flow pages; filled buttons are reserved for saving forms (a sheet, an editor's top bar, the
+login form, Config's floating save bar), plus at most one primary `ActionMenu` per page.
+
+### Sentences are models
+
+Each page's sentence comes from a small React-free function next to the page that returns i18n
+key descriptors (`{ key, values }`), so it can be tested without rendering:
+`describeOverview`, `describeProviders` / `describeQuickStart` (`providersHeadline.ts`),
+`describeConfig` (`configHeadline.ts`), `describeLogs` (`logs/model/logsHeadline.ts`),
+`describeOAuth` (`pages/oauthFlow.ts`), `describeSystem` (`pages/systemHeadline.ts`),
+`describePlugins` / `describeStore` (`pluginsHeadline.ts`) and `describeModelRuleEditor`
+(`modelRulesHeadline.ts`). Blocking states (disconnected, loading, failed) come before counts.
+
+### More stays open while it holds something
+
+A search that filters the visible list (Plugins, Plugin Store), a sign-in or Vertex import under
+way (OAuth), or a custom address being typed (login) keeps the page's More open through
+`forcedOpen`, with a one-line `forcedNote`. A filter is never hidden behind a closed More.
+
+### Retrofitting an older page
+
+Most of these pages keep their logic and components. The restyle is: replace the old title with
+`PageHeader`, wrap the page in `flowPage.page`, move rarely used controls into the page's More,
+then add a short "Flow layer" at the end of the page's own module that flattens boxed cards to
+hairline rows (`border: 0; border-bottom: 1px solid var(--hairline); background: none`), turns
+pill badges into coloured words and drops card hover fills. Use `.quietButtons` on a container
+rather than rewriting each `<Button>`.
 
 ## Pages
 
-| Page     | Main view                                                                                                    | Under More                                                                                   |
-| -------- | ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
-| Overview | The state sentence (`describeOverview`), TrafficFlow, 5-hour and weekly rails per account, one line of totals | Throughput chart, per-provider requests and success rate, account health, gateway settings, links |
-| Accounts | The state sentence, search, one row per account grouped by provider (Claude in routing order), Add account; provider tabs only for 7+ accounts | Show filter, sort, list/cards, page size, batch selection, model rules, scoped Delete        |
-| Routing  | The order sentence, FlowDiagram of clients → gateway → accounts                                              | Shared strategy, session affinity, per-client rules, client keys                             |
-| Quota    | Per-account quota cards and the windows timeline (only providers with accounts get a tab)                    | Sort                                                                                         |
+| Page               | Main view                                                                                                                                                 | Under More                                                                                                    |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Overview           | The state sentence (`describeOverview`), TrafficFlow, 5-hour and weekly rails per account, one line of totals                                             | Throughput chart, per-provider requests and success rate, account health, gateway settings, links             |
+| Accounts           | The state sentence, search, one row per account grouped by provider (Claude in routing order), Add account; provider tabs only for 7+ accounts            | Show filter, sort, list/cards, page size, batch selection, model rules, scoped Delete                         |
+| Routing            | The order sentence, FlowDiagram of clients → gateway → accounts                                                                                           | Shared strategy, session affinity, per-client rules, client keys                                              |
+| Quota              | Per-account quota cards and the windows timeline (only providers with accounts get a tab)                                                                 | Sort                                                                                                          |
+| AI Providers       | "3 provider keys configured." / "No API keys yet."; one hairline row per key grouped by provider (state, switch, View/Edit/Delete menu); "Add a key" menu | Every provider with search, sort, model filter and the full table; quick-fill sponsors; sync time and Refresh |
+| Quick Start        | The sponsor's state sentence and its set-up form                                                                                                          | Sync time and Refresh                                                                                         |
+| OAuth              | "Sign in a new account." changing with the sign-in; StepFlow; Claude, Codex, Antigravity rows; the sign-in under way unfolds under its row                | Muse, Kimi (both), xAI, Devin, plugin providers, Vertex JSON import                                           |
+| Logs               | Whether logs can be read and if they are live; the viewer (search, level, filters, refresh, live, fullscreen)                                             | Download and clear the loaded lines; error request logs (read only while open)                                |
+| Config             | "Your gateway settings are in sync." (or unsaved/invalid counts); search; quiet section tabs; the active section (Common first)                           | Visual ↔ YAML source switch; reload                                                                           |
+| Plugins            | How many plugins run; one row per plugin with switch, Edit config, Delete                                                                                 | Search; global status, folder, counts; refresh                                                                |
+| Plugin Store       | What is available or updatable; the trust note; status filters; one row per plugin                                                                        | Search; global status, folder, count; refresh                                                                 |
+| Management Center  | Gateway version (with Check for updates), connection, UI version, build time, model count                                                                 | Models by family with refresh; links; clear local login data (asks first)                                     |
+| Model-rule editors | A sentence about the chosen provider's rules; provider chips; the rules; Save in the top bar                                                              | (none; they are short forms)                                                                                  |
+| Login              | "Sign in to your gateway."; management key; remember; Login                                                                                               | Connection: the detected address and a custom one                                                             |
 
 An account row opens its details sheet, which starts with how the account is doing (status, pool,
 cooldown, quota, pinned clients) and its one-off actions (models, refresh, download, delete).
