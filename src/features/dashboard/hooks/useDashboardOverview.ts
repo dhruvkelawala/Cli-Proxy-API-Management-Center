@@ -293,6 +293,9 @@ export function useDashboardOverview() {
     traffic,
     providers,
     credentials,
+    /** The raw account list (null until loaded or after a failed read). */
+    authFiles,
+    reloadAuthFiles: loadAuthFiles,
     refresh,
   };
 }

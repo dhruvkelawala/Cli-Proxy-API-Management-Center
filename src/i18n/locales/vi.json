@@ -2735,5 +2735,92 @@
     "profiles_incompatible": "Cổng này dùng phiên bản API hồ sơ máy khách mà bảng điều khiển không hiểu, nên khóa và khóa máy khách bị ẩn. Thứ tự ở trên vẫn hoạt động.",
     "accounts_failed": "Không tải được tài khoản nên không thể hiển thị thứ tự.",
     "save_unconfirmed": "Không xác nhận được thứ tự mới; đang hiển thị những gì cổng hiện có."
+  },
+  "overview": {
+    "eyebrow": "Tổng quan",
+    "more": "Thêm",
+    "hero": {
+      "connecting": "Đang kết nối tới gateway…",
+      "offline": "Không kết nối được gateway.",
+      "offline_follow": "Yêu cầu sẽ không được định tuyến cho tới khi nó hoạt động lại. Hãy kiểm tra gateway đang chạy.",
+      "loading": "Đang kiểm tra gateway…",
+      "empty": "Chưa có tài khoản nào.",
+      "empty_follow": "Thêm một tài khoản ở mục Tài khoản và lưu lượng sẽ bắt đầu đi qua nó.",
+      "failing": "Nhiều yêu cầu đang lỗi (gần đây {{percent}}%).",
+      "none": "{{provider}} hiện không có tài khoản nào phục vụ được.",
+      "none_follow": "Yêu cầu của nó sẽ lỗi cho tới khi có tài khoản hồi phục.",
+      "all_off": "Mọi tài khoản {{provider}} đều đang tắt.",
+      "switched_cooling": "{{out}} đang hạ nhiệt; {{provider}} đã chuyển sang {{account}}.",
+      "switched_limit": "{{out}} đã hết hạn mức; {{provider}} đã chuyển sang {{account}}.",
+      "switched_out": "{{out}} không phục vụ được; {{provider}} đã chuyển sang {{account}}.",
+      "back_at": "{{out}} sẽ trở lại {{when}}.",
+      "back_later": "{{out}} sẽ trở lại khi có hạn mức.",
+      "quiet": "Mọi thứ yên ắng.",
+      "flowing": "Mọi thứ đang chạy tốt.",
+      "shared": "{{provider}} được chia giữa {{accounts}}.",
+      "running": "{{provider}} đang chạy.",
+      "on": "{{provider}} đang dùng {{account}}.",
+      "backup": "Nếu {{account}} hết hạn mức, {{provider}} sẽ chuyển sang {{backup}}.",
+      "attention_one": "{{names}} cần được xem.",
+      "attention_many": "{{names}} cần được xem."
+    },
+    "line": {
+      "none": "{{provider}} không có tài khoản nào phục vụ được.",
+      "all_off": "{{provider}} đang tắt.",
+      "switched_cooling": "{{provider}} đã chuyển sang {{account}} trong lúc {{out}} hạ nhiệt.",
+      "switched_limit": "{{provider}} đã chuyển sang {{account}} trong lúc {{out}} hết hạn mức.",
+      "switched_out": "{{provider}} đã chuyển sang {{account}}.",
+      "shared": "{{provider}} được chia giữa {{accounts}}.",
+      "running": "{{provider}} đang chạy.",
+      "on": "{{provider}} đang dùng {{account}}."
+    },
+    "in": {
+      "now": "ngay bây giờ",
+      "m": "{{m}} phút",
+      "hm": "{{h}} giờ {{m}} phút",
+      "dh": "{{d}} ngày {{h}} giờ"
+    },
+    "state": {
+      "serving": "Đang phục vụ",
+      "serving_errors": "Đang phục vụ, có vài lỗi gần đây",
+      "standby": "Đang chờ"
+    },
+    "flow": {
+      "section": "Lưu lượng trực tiếp",
+      "label": "Nhà cung cấp và tài khoản của họ",
+      "legend": "Đường càng dày thì càng nhiều yêu cầu trong vài giờ qua; chấm đỏ là lỗi.",
+      "change_order": "Đổi thứ tự ưu tiên",
+      "recent_title_one": "{{count}} yêu cầu trong 30 phút qua",
+      "recent_title_other": "{{count}} yêu cầu trong 30 phút qua",
+      "requests_one": "{{formatted}} yêu cầu",
+      "requests_other": "{{formatted}} yêu cầu",
+      "accounts_one": "{{count}} tài khoản",
+      "accounts_other": "{{count}} tài khoản",
+      "recent_unit": "30 phút"
+    },
+    "quota": {
+      "title": "Hạn mức",
+      "details": "Xem toàn bộ chi tiết hạn mức",
+      "checking": "Đang kiểm tra…",
+      "unknown": "Chưa rõ",
+      "left": "còn {{percent}}%",
+      "left_reset": "còn {{percent}}% · đặt lại sau {{in}}",
+      "session": "5 giờ",
+      "week": "Hằng tuần",
+      "session_label": "{{account}}: hạn mức 5 giờ còn lại",
+      "week_label": "{{account}}: hạn mức tuần còn lại"
+    },
+    "totals": "{{count}} yêu cầu trong {{window}} qua · {{rate}} thành công",
+    "totals_none": "Không có yêu cầu nào trong vài giờ qua.",
+    "strategy": {
+      "fill-first": "Dùng hết trước",
+      "round-robin": "Xoay vòng",
+      "weighted-round-robin": "Xoay vòng có trọng số"
+    },
+    "details": {
+      "traffic": "Thông lượng",
+      "gateway": "Gateway",
+      "elsewhere": "Trang khác"
+    }
   }
 }

@@ -2719,5 +2719,89 @@
     "profiles_incompatible": "此网关使用本面板无法识别的客户端配置 API 版本，因此已隐藏锁定和客户端密钥。上面的顺序仍然有效。",
     "accounts_failed": "无法加载账号，因此无法显示顺序。",
     "save_unconfirmed": "无法确认新顺序是否已保存；下面显示的是网关当前的设置。"
+  },
+  "overview": {
+    "eyebrow": "概览",
+    "more": "更多",
+    "hero": {
+      "connecting": "正在连接网关…",
+      "offline": "无法连接网关。",
+      "offline_follow": "恢复连接前请求无法转发，请确认网关正在运行。",
+      "loading": "正在检查网关…",
+      "empty": "还没有账号。",
+      "empty_follow": "在“账号”中添加一个，流量就会开始经过它。",
+      "failing": "大量请求失败（最近 {{percent}}%）。",
+      "none": "{{provider}} 现在没有可用的账号。",
+      "none_follow": "在有账号恢复之前，它的请求会失败。",
+      "all_off": "所有 {{provider}} 账号都已关闭。",
+      "switched_cooling": "{{out}} 正在冷却，{{provider}} 已切换到 {{account}}。",
+      "switched_limit": "{{out}} 额度已用完，{{provider}} 已切换到 {{account}}。",
+      "switched_out": "{{out}} 暂不可用，{{provider}} 已切换到 {{account}}。",
+      "back_at": "{{out}} 将于{{when}}恢复。",
+      "back_later": "{{out}} 有额度后会恢复。",
+      "quiet": "一切安静。",
+      "flowing": "一切顺畅。",
+      "shared": "{{provider}} 由 {{accounts}} 共同承担。",
+      "running": "{{provider}} 运行正常。",
+      "on": "{{provider}} 正在使用 {{account}}。",
+      "backup": "如果 {{account}} 用完，{{provider}} 会切换到 {{backup}}。",
+      "attention_one": "{{names}} 需要查看。",
+      "attention_many": "{{names}} 需要查看。"
+    },
+    "line": {
+      "none": "{{provider}} 没有可用的账号。",
+      "all_off": "{{provider}} 已关闭。",
+      "switched_cooling": "{{out}} 冷却期间，{{provider}} 改用 {{account}}。",
+      "switched_limit": "{{out}} 额度用完期间，{{provider}} 改用 {{account}}。",
+      "switched_out": "{{provider}} 改用 {{account}}。",
+      "shared": "{{provider}} 由 {{accounts}} 共同承担。",
+      "running": "{{provider}} 运行正常。",
+      "on": "{{provider}} 正在使用 {{account}}。"
+    },
+    "in": {
+      "now": "现在",
+      "m": "{{m}} 分钟",
+      "hm": "{{h}} 小时 {{m}} 分",
+      "dh": "{{d}} 天 {{h}} 小时"
+    },
+    "state": {
+      "serving": "正在服务",
+      "serving_errors": "正在服务，近期有少量错误",
+      "standby": "待命"
+    },
+    "flow": {
+      "section": "实时流量",
+      "label": "提供商及其账号",
+      "legend": "路径越粗，近几小时承载的请求越多；红点表示失败。",
+      "change_order": "调整优先顺序",
+      "recent_title": "最近 30 分钟 {{count}} 个请求",
+      "requests": "{{formatted}} 个请求",
+      "accounts": "{{count}} 个账号",
+      "recent_unit": "30 分钟"
+    },
+    "quota": {
+      "title": "额度",
+      "details": "查看全部额度详情",
+      "checking": "检查中…",
+      "unknown": "暂未知",
+      "left": "剩余 {{percent}}%",
+      "left_reset": "剩余 {{percent}}% · {{in}}后重置",
+      "session": "5 小时",
+      "week": "每周",
+      "session_label": "{{account}}：5 小时额度剩余",
+      "week_label": "{{account}}：每周额度剩余"
+    },
+    "totals": "最近 {{window}} 共 {{count}} 个请求 · 成功率 {{rate}}",
+    "totals_none": "最近几小时没有请求。",
+    "strategy": {
+      "fill-first": "优先填满",
+      "round-robin": "轮询",
+      "weighted-round-robin": "加权轮询"
+    },
+    "details": {
+      "traffic": "吞吐量",
+      "gateway": "网关",
+      "elsewhere": "其他页面"
+    }
   }
 }

@@ -2750,5 +2750,98 @@
     "profiles_incompatible": "Шлюз использует версию API клиентских профилей, которую эта панель не понимает, поэтому закрепление и клиентские ключи скрыты. Порядок выше по-прежнему работает.",
     "accounts_failed": "Не удалось загрузить аккаунты, поэтому порядок нельзя показать.",
     "save_unconfirmed": "Не удалось подтвердить новый порядок; показано то, что сейчас на шлюзе."
+  },
+  "overview": {
+    "eyebrow": "Обзор",
+    "more": "Ещё",
+    "hero": {
+      "connecting": "Подключаемся к шлюзу…",
+      "offline": "Шлюз недоступен.",
+      "offline_follow": "Пока он не вернётся, запросы не маршрутизируются. Проверьте, что он запущен.",
+      "loading": "Проверяем шлюз…",
+      "empty": "Аккаунтов пока нет.",
+      "empty_follow": "Добавьте аккаунт в разделе «Аккаунты», и трафик пойдёт через него.",
+      "failing": "Много запросов завершаются ошибкой (недавно {{percent}}%).",
+      "none": "У {{provider}} сейчас нет аккаунта, который может обслуживать запросы.",
+      "none_follow": "Его запросы будут падать, пока какой-нибудь аккаунт не восстановится.",
+      "all_off": "Все аккаунты {{provider}} выключены.",
+      "switched_cooling": "{{out}} остывает; {{provider}} переключился на {{account}}.",
+      "switched_limit": "У {{out}} закончился лимит; {{provider}} переключился на {{account}}.",
+      "switched_out": "{{out}} не может обслуживать; {{provider}} переключился на {{account}}.",
+      "back_at": "{{out}} вернётся {{when}}.",
+      "back_later": "{{out}} вернётся, когда снова появится лимит.",
+      "quiet": "Всё спокойно.",
+      "flowing": "Всё идёт как надо.",
+      "shared": "{{provider}} распределяется между {{accounts}}.",
+      "running": "{{provider}} работает.",
+      "on": "{{provider}} работает через {{account}}.",
+      "backup": "Если у {{account}} закончится лимит, {{provider}} переключится на {{backup}}.",
+      "attention_one": "{{names}} стоит проверить.",
+      "attention_many": "{{names}} стоит проверить."
+    },
+    "line": {
+      "none": "У {{provider}} нет аккаунта, который может обслуживать запросы.",
+      "all_off": "{{provider}} выключен.",
+      "switched_cooling": "{{provider}} перешёл на {{account}}, пока {{out}} остывает.",
+      "switched_limit": "{{provider}} перешёл на {{account}}, пока у {{out}} нет лимита.",
+      "switched_out": "{{provider}} перешёл на {{account}}.",
+      "shared": "{{provider}} распределяется между {{accounts}}.",
+      "running": "{{provider}} работает.",
+      "on": "{{provider}} работает через {{account}}."
+    },
+    "in": {
+      "now": "сейчас",
+      "m": "{{m}} мин",
+      "hm": "{{h}} ч {{m}} мин",
+      "dh": "{{d}} д {{h}} ч"
+    },
+    "state": {
+      "serving": "Обслуживает сейчас",
+      "serving_errors": "Обслуживает, есть недавние ошибки",
+      "standby": "В резерве"
+    },
+    "flow": {
+      "section": "Трафик в реальном времени",
+      "label": "Провайдеры и их аккаунты",
+      "legend": "Чем толще линия, тем больше запросов за последние часы; красные точки — ошибки.",
+      "change_order": "Изменить порядок",
+      "recent_title_one": "{{count}} запрос за последние 30 минут",
+      "recent_title_few": "{{count}} запроса за последние 30 минут",
+      "recent_title_many": "{{count}} запросов за последние 30 минут",
+      "recent_title_other": "{{count}} запроса за последние 30 минут",
+      "requests_one": "{{formatted}} запрос",
+      "requests_few": "{{formatted}} запроса",
+      "requests_many": "{{formatted}} запросов",
+      "requests_other": "{{formatted}} запроса",
+      "accounts_one": "{{count}} аккаунт",
+      "accounts_few": "{{count}} аккаунта",
+      "accounts_many": "{{count}} аккаунтов",
+      "accounts_other": "{{count}} аккаунта",
+      "recent_unit": "30 мин"
+    },
+    "quota": {
+      "title": "Лимиты",
+      "details": "Все подробности о лимитах",
+      "checking": "Проверяем…",
+      "unknown": "Пока неизвестно",
+      "left": "осталось {{percent}}%",
+      "left_reset": "осталось {{percent}}% · сброс через {{in}}",
+      "session": "5 часов",
+      "week": "Неделя",
+      "session_label": "{{account}}: остаток 5-часового лимита",
+      "week_label": "{{account}}: остаток недельного лимита"
+    },
+    "totals": "{{count}} запросов за последние {{window}} · успешно {{rate}}",
+    "totals_none": "За последние несколько часов запросов не было.",
+    "strategy": {
+      "fill-first": "Сначала заполнять",
+      "round-robin": "По кругу",
+      "weighted-round-robin": "По кругу с весами"
+    },
+    "details": {
+      "traffic": "Пропускная способность",
+      "gateway": "Шлюз",
+      "elsewhere": "Другие разделы"
+    }
   }
 }

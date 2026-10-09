@@ -2745,5 +2745,89 @@
     "profiles_incompatible": "此閘道使用本面板無法辨識的用戶端設定檔 API 版本，因此已隱藏鎖定與用戶端金鑰。上面的順序仍然有效。",
     "accounts_failed": "無法載入帳號，因此無法顯示順序。",
     "save_unconfirmed": "無法確認新順序是否已儲存；下面顯示的是閘道目前的設定。"
+  },
+  "overview": {
+    "eyebrow": "概覽",
+    "more": "更多",
+    "hero": {
+      "connecting": "正在連線閘道…",
+      "offline": "無法連線閘道。",
+      "offline_follow": "恢復連線前請求無法轉送，請確認閘道正在執行。",
+      "loading": "正在檢查閘道…",
+      "empty": "還沒有帳號。",
+      "empty_follow": "在「帳號」中新增一個，流量就會開始經過它。",
+      "failing": "大量請求失敗（最近 {{percent}}%）。",
+      "none": "{{provider}} 現在沒有可用的帳號。",
+      "none_follow": "在有帳號恢復之前，它的請求會失敗。",
+      "all_off": "所有 {{provider}} 帳號都已關閉。",
+      "switched_cooling": "{{out}} 正在冷卻，{{provider}} 已切換到 {{account}}。",
+      "switched_limit": "{{out}} 額度已用完，{{provider}} 已切換到 {{account}}。",
+      "switched_out": "{{out}} 暫不可用，{{provider}} 已切換到 {{account}}。",
+      "back_at": "{{out}} 將於{{when}}恢復。",
+      "back_later": "{{out}} 有額度後會恢復。",
+      "quiet": "一切安靜。",
+      "flowing": "一切順暢。",
+      "shared": "{{provider}} 由 {{accounts}} 共同承擔。",
+      "running": "{{provider}} 運作正常。",
+      "on": "{{provider}} 正在使用 {{account}}。",
+      "backup": "如果 {{account}} 用完，{{provider}} 會切換到 {{backup}}。",
+      "attention_one": "{{names}} 需要查看。",
+      "attention_many": "{{names}} 需要查看。"
+    },
+    "line": {
+      "none": "{{provider}} 沒有可用的帳號。",
+      "all_off": "{{provider}} 已關閉。",
+      "switched_cooling": "{{out}} 冷卻期間，{{provider}} 改用 {{account}}。",
+      "switched_limit": "{{out}} 額度用完期間，{{provider}} 改用 {{account}}。",
+      "switched_out": "{{provider}} 改用 {{account}}。",
+      "shared": "{{provider}} 由 {{accounts}} 共同承擔。",
+      "running": "{{provider}} 運作正常。",
+      "on": "{{provider}} 正在使用 {{account}}。"
+    },
+    "in": {
+      "now": "現在",
+      "m": "{{m}} 分鐘",
+      "hm": "{{h}} 小時 {{m}} 分",
+      "dh": "{{d}} 天 {{h}} 小時"
+    },
+    "state": {
+      "serving": "正在服務",
+      "serving_errors": "正在服務，近期有少量錯誤",
+      "standby": "待命"
+    },
+    "flow": {
+      "section": "即時流量",
+      "label": "供應商及其帳號",
+      "legend": "路徑越粗，近幾小時承載的請求越多；紅點表示失敗。",
+      "change_order": "調整優先順序",
+      "recent_title": "最近 30 分鐘 {{count}} 個請求",
+      "requests": "{{formatted}} 個請求",
+      "accounts": "{{count}} 個帳號",
+      "recent_unit": "30 分鐘"
+    },
+    "quota": {
+      "title": "額度",
+      "details": "查看全部額度詳情",
+      "checking": "檢查中…",
+      "unknown": "暫未知",
+      "left": "剩餘 {{percent}}%",
+      "left_reset": "剩餘 {{percent}}% · {{in}}後重置",
+      "session": "5 小時",
+      "week": "每週",
+      "session_label": "{{account}}：5 小時額度剩餘",
+      "week_label": "{{account}}：每週額度剩餘"
+    },
+    "totals": "最近 {{window}} 共 {{count}} 個請求 · 成功率 {{rate}}",
+    "totals_none": "最近幾小時沒有請求。",
+    "strategy": {
+      "fill-first": "優先填滿",
+      "round-robin": "輪詢",
+      "weighted-round-robin": "加權輪詢"
+    },
+    "details": {
+      "traffic": "吞吐量",
+      "gateway": "閘道",
+      "elsewhere": "其他頁面"
+    }
   }
 }

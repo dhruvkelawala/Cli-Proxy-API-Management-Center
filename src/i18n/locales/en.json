@@ -2729,5 +2729,92 @@
     "profiles_incompatible": "This gateway uses a client profile API version this panel doesn’t understand, so locks and client keys are hidden. The order above still works.",
     "accounts_failed": "Couldn’t load the accounts, so the order can’t be shown.",
     "save_unconfirmed": "Couldn’t confirm the new order; showing what the gateway has now."
+  },
+  "overview": {
+    "eyebrow": "Overview",
+    "more": "More",
+    "hero": {
+      "connecting": "Connecting to the gateway…",
+      "offline": "Can’t reach the gateway.",
+      "offline_follow": "Requests can’t be routed until it’s back. Check that it’s running.",
+      "loading": "Checking the gateway…",
+      "empty": "No accounts yet.",
+      "empty_follow": "Add one under Accounts and traffic will start flowing through it.",
+      "failing": "Many requests are failing ({{percent}}% recently).",
+      "none": "{{provider}} has no account that can serve right now.",
+      "none_follow": "Its requests will fail until one recovers.",
+      "all_off": "Every {{provider}} account is turned off.",
+      "switched_cooling": "{{out}} is cooling down; {{provider}} switched to {{account}}.",
+      "switched_limit": "{{out}} is out of room; {{provider}} switched to {{account}}.",
+      "switched_out": "{{out}} can’t serve; {{provider}} switched to {{account}}.",
+      "back_at": "{{out}} is back {{when}}.",
+      "back_later": "{{out}} comes back when it has room again.",
+      "quiet": "All quiet.",
+      "flowing": "Everything’s flowing.",
+      "shared": "{{provider}} is shared between {{accounts}}.",
+      "running": "{{provider}} is running.",
+      "on": "{{provider}} is on {{account}}.",
+      "backup": "If {{account}} runs out, {{provider}} switches to {{backup}}.",
+      "attention_one": "{{names}} needs a look.",
+      "attention_many": "{{names}} need a look."
+    },
+    "line": {
+      "none": "{{provider}} has no account that can serve.",
+      "all_off": "{{provider}} is turned off.",
+      "switched_cooling": "{{provider}} moved to {{account}} while {{out}} cools down.",
+      "switched_limit": "{{provider}} moved to {{account}} while {{out}} is out of room.",
+      "switched_out": "{{provider}} moved to {{account}}.",
+      "shared": "{{provider}} is shared between {{accounts}}.",
+      "running": "{{provider}} is running.",
+      "on": "{{provider}} is on {{account}}."
+    },
+    "in": {
+      "now": "now",
+      "m": "{{m}}m",
+      "hm": "{{h}}h {{m}}m",
+      "dh": "{{d}}d {{h}}h"
+    },
+    "state": {
+      "serving": "Serving now",
+      "serving_errors": "Serving, a few recent errors",
+      "standby": "Standing by"
+    },
+    "flow": {
+      "section": "Live traffic",
+      "label": "Providers and their accounts",
+      "legend": "Thicker paths carried more requests in the last few hours; red flecks are failures.",
+      "change_order": "Change who goes first",
+      "recent_title_one": "{{count}} request in the last 30 minutes",
+      "recent_title_other": "{{count}} requests in the last 30 minutes",
+      "requests_one": "{{formatted}} request",
+      "requests_other": "{{formatted}} requests",
+      "accounts_one": "{{count}} account",
+      "accounts_other": "{{count}} accounts",
+      "recent_unit": "30 min"
+    },
+    "quota": {
+      "title": "Quota",
+      "details": "All quota details",
+      "checking": "Checking…",
+      "unknown": "Not known yet",
+      "left": "{{percent}}% left",
+      "left_reset": "{{percent}}% left · resets in {{in}}",
+      "session": "5-hour",
+      "week": "Weekly",
+      "session_label": "{{account}}: 5-hour quota left",
+      "week_label": "{{account}}: weekly quota left"
+    },
+    "totals": "{{count}} requests in the last {{window}} · {{rate}} succeeded",
+    "totals_none": "No requests in the last few hours.",
+    "strategy": {
+      "fill-first": "Fill first",
+      "round-robin": "Round robin",
+      "weighted-round-robin": "Weighted round robin"
+    },
+    "details": {
+      "traffic": "Throughput",
+      "gateway": "Gateway",
+      "elsewhere": "Elsewhere"
+    }
   }
 }
