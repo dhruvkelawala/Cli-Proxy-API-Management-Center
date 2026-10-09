@@ -2397,16 +2397,6 @@
       "claude": "Claude",
       "codex": "Codex"
     },
-    "matrix": {
-      "caption": "各客户端配置在每个提供商下可使用的订阅",
-      "profile_column": "客户端配置",
-      "edit_profile": "{{name}} 的配置与密钥",
-      "cell_context": "{{profile}}：",
-      "cell_change": "修改规则",
-      "keys_count": "{{count}} 个客户端密钥",
-      "no_keys": "尚未关联客户端密钥",
-      "footnote": "一条规则覆盖使用该配置客户端密钥发出的该提供商全部请求。Claude 与 Codex 规则彼此独立。"
-    },
     "pill": {
       "automatic": "自动",
       "only": "仅 {{account}}",
@@ -2453,10 +2443,6 @@
       "affinity_on": "对话固定在同一账号",
       "affinity_on_ttl": "对话固定在同一账号，保持 {{ttl}}",
       "affinity_off": "对话不固定在同一账号",
-      "edit": "编辑",
-      "hide": "收起",
-      "edit_aria": "编辑共享账号池设置",
-      "hide_aria": "收起共享账号池设置",
       "locked": "保存或放弃共享账号池的更改后才能收起。"
     },
     "connection": {
@@ -2633,6 +2619,112 @@
       "open_routes": "打开客户端路由",
       "enroll_first": "选择客户端之前，请先为 {{account}} 做严格路由准备。",
       "unsupported": "此凭证不能用于严格路由。"
+    }
+  },
+  "routing": {
+    "eyebrow": "Claude",
+    "loading": "正在加载路由…",
+    "title_first": "新对话会使用 {{account}}。",
+    "follow_backup": "如果 {{account}} 用完，会自动切换到 {{backup}}。",
+    "follow_no_backup": "目前没有备用账号。",
+    "title_shared": "新对话由 {{accounts}} 共同分担。",
+    "follow_shared": "其中一个用完时，其余账号继续接手。",
+    "title_fallback": "{{out}} 已用完，新对话改用 {{account}}。",
+    "follow_back_at": "{{when}}会切回 {{out}}。",
+    "follow_back_later": "{{out}} 恢复额度后会切回。",
+    "follow_preview": "这只是预览，没有做任何更改。",
+    "title_none": "目前没有可用额度的 Claude 账号。",
+    "follow_none": "在有账号恢复之前，新对话会失败。",
+    "title_empty": "还没有 Claude 账号。",
+    "follow_empty": "在「OAuth 登录」中登录 Claude 后会显示在这里。",
+    "rank": {
+      "first": "优先",
+      "backup": "备用",
+      "shared": "共享",
+      "off": "已关闭"
+    },
+    "health": {
+      "available": "可用",
+      "attention": "可用，近期有少量错误",
+      "cooling": "冷却中",
+      "cooling_until": "冷却中，{{when}}恢复",
+      "limit": "已达上限",
+      "limit_until": "已达上限，{{when}}恢复",
+      "disabled": "已关闭",
+      "unknown": "状态未知",
+      "preview_out": "额度用完（预览）"
+    },
+    "quota": {
+      "week_left": "本周剩余 {{percent}}%",
+      "week_left_reset": "本周剩余 {{percent}}% · {{when}}重置",
+      "checking": "正在查询剩余额度…",
+      "meter_label": "{{account}}：本周剩余额度"
+    },
+    "when": {
+      "today": "今天 {{time}}",
+      "tomorrow": "明天 {{time}}",
+      "other": "{{day}} {{time}}"
+    },
+    "hint": {
+      "sooner_bad": "{{account}} 更早重置（{{when}}），除非先用它，否则剩余的 {{percent}}% 会浪费。",
+      "sooner_good": "{{account}} 更早重置（{{when}}），先用它不会浪费额度。",
+      "drag": "拖动账号，或聚焦后按 ↑ / ↓，即可调整谁先用。",
+      "single": "再添加一个 Claude 账号即可拥有备用。"
+    },
+    "make_first": "改为先用 {{account}}",
+    "preview_start": "预览：{{account}} 用完",
+    "preview_end": "结束预览",
+    "list_label": "按顺序排列的 Claude 账号",
+    "card_label": "{{rank}}：{{account}}。{{status}}",
+    "reorder_hint": "按上下方向键移动，按 Home 设为优先。",
+    "hub": "网关",
+    "all_clients": "所有客户端",
+    "saving": "正在保存新顺序…",
+    "saved": "现在优先使用 {{account}}。",
+    "save_failed": "无法保存新顺序，已恢复原顺序。",
+    "save_failed_detail": "无法保存新顺序（{{message}}），已恢复原顺序。",
+    "clients": {
+      "none": "还没有设置客户端；所有客户端密钥都使用这个顺序。",
+      "one": "{{names}} 使用这个顺序。",
+      "two": "{{names}} 都使用这个顺序。",
+      "many": "{{names}} 都使用这个顺序。",
+      "locked": "{{client}} 已锁定为 {{account}}（见「更多」）。",
+      "locked_broken": "{{client}} 已锁定为 {{account}}，但它目前无法服务，因此请求会失败。",
+      "locked_missing": "{{client}} 锁定的账号无法使用，因此请求会失败。"
+    },
+    "codex": {
+      "one": "Codex 自动使用它唯一的账号，无需选择。",
+      "many": "Codex 自动在 {{count}} 个账号之间分担。"
+    },
+    "profiles_unsupported": "此网关没有客户端配置，所有客户端密钥都使用上面的顺序。锁定和客户端密钥需要更新版本的 CLIProxyAPI。",
+    "more": "更多",
+    "more_sections": {
+      "locks": "将客户端锁定到一个账号",
+      "locks_note": "锁定的客户端不走上面的顺序。它的账号用完时会停止工作，而不是切换。",
+      "clients": "客户端与密钥",
+      "clients_note": "每个客户端使用自己的客户端密钥，规则适用于它的所有请求。"
+    },
+    "rule": {
+      "claude": "Claude：{{rule}}",
+      "codex": "Codex：{{rule}}",
+      "follows": "按顺序",
+      "only": "仅 {{account}}",
+      "only_missing": "仅一个已不存在的账号",
+      "unknown": "本面板无法识别的规则",
+      "strict_warning": "如果 {{account}} 用完，{{client}} 会停止工作，不会切换到备用。",
+      "broken": "{{client}} 锁定的账号目前无法服务，因此请求会失败。",
+      "change": "更改",
+      "change_aria": "更改：{{client}} 的 Claude 规则",
+      "change_codex": "Codex 规则",
+      "change_codex_aria": "Codex 规则：{{client}}",
+      "automatic": "自动"
+    },
+    "keys": {
+      "none": "未关联客户端密钥",
+      "count": "{{count}} 个客户端密钥",
+      "manage": "密钥",
+      "manage_aria": "密钥（{{client}}）",
+      "new_client": "新建客户端"
     }
   }
 }

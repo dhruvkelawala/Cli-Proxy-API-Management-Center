@@ -330,39 +330,44 @@ describe('Accounts controls: names that contain their visible text (WCAG 2.5.3)'
       const data = locale(lng);
       expect(typeof lookup(data, 'notification.copied')).toBe('string');
       expect(typeof lookup(data, 'notification.copy_failed')).toBe('string');
-      expect(typeof lookup(data, 'client_routes.matrix.cell_context')).toBe('string');
-      expect(typeof lookup(data, 'client_routes.matrix.cell_change')).toBe('string');
-      expect(lookup(data, 'client_routes.matrix.cell_label')).toBeUndefined();
     }
     expect(read('src/features/authFiles/AuthFilesPage.tsx')).toContain("t('notification.copied')");
   });
 });
 
-describe('Client routes and the shared band', () => {
-  test('shared band disclosure exposes expanded state and a name that starts with its visible text', () => {
-    const source = read('src/features/clientProfiles/components/CollapsibleSharedRoutingBand.tsx');
+describe('Routing page and its More disclosure', () => {
+  test('More exposes expanded state, controls a labelled region and stays inert while closed', () => {
+    const source = read('src/components/flow/MoreDisclosure.tsx');
     expect(source).toContain('aria-expanded={open}');
     expect(source).toContain('aria-controls={regionId}');
+    expect(source).toContain('role="region"');
+    expect(source).toContain('aria-labelledby={buttonId}');
+    expect(source).toContain('inert={!open}');
+  });
+
+  test('rule and key buttons are named starting from their visible text', () => {
     for (const lng of LOCALES) {
       const data = locale(lng);
-      const base = 'client_routes.shared_band';
-      expect((lookup(data, `${base}.edit_aria`) as string).toLowerCase()).toContain(
-        (lookup(data, `${base}.edit`) as string).toLowerCase()
+      const visible = (key: string) => (lookup(data, key) as string).toLowerCase();
+      const named = (key: string) => (lookup(data, key) as string).toLowerCase();
+      expect(named('routing.rule.change_aria').startsWith(visible('routing.rule.change'))).toBe(
+        true
       );
-      expect((lookup(data, `${base}.hide_aria`) as string).toLowerCase()).toContain(
-        (lookup(data, `${base}.hide`) as string).toLowerCase()
+      expect(
+        named('routing.rule.change_codex_aria').startsWith(visible('routing.rule.change_codex'))
+      ).toBe(true);
+      expect(named('routing.keys.manage_aria').startsWith(visible('routing.keys.manage'))).toBe(
+        true
       );
     }
   });
 
-  test('matrix cells are named from visible text, with narrow-screen provider text kept in the tree', () => {
-    const matrix = read('src/features/clientProfiles/components/ClientRoutesMatrix.tsx');
-    expect(matrix).not.toMatch(/aria-label=\{t\(`\$\{CR\}\.matrix\.cell_label`/);
-    expect(matrix).not.toContain('aria-hidden="true">\n                          {providerName}');
-    const css = read('src/features/clientProfiles/components/ClientRoutesMatrix.module.scss');
-    // Visually hidden (not display:none) so the provider stays part of the cell's name.
-    expect(css).toMatch(/\.visuallyHidden,\s*\.mobileProvider\s*\{[^}]*clip-path:\s*inset\(50%\)/);
-    expect(css).not.toMatch(/\.mobileProvider\s*\{[^}]*display:\s*none/);
+  test('reorderable account cards are focusable list items with a described keyboard hint', () => {
+    const source = read('src/components/flow/FlowDiagram.tsx');
+    expect(source).toContain('role="listitem"');
+    expect(source).toContain('tabIndex={0}');
+    expect(source).toContain('aria-describedby={canReorder && reorderHint ? hintId : undefined}');
+    expect(source).toMatch(/'ArrowUp'[\s\S]*'ArrowDown'[\s\S]*'Home'[\s\S]*'End'/);
   });
 });
 

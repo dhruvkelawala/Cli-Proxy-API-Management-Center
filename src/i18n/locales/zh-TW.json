@@ -2423,16 +2423,6 @@
       "claude": "Claude",
       "codex": "Codex"
     },
-    "matrix": {
-      "caption": "各用戶端設定檔在每個提供者下可使用的訂閱",
-      "profile_column": "用戶端設定檔",
-      "edit_profile": "{{name}} 的設定檔與金鑰",
-      "cell_context": "{{profile}}：",
-      "cell_change": "修改規則",
-      "keys_count": "{{count}} 個用戶端金鑰",
-      "no_keys": "尚未連結用戶端金鑰",
-      "footnote": "一條規則涵蓋以該設定檔用戶端金鑰發出的該提供者全部請求。Claude 與 Codex 規則彼此獨立。"
-    },
     "pill": {
       "automatic": "自動",
       "only": "僅 {{account}}",
@@ -2479,10 +2469,6 @@
       "affinity_on": "對話固定在同一帳號",
       "affinity_on_ttl": "對話固定在同一帳號，保持 {{ttl}}",
       "affinity_off": "對話不固定在同一帳號",
-      "edit": "編輯",
-      "hide": "收合",
-      "edit_aria": "編輯共用帳號池設定",
-      "hide_aria": "收合共用帳號池設定",
       "locked": "儲存或捨棄共用帳號池的變更後才能收合。"
     },
     "connection": {
@@ -2659,6 +2645,112 @@
       "open_routes": "開啟用戶端路由",
       "enroll_first": "選擇用戶端之前，請先為 {{account}} 做嚴格路由準備。",
       "unsupported": "此憑證無法用於嚴格路由。"
+    }
+  },
+  "routing": {
+    "eyebrow": "Claude",
+    "loading": "正在載入路由…",
+    "title_first": "新對話會使用 {{account}}。",
+    "follow_backup": "如果 {{account}} 用完，會自動切換到 {{backup}}。",
+    "follow_no_backup": "目前沒有備用帳號。",
+    "title_shared": "新對話由 {{accounts}} 共同分擔。",
+    "follow_shared": "其中一個用完時，其餘帳號繼續接手。",
+    "title_fallback": "{{out}} 已用完，新對話改用 {{account}}。",
+    "follow_back_at": "{{when}}會切回 {{out}}。",
+    "follow_back_later": "{{out}} 恢復額度後會切回。",
+    "follow_preview": "這只是預覽，沒有做任何變更。",
+    "title_none": "目前沒有可用額度的 Claude 帳號。",
+    "follow_none": "在有帳號恢復之前，新對話會失敗。",
+    "title_empty": "還沒有 Claude 帳號。",
+    "follow_empty": "在「OAuth 登入」中登入 Claude 後會顯示在這裡。",
+    "rank": {
+      "first": "優先",
+      "backup": "備用",
+      "shared": "共用",
+      "off": "已關閉"
+    },
+    "health": {
+      "available": "可用",
+      "attention": "可用，近期有少量錯誤",
+      "cooling": "冷卻中",
+      "cooling_until": "冷卻中，{{when}}恢復",
+      "limit": "已達上限",
+      "limit_until": "已達上限，{{when}}恢復",
+      "disabled": "已關閉",
+      "unknown": "狀態未知",
+      "preview_out": "額度用完（預覽）"
+    },
+    "quota": {
+      "week_left": "本週剩餘 {{percent}}%",
+      "week_left_reset": "本週剩餘 {{percent}}% · {{when}}重置",
+      "checking": "正在查詢剩餘額度…",
+      "meter_label": "{{account}}：本週剩餘額度"
+    },
+    "when": {
+      "today": "今天 {{time}}",
+      "tomorrow": "明天 {{time}}",
+      "other": "{{day}} {{time}}"
+    },
+    "hint": {
+      "sooner_bad": "{{account}} 較早重置（{{when}}），除非先用它，否則剩餘的 {{percent}}% 會浪費。",
+      "sooner_good": "{{account}} 較早重置（{{when}}），先用它不會浪費額度。",
+      "drag": "拖曳帳號，或聚焦後按 ↑ / ↓，即可調整誰先用。",
+      "single": "再新增一個 Claude 帳號即可擁有備用。"
+    },
+    "make_first": "改為先用 {{account}}",
+    "preview_start": "預覽：{{account}} 用完",
+    "preview_end": "結束預覽",
+    "list_label": "依順序排列的 Claude 帳號",
+    "card_label": "{{rank}}：{{account}}。{{status}}",
+    "reorder_hint": "按上下方向鍵移動，按 Home 設為優先。",
+    "hub": "閘道",
+    "all_clients": "所有用戶端",
+    "saving": "正在儲存新順序…",
+    "saved": "現在優先使用 {{account}}。",
+    "save_failed": "無法儲存新順序，已恢復原順序。",
+    "save_failed_detail": "無法儲存新順序（{{message}}），已恢復原順序。",
+    "clients": {
+      "none": "還沒有設定用戶端；所有用戶端金鑰都使用這個順序。",
+      "one": "{{names}} 使用這個順序。",
+      "two": "{{names}} 都使用這個順序。",
+      "many": "{{names}} 都使用這個順序。",
+      "locked": "{{client}} 已鎖定為 {{account}}（見「更多」）。",
+      "locked_broken": "{{client}} 已鎖定為 {{account}}，但它目前無法服務，因此請求會失敗。",
+      "locked_missing": "{{client}} 鎖定的帳號無法使用，因此請求會失敗。"
+    },
+    "codex": {
+      "one": "Codex 自動使用它唯一的帳號，無需選擇。",
+      "many": "Codex 自動在 {{count}} 個帳號之間分擔。"
+    },
+    "profiles_unsupported": "此閘道沒有用戶端設定檔，所有用戶端金鑰都使用上面的順序。鎖定與用戶端金鑰需要較新版本的 CLIProxyAPI。",
+    "more": "更多",
+    "more_sections": {
+      "locks": "將用戶端鎖定到一個帳號",
+      "locks_note": "鎖定的用戶端不走上面的順序。它的帳號用完時會停止運作，而不是切換。",
+      "clients": "用戶端與金鑰",
+      "clients_note": "每個用戶端使用自己的用戶端金鑰，規則適用於它的所有請求。"
+    },
+    "rule": {
+      "claude": "Claude：{{rule}}",
+      "codex": "Codex：{{rule}}",
+      "follows": "依順序",
+      "only": "僅 {{account}}",
+      "only_missing": "僅一個已不存在的帳號",
+      "unknown": "本面板無法辨識的規則",
+      "strict_warning": "如果 {{account}} 用完，{{client}} 會停止運作，不會切換到備用。",
+      "broken": "{{client}} 鎖定的帳號目前無法服務，因此請求會失敗。",
+      "change": "變更",
+      "change_aria": "變更：{{client}} 的 Claude 規則",
+      "change_codex": "Codex 規則",
+      "change_codex_aria": "Codex 規則：{{client}}",
+      "automatic": "自動"
+    },
+    "keys": {
+      "none": "未連結用戶端金鑰",
+      "count": "{{count}} 個用戶端金鑰",
+      "manage": "金鑰",
+      "manage_aria": "金鑰（{{client}}）",
+      "new_client": "新增用戶端"
     }
   }
 }

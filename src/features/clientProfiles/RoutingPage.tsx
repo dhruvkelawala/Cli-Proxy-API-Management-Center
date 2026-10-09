@@ -1,30 +1,38 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
-import { EmptyState } from '@/components/ui/EmptyState';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { IconPlus } from '@/components/ui/icons';
+import { MoreDisclosure } from '@/components/flow';
 import { usePageTransitionLayer } from '@/components/common/PageTransitionLayer';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useAuthStore } from '@/stores';
 import { useClientProfilesStore } from '@/stores/useClientProfilesStore';
-import { gatewayDisplayHost } from '@/utils/connection';
+import {
+  SharedRoutingBand,
+  type SharedRoutingBandState,
+} from '@/features/config/routing/SharedRoutingBand';
 import type { ClientProfileProvider } from '@/types/clientProfiles';
 import {
   readConnectionContexts,
   saveConnectionContext,
   type ConnectionContext,
 } from './connectionContext';
-import { buildPoolPreview, buildProfileRows, countAutomaticProfiles, matrixCellId } from './model';
+import { buildPoolPreview, countAutomaticProfiles, matrixCellId } from './model';
 import { CR } from './copy';
-import { useClientRoutesData } from './hooks/useClientRoutesData';
-import { ClientRoutesMatrix } from './components/ClientRoutesMatrix';
-import { CollapsibleSharedRoutingBand } from './components/CollapsibleSharedRoutingBand';
+import {
+  isSharedBandForcedOpen,
+  sharedBandSaveFinished,
+  sharedBandSummaryParts,
+} from './sharedBand';
 import { EnforcementNotice, FailureNotice, Notice } from './components/Notices';
 import { PolicySheet } from './components/PolicySheet';
 import { ProfileSheet } from './components/ProfileSheet';
-import styles from './ClientRoutesPage.module.scss';
+import { RoutingHero } from './routing/RoutingHero';
+import { RoutingMore } from './routing/RoutingMore';
+import { describeClientRoutes, otherProviderLine } from './routing/routingOrder';
+import { useRoutingOrder } from './routing/useRoutingOrder';
+import styles from './routing/RoutingPage.module.scss';
 
 type SheetState =
   | {
@@ -39,20 +47,21 @@ type SheetState =
 let sheetSequence = 0;
 
 /**
- * Client routes: which subscription each client profile may use, per provider.
- * Matrix overview; a cell opens the rule editor; the profile name opens profile & keys.
+ * Routing (#/client-routes): who goes first for Claude, who is the backup, and whether every
+ * client follows that order. Reordering writes real account priorities. Rare settings (shared
+ * strategy, session affinity, weights, per-client locks, client keys) live under one More.
  */
-export function ClientRoutesPage() {
+export function RoutingPage() {
   const { t } = useTranslation();
   const status = useClientProfilesStore((state) => state.status);
   const capabilities = useClientProfilesStore((state) => state.capabilities);
   const snapshot = useClientProfilesStore((state) => state.snapshot);
   const loadFailure = useClientProfilesStore((state) => state.loadFailure);
-  const unsupportedReason = useClientProfilesStore((state) => state.unsupportedReason);
   const refreshing = useClientProfilesStore((state) => state.refreshing);
   const load = useClientProfilesStore((state) => state.load);
   const apiBase = useAuthStore((state) => state.apiBase);
-  const { files, strategy, apiKeys, wsAuth, refresh } = useClientRoutesData();
+  const routing = useRoutingOrder();
+  const { files, strategy, apiKeys, wsAuth, refresh, model } = routing;
 
   const [contextVersion, setContextVersion] = useState(0);
   const contexts = useMemo(
@@ -87,28 +96,44 @@ export function ClientRoutesPage() {
     }),
     [t]
   );
+
+  // Shared band (strategy / session affinity) inside More: forced open while it needs attention.
+  const [bandState, setBandState] = useState<SharedRoutingBandState | null>(null);
+  const previousBandState = useRef<SharedRoutingBandState | null>(null);
+  const handleBandState = useCallback(
+    (next: SharedRoutingBandState) => {
+      // A finished save may have written the config file; client profile ETags hash that file.
+      if (sharedBandSaveFinished(previousBandState.current, next)) void load({ fresh: true });
+      previousBandState.current = next;
+      setBandState(next);
+    },
+    [load]
+  );
+
   useUnsavedChangesGuard({
     enabled: isCurrentLayer,
-    shouldBlock: sheetDirty,
+    shouldBlock: sheetDirty || Boolean(bandState?.dirty),
     dialog: unsavedDialog,
   });
   useHeaderRefresh(refresh, isCurrentLayer);
 
-  const rows = useMemo(
-    () => (snapshot ? buildProfileRows(snapshot, files, strategy) : []),
-    [files, snapshot, strategy]
+  const profilesReady = status === 'ready' && snapshot !== null && capabilities !== null;
+  const routes = useMemo(
+    () =>
+      profilesReady && snapshot && model
+        ? describeClientRoutes(snapshot, 'claude', model.order)
+        : null,
+    [model, profilesReady, snapshot]
   );
-  const ready = status === 'ready' && snapshot && capabilities;
-  const host = gatewayDisplayHost(apiBase);
+  const otherLine = useMemo(() => (files ? otherProviderLine(files, 'codex') : null), [files]);
 
-  const openCell = (profileRef: string, provider: ClientProfileProvider) =>
+  const openRule = (profileRef: string, provider: ClientProfileProvider) =>
     setSheet({ kind: 'policy', profileRef, provider, open: true, id: (sheetSequence += 1) });
   const openProfile = (profileRef: string | null) =>
     setSheet({ kind: 'profile', profileRef, open: true, id: (sheetSequence += 1) });
   /**
-   * "Manage profile" from the rule editor (its unsaved-changes check already passed). Focus moves
-   * to the originating cell first, so closing the profile sheet returns there rather than to a
-   * button in the rule sheet that no longer exists.
+   * "Manage profile" from the rule editor (its unsaved-changes check already passed). Focus
+   * moves to the originating Change button first, so closing the profile sheet returns there.
    */
   const switchToProfile = (profileRef: string, provider: ClientProfileProvider) => {
     document
@@ -117,59 +142,23 @@ export function ClientRoutesPage() {
     setSheetDirty(false);
     openProfile(profileRef);
   };
-  // A finished band save may have written the config file; client profile ETags hash that file.
-  const handleBandConfigWritten = useCallback(() => void load({ fresh: true }), [load]);
 
   const sheetProfile =
     sheet && sheet.profileRef && snapshot
       ? (snapshot.profiles.find((profile) => profile.profileRef === sheet.profileRef) ?? null)
       : null;
 
-  return (
-    <div className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.headerCopy}>
-          <h1 className={styles.title}>{t(`${CR}.title`)}</h1>
-          <p className={styles.subtitle}>{t(`${CR}.subtitle`)}</p>
-          {host && status !== 'unsupported' && (
-            <p className={styles.meta}>{t(`${CR}.gateway`, { host })}</p>
-          )}
-        </div>
-        {ready && (
-          <Button onClick={() => openProfile(null)} className={styles.newButton}>
-            <IconPlus size={16} aria-hidden="true" />
-            {t(`${CR}.new_profile`)}
-          </Button>
-        )}
-      </header>
+  const moreSummary = bandState?.saved
+    ? sharedBandSummaryParts(t, bandState).slice(1).join(' · ')
+    : undefined;
 
-      {/* Shared load balancing for Automatic rules (CPA-008), collapsed so the matrix leads. */}
-      {status !== 'unsupported' && (
-        <CollapsibleSharedRoutingBand
-          automaticClientCount={snapshot ? countAutomaticProfiles(snapshot) : undefined}
-          onConfigWritten={handleBandConfigWritten}
-        />
-      )}
-
-      {ready && <EnforcementNotice capabilities={capabilities} />}
-
-      {(status === 'idle' || status === 'loading') && (
-        <div className={styles.loading} role="status">
-          <LoadingSpinner size={18} />
-          <span>{t(`${CR}.loading`)}</span>
-        </div>
-      )}
-
+  const notices = (
+    <>
       {status === 'unsupported' && (
         <Notice title={t(`${CR}.unsupported.title`)}>
-          <p>
-            {unsupportedReason === 'incompatible_contract'
-              ? t(`${CR}.unsupported.incompatible`)
-              : t(`${CR}.unsupported.body`)}
-          </p>
+          <p>{t('routing.profiles_unsupported')}</p>
         </Notice>
       )}
-
       {status === 'error' && loadFailure && (
         <div className={styles.errorBlock}>
           <FailureNotice failure={loadFailure} title={t(`${CR}.load_error_title`)} />
@@ -178,8 +167,7 @@ export function ClientRoutesPage() {
           </Button>
         </div>
       )}
-
-      {ready && loadFailure && (
+      {profilesReady && loadFailure && (
         <FailureNotice
           failure={loadFailure}
           title={t(`${CR}.refresh_error_title`)}
@@ -187,29 +175,57 @@ export function ClientRoutesPage() {
           reloading={refreshing}
         />
       )}
+      {profilesReady && capabilities && <EnforcementNotice capabilities={capabilities} />}
+    </>
+  );
 
-      {ready &&
-        (rows.length === 0 ? (
-          <EmptyState
-            title={t(`${CR}.empty.title`)}
-            description={t(`${CR}.empty.body`)}
-            action={
-              <Button onClick={() => openProfile(null)}>
-                <IconPlus size={16} aria-hidden="true" />
-                {t(`${CR}.new_profile`)}
-              </Button>
+  return (
+    <div className={styles.page}>
+      {model ? (
+        <RoutingHero
+          model={model}
+          routes={routes}
+          otherLine={otherLine}
+          hubLabel={t('routing.hub')}
+          saving={routing.saving}
+          simulateOut={routing.simulateOut}
+          formatWhen={routing.formatWhen}
+          joinNames={routing.joinNames}
+          onReorder={(ids) => void routing.setOrder(ids)}
+          onPreview={routing.setSimulateOut}
+        />
+      ) : (
+        <div className={styles.loading} role="status">
+          <LoadingSpinner size={18} />
+          <span>{t('routing.loading')}</span>
+        </div>
+      )}
+
+      <div className={styles.moreWrap}>
+        <MoreDisclosure
+          label={t('routing.more')}
+          summary={moreSummary}
+          forcedOpen={isSharedBandForcedOpen(bandState)}
+          forcedNote={t(`${CR}.shared_band.locked`)}
+        >
+          <RoutingMore
+            band={
+              <SharedRoutingBand
+                automaticClientCount={snapshot ? countAutomaticProfiles(snapshot) : undefined}
+                onStateChange={handleBandState}
+              />
             }
-          />
-        ) : (
-          <ClientRoutesMatrix
-            rows={rows}
-            contexts={contexts}
-            onOpenCell={openCell}
+            routes={profilesReady ? (routes ?? []) : null}
+            snapshot={snapshot}
+            files={files}
+            notices={notices}
+            onEditRule={openRule}
             onOpenProfile={openProfile}
           />
-        ))}
+        </MoreDisclosure>
+      </div>
 
-      {ready && sheet?.kind === 'policy' && (
+      {profilesReady && snapshot && capabilities && sheet?.kind === 'policy' && (
         <PolicySheet
           key={sheet.id}
           open={sheet.open}
@@ -225,7 +241,7 @@ export function ClientRoutesPage() {
           onOpenProfile={() => switchToProfile(sheet.profileRef, sheet.provider)}
         />
       )}
-      {ready && sheet?.kind === 'profile' && (
+      {profilesReady && snapshot && capabilities && sheet?.kind === 'profile' && (
         <ProfileSheet
           key={sheet.id}
           open={sheet.open}

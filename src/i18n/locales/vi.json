@@ -2408,17 +2408,6 @@
       "claude": "Claude",
       "codex": "Codex"
     },
-    "matrix": {
-      "caption": "Hồ sơ máy khách và gói đăng ký mỗi hồ sơ được dùng, theo nhà cung cấp",
-      "profile_column": "Hồ sơ máy khách",
-      "edit_profile": "Hồ sơ và khóa của {{name}}",
-      "cell_context": "{{profile}}:",
-      "cell_change": "Đổi quy tắc",
-      "keys_count_one": "{{count}} khóa máy khách",
-      "keys_count_other": "{{count}} khóa máy khách",
-      "no_keys": "Chưa liên kết khóa máy khách",
-      "footnote": "Một quy tắc áp dụng cho mọi yêu cầu tới nhà cung cấp đó được gửi bằng khóa máy khách của hồ sơ. Quy tắc Claude và Codex độc lập với nhau."
-    },
     "pill": {
       "automatic": "Tự động",
       "only": "Chỉ {{account}}",
@@ -2466,10 +2455,6 @@
       "affinity_on": "Hội thoại giữ trên một tài khoản",
       "affinity_on_ttl": "Hội thoại giữ trên một tài khoản trong {{ttl}}",
       "affinity_off": "Hội thoại không giữ trên một tài khoản",
-      "edit": "Sửa",
-      "hide": "Ẩn",
-      "edit_aria": "Sửa thiết lập nhóm dùng chung",
-      "hide_aria": "Ẩn thiết lập nhóm dùng chung",
       "locked": "Hãy lưu hoặc hủy thay đổi của nhóm dùng chung để thu gọn."
     },
     "connection": {
@@ -2649,6 +2634,113 @@
       "open_routes": "Mở Định tuyến máy khách",
       "enroll_first": "Hãy chuẩn bị {{account}} cho định tuyến nghiêm ngặt trước khi chọn máy khách.",
       "unsupported": "Không thể dùng thông tin xác thực này cho định tuyến nghiêm ngặt."
+    }
+  },
+  "routing": {
+    "eyebrow": "Claude",
+    "loading": "Đang tải định tuyến…",
+    "title_first": "Cuộc trò chuyện mới dùng {{account}}.",
+    "follow_backup": "Nếu {{account}} hết, chúng sẽ tự chuyển sang {{backup}}.",
+    "follow_no_backup": "Hiện chưa có tài khoản dự phòng.",
+    "title_shared": "Cuộc trò chuyện mới được chia giữa {{accounts}}.",
+    "follow_shared": "Nếu một tài khoản hết, các tài khoản còn lại tiếp tục.",
+    "title_fallback": "{{out}} đã hết, nên cuộc trò chuyện mới dùng {{account}}.",
+    "follow_back_at": "Chúng sẽ quay lại {{out}} {{when}}.",
+    "follow_back_later": "Chúng sẽ quay lại {{out}} khi có hạn mức trở lại.",
+    "follow_preview": "Đây chỉ là xem trước. Không có gì thay đổi.",
+    "title_none": "Hiện không tài khoản Claude nào còn hạn mức.",
+    "follow_none": "Cuộc trò chuyện mới sẽ lỗi cho đến khi có tài khoản phục hồi.",
+    "title_empty": "Chưa có tài khoản Claude nào.",
+    "follow_empty": "Đăng nhập Claude trong mục Đăng nhập OAuth và tài khoản sẽ xuất hiện ở đây.",
+    "rank": {
+      "first": "Ưu tiên",
+      "backup": "Dự phòng",
+      "shared": "Dùng chung",
+      "off": "Đã tắt"
+    },
+    "health": {
+      "available": "Sẵn sàng",
+      "attention": "Sẵn sàng, có vài lỗi gần đây",
+      "cooling": "Đang tạm nghỉ",
+      "cooling_until": "Tạm nghỉ đến {{when}}",
+      "limit": "Đã chạm giới hạn",
+      "limit_until": "Chạm giới hạn đến {{when}}",
+      "disabled": "Đã tắt",
+      "unknown": "Không rõ trạng thái",
+      "preview_out": "Hết hạn mức (xem trước)"
+    },
+    "quota": {
+      "week_left": "Còn {{percent}}% tuần này",
+      "week_left_reset": "Còn {{percent}}% tuần này · đặt lại {{when}}",
+      "checking": "Đang kiểm tra hạn mức còn lại…",
+      "meter_label": "{{account}}: hạn mức tuần còn lại"
+    },
+    "when": {
+      "today": "hôm nay lúc {{time}}",
+      "tomorrow": "ngày mai lúc {{time}}",
+      "other": "{{day}} {{time}}"
+    },
+    "hint": {
+      "sooner_bad": "{{account}} đặt lại sớm hơn ({{when}}), nên {{percent}}% còn lại sẽ mất nếu không dùng nó trước.",
+      "sooner_good": "{{account}} đặt lại sớm hơn ({{when}}), nên dùng nó trước không lãng phí gì.",
+      "drag": "Kéo một tài khoản, hoặc chọn nó và nhấn ↑ hay ↓, để đổi thứ tự.",
+      "single": "Thêm tài khoản Claude thứ hai để có dự phòng."
+    },
+    "make_first": "Dùng {{account}} trước",
+    "preview_start": "Xem trước: {{account}} hết hạn mức",
+    "preview_end": "Kết thúc xem trước",
+    "list_label": "Các tài khoản Claude theo thứ tự",
+    "card_label": "{{rank}}: {{account}}. {{status}}",
+    "reorder_hint": "Nhấn mũi tên lên hoặc xuống để di chuyển. Home đưa lên đầu.",
+    "hub": "Cổng",
+    "all_clients": "Mọi máy khách",
+    "saving": "Đang lưu thứ tự mới…",
+    "saved": "Giờ {{account}} được dùng trước.",
+    "save_failed": "Không lưu được thứ tự mới nên đã khôi phục như cũ.",
+    "save_failed_detail": "Không lưu được thứ tự mới ({{message}}) nên đã khôi phục như cũ.",
+    "clients": {
+      "none": "Chưa thiết lập máy khách nào; mọi khóa máy khách đều dùng thứ tự này.",
+      "one": "{{names}} dùng thứ tự này.",
+      "two": "{{names}} đều dùng thứ tự này.",
+      "many": "{{names}} đều dùng thứ tự này.",
+      "locked": "{{client}} bị khóa vào {{account}} (xem Thêm).",
+      "locked_broken": "{{client}} bị khóa vào {{account}}, nhưng tài khoản này hiện không phục vụ được nên yêu cầu sẽ lỗi.",
+      "locked_missing": "{{client}} bị khóa vào một tài khoản không dùng được nên yêu cầu sẽ lỗi."
+    },
+    "codex": {
+      "one": "Codex tự dùng tài khoản duy nhất của nó. Không cần chọn gì.",
+      "many": "Codex tự chia giữa {{count}} tài khoản của nó."
+    },
+    "profiles_unsupported": "Cổng này không có hồ sơ máy khách nên mọi khóa máy khách dùng thứ tự ở trên. Khóa và khóa máy khách cần phiên bản CLIProxyAPI mới hơn.",
+    "more": "Thêm",
+    "more_sections": {
+      "locks": "Khóa máy khách vào một tài khoản",
+      "locks_note": "Máy khách bị khóa sẽ bỏ qua thứ tự. Nếu tài khoản của nó hết, nó sẽ dừng thay vì chuyển.",
+      "clients": "Máy khách và khóa",
+      "clients_note": "Mỗi máy khách dùng khóa máy khách riêng, nên quy tắc áp dụng cho mọi yêu cầu của nó."
+    },
+    "rule": {
+      "claude": "Claude: {{rule}}",
+      "codex": "Codex: {{rule}}",
+      "follows": "theo thứ tự",
+      "only": "chỉ {{account}}",
+      "only_missing": "chỉ một tài khoản không còn",
+      "unknown": "quy tắc bảng này không đọc được",
+      "strict_warning": "Nếu {{account}} hết, {{client}} sẽ ngừng hoạt động thay vì chuyển sang dự phòng.",
+      "broken": "Tài khoản bị khóa của {{client}} hiện không phục vụ được nên yêu cầu sẽ lỗi.",
+      "change": "Đổi",
+      "change_aria": "Đổi: quy tắc Claude cho {{client}}",
+      "change_codex": "Quy tắc Codex",
+      "change_codex_aria": "Quy tắc Codex cho {{client}}",
+      "automatic": "tự động"
+    },
+    "keys": {
+      "none": "Chưa liên kết khóa máy khách",
+      "count_one": "{{count}} khóa máy khách",
+      "count_other": "{{count}} khóa máy khách",
+      "manage": "Khóa",
+      "manage_aria": "Khóa và hồ sơ của {{client}}",
+      "new_client": "Máy khách mới"
     }
   }
 }

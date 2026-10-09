@@ -3,7 +3,6 @@ import { createElement, type ReactElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
 import i18n from '@/i18n';
-import { ClientRoutesMatrix } from '@/features/clientProfiles/components/ClientRoutesMatrix';
 import { PolicyPill } from '@/features/clientProfiles/components/PolicyPill';
 import { PolicyPreview } from '@/features/clientProfiles/components/PolicyPreview';
 import { PolicySheet } from '@/features/clientProfiles/components/PolicySheet';
@@ -13,15 +12,10 @@ import { AccountPinSheet } from '@/features/clientProfiles/components/AccountPin
 import { ProfileKeys } from '@/features/clientProfiles/components/ProfileKeys';
 import { EnforcementNotice, FailureNotice } from '@/features/clientProfiles/components/Notices';
 import { buildAccountClientLinks } from '@/features/clientProfiles/accountLinks';
-import {
-  CollapsibleSharedRoutingBand,
-  SharedBandDisclosure,
-} from '@/features/clientProfiles/components/CollapsibleSharedRoutingBand';
 import { isSharedBandOpen, sharedBandSummaryParts } from '@/features/clientProfiles/sharedBand';
 import type { SharedRoutingBandState } from '@/features/config/routing/SharedRoutingBand';
 import {
   buildPoolPreview,
-  buildProfileRows,
   clientKeyFingerprint,
   credentialRefForAuthFile,
 } from '@/features/clientProfiles/model';
@@ -142,7 +136,6 @@ const t = (key: string, options?: Record<string, unknown>) =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#x27;');
 const noop = () => {};
-const rows = buildProfileRows(snapshot, files, 'round-robin');
 
 let previousLanguage = 'en';
 beforeAll(async () => {
@@ -151,52 +144,6 @@ beforeAll(async () => {
 });
 afterAll(async () => {
   await i18n.changeLanguage(previousLanguage);
-});
-
-describe('client routes matrix', () => {
-  // Rendered lazily: the language switches to English in beforeAll.
-  const matrix = () =>
-    render(
-      createElement(ClientRoutesMatrix, {
-        rows,
-        contexts: { [P2]: 'macbook_tunnel', [P1]: 'mini_local' },
-        onOpenCell: noop,
-        onOpenProfile: noop,
-      })
-    );
-
-  test('every cell is a button whose name comes from its visible text plus hidden context', () => {
-    const markup = matrix();
-    // No aria-label override: it would hide the visible rule text (WCAG 2.5.3 label in name).
-    expect(markup).not.toMatch(/data-cell="[^"]*"[^>]*aria-label=/);
-    expect(markup).not.toMatch(/aria-label="[^"]*"[^>]*data-cell=/);
-    const context = t('client_routes.matrix.cell_context', { profile: 'MacBook · T3 Claude' });
-    expect(markup).toContain(context);
-    expect(markup).toContain(t('client_routes.matrix.cell_change'));
-    expect(markup).toContain(t('client_routes.pill.only', { account: 'Claude A' }));
-    expect(markup).toContain(t('client_routes.pill.available'));
-    expect(markup.match(/<button/g)).toHaveLength(3 + 6);
-  });
-
-  test('Automatic shows an illustrative share; Only is a strong pill; a disabled target will fail', () => {
-    expect(matrix()).toContain(
-      t('client_routes.pill.share', { account: 'Claude A', percent: 100 })
-    );
-    expect(matrix()).toContain(t('client_routes.pill.only', { account: 'Claude B' }));
-    expect(matrix()).toContain(t('client_routes.pill.will_fail'));
-    expect(matrix()).toContain(t('client_routes.states.target_unavailable'));
-  });
-
-  test('connection context is configured topology; unset stays unset', () => {
-    expect(matrix()).toContain(t('client_routes.connection.path_macbook_tunnel'));
-    expect(matrix()).toContain(t('client_routes.connection.unset'));
-    expect(matrix()).not.toMatch(/served by/i);
-  });
-
-  test('never renders raw keys or OAuth metadata', () => {
-    expect(matrix()).not.toContain(RAW_TOKEN);
-    expect(matrix()).not.toContain(RAW_CLIENT_KEY);
-  });
 });
 
 describe('policy pills and previews', () => {
@@ -496,7 +443,11 @@ describe('client routes locales', () => {
       );
     const en = await read('en');
     const enKeys = Object.keys(en).filter(
-      (key) => key.startsWith('client_routes.') || key.endsWith('.client_routes')
+      (key) =>
+        key.startsWith('client_routes.') ||
+        key.startsWith('routing.') ||
+        key.endsWith('.client_routes') ||
+        key.startsWith('nav.')
     );
     for (const locale of ['zh-CN', 'zh-TW', 'ru', 'vi']) {
       const other = await read(locale);
@@ -512,36 +463,13 @@ describe('client routes locales', () => {
   });
 });
 
-describe('collapsible shared routing band', () => {
+describe('shared routing band summary (Routing page More)', () => {
   const savedState = (overrides: Partial<SharedRoutingBandState> = {}): SharedRoutingBandState => ({
     saved: { strategy: 'round-robin', sessionAffinity: false, sessionAffinityTtl: '' },
     dirty: false,
     attention: false,
+    save: { phase: 'idle' },
     ...overrides,
-  });
-  const disclosure = (open: boolean, forced: boolean, state: SharedRoutingBandState | null) =>
-    render(
-      createElement(
-        SharedBandDisclosure,
-        {
-          open,
-          forced,
-          summary: sharedBandSummaryParts(i18n.t, state),
-          onToggle: noop,
-        },
-        createElement('p', null, 'BAND CONTENT')
-      )
-    );
-  const attr = (markup: string, name: string) => markup.match(new RegExp(`${name}="([^"]+)"`))?.[1];
-
-  test('collapsed by default: one summary row and an Edit disclosure controlling a hidden region', () => {
-    const markup = render(createElement(CollapsibleSharedRoutingBand, { automaticClientCount: 3 }));
-    expect(markup).toContain('aria-expanded="false"');
-    expect(markup).toContain(t('client_routes.shared_band.edit'));
-    expect(markup).toContain(`aria-label="${t('client_routes.shared_band.edit_aria')}"`);
-    const controls = attr(markup, 'aria-controls');
-    expect(controls).toBeTruthy();
-    expect(markup).toMatch(new RegExp(`id="${controls}"[^>]*hidden=""`));
   });
 
   test('the summary names the saved strategy and conversation affinity', () => {
@@ -564,23 +492,11 @@ describe('collapsible shared routing band', () => {
     );
   });
 
-  test('expanded shows the band inline with a Hide control', () => {
-    const markup = disclosure(true, false, savedState());
-    expect(markup).toContain('aria-expanded="true"');
-    expect(markup).toContain(t('client_routes.shared_band.hide'));
-    expect(markup).toContain('BAND CONTENT');
-    expect(markup).not.toContain('hidden=""');
-  });
-
-  test('unsaved edits or a save error force it open and explain why it cannot collapse', () => {
+  test('unsaved edits or a save error force More open', () => {
     expect(isSharedBandOpen(false, savedState())).toBe(false);
     expect(isSharedBandOpen(false, savedState({ dirty: true }))).toBe(true);
     expect(isSharedBandOpen(false, savedState({ attention: true }))).toBe(true);
     expect(isSharedBandOpen(false, null)).toBe(false);
-    const markup = disclosure(true, true, savedState({ dirty: true }));
-    expect(markup).toContain('aria-expanded="true"');
-    expect(markup).toContain(t('client_routes.shared_band.locked'));
-    expect(markup).not.toContain('hidden=""');
   });
 });
 
