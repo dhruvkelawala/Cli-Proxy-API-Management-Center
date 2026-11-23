@@ -278,6 +278,27 @@ describe('client profiles store: writes', () => {
     expect(useClientProfilesStore.getState().snapshot?.revision).toBe('"r2"');
   });
 
+  test('a failed re-read after a save keeps the old ETag, so stale rules cannot be resent', async () => {
+    const list = await ready();
+    track(
+      spyOn(clientProfilesApi, 'updateProfile').mockResolvedValue({
+        revision: '"r2"',
+        result: null,
+        sessionBehavior: 'fresh_session_required',
+      })
+    );
+    list.mockRejectedValueOnce(apiError(503, 'unavailable'));
+    const outcome = await useClientProfilesStore
+      .getState()
+      .mutate((revision) =>
+        clientProfilesApi.updateProfile(revision, P_MBP, { label: 'MacBook · T3 Claude', policies })
+      );
+    expect(outcome.ok).toBe(true);
+    // The profiles shown are from before the save; pairing them with "r2" would let the next
+    // edit overwrite the save. With "r1" the gateway refuses that edit (412) until a reload.
+    expect(useClientProfilesStore.getState().snapshot?.revision).toBe('"r1"');
+  });
+
   test('a failed save reports the failure and leaves the saved snapshot untouched', async () => {
     const list = await ready();
     track(

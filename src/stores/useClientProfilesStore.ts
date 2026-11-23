@@ -199,6 +199,15 @@ export const useClientProfilesStore = create<ClientProfilesState>((set, get) => 
         );
         // Never reuse a read that started before the write.
         await startLoad(false);
+        // A failed re-read leaves the profiles from before the write. Pair them with the old
+        // ETag again, so the gateway refuses (412) an edit that would resend those stale rules.
+        if (isCurrent(started, connection) && get().loadFailure && response.revision) {
+          set((current) =>
+            current.snapshot?.revision === response.revision
+              ? { snapshot: { ...current.snapshot, revision: snapshot.revision } }
+              : {}
+          );
+        }
         return { ok: true, result: response.result, sessionBehavior: response.sessionBehavior };
       } catch (error) {
         if (!isCurrent(started, connection) || isAbort(error)) {
