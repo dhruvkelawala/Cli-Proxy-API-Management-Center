@@ -57,14 +57,17 @@ export function RoutingMore({
       ? t('routing.rule.only', { account: accountDisplayLabel(matches[0], files) })
       : t('routing.rule.only_missing');
   };
-  // Codex Only rules resolved the same way as Claude's, for their will-fail warning.
-  const codexBroken = new Set(
-    snapshot
-      ? describeClientRoutes(snapshot, 'codex', [])
-          .filter((route) => route.locked && route.broken)
-          .map((route) => route.profile.profileRef)
-      : []
-  );
+  // Codex and Antigravity Only rules resolved the same way as Claude's, for their will-fail warning.
+  const brokenFor = (provider: ClientProfileProvider) =>
+    new Set(
+      snapshot
+        ? describeClientRoutes(snapshot, provider, [])
+            .filter((route) => route.locked && route.broken)
+            .map((route) => route.profile.profileRef)
+        : []
+    );
+  const codexBroken = brokenFor('codex');
+  const antigravityBroken = brokenFor('antigravity');
   const keyCount = (profileRef: string) =>
     (snapshot?.keys ?? []).filter((key) => key.profileRef === profileRef).length;
 
@@ -95,6 +98,16 @@ export function RoutingMore({
                   {codexBroken.has(route.profile.profileRef) && (
                     <span className={styles.rowWarn} data-broken="true">
                       {t('routing.rule.codex_will_fail', { client: route.shortName })}
+                    </span>
+                  )}
+                  <span className={styles.rowRuleQuiet}>
+                    {t('routing.rule.antigravity', {
+                      rule: ruleLabel(route.profile, 'antigravity'),
+                    })}
+                  </span>
+                  {antigravityBroken.has(route.profile.profileRef) && (
+                    <span className={styles.rowWarn} data-broken="true">
+                      {t('routing.rule.antigravity_will_fail', { client: route.shortName })}
                     </span>
                   )}
                   {route.locked && (
@@ -128,6 +141,17 @@ export function RoutingMore({
                     onClick={() => onEditRule(route.profile.profileRef, 'codex')}
                   >
                     {t('routing.rule.change_codex')}
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.textButton}
+                    data-cell={matrixCellId(route.profile.profileRef, 'antigravity')}
+                    aria-label={t('routing.rule.change_antigravity_aria', {
+                      client: route.shortName,
+                    })}
+                    onClick={() => onEditRule(route.profile.profileRef, 'antigravity')}
+                  >
+                    {t('routing.rule.change_antigravity')}
                   </button>
                 </span>
               </li>

@@ -89,6 +89,9 @@ const normalizePolicies = (value: unknown): ClientProfilePolicies => {
   return {
     claude: normalizePolicy(record.claude),
     codex: normalizePolicy(record.codex),
+    // Gateways from before Antigravity send no rule for it, and apply none: Automatic.
+    antigravity:
+      record.antigravity === undefined ? { mode: 'automatic' } : normalizePolicy(record.antigravity),
   };
 };
 
@@ -220,18 +223,25 @@ const requireKey = (value: unknown): ClientProfileKey => {
   return key;
 };
 
+/**
+ * An Automatic Antigravity rule is left out: gateways that know Antigravity store a missing rule
+ * as Automatic, and older ones reject the provider name. An Only rule is always sent.
+ */
 export const serializeClientProfilePolicies = (policies: WritableClientProfilePolicies) =>
   Object.fromEntries(
-    CLIENT_PROFILE_PROVIDERS.map((provider) => {
+    CLIENT_PROFILE_PROVIDERS.flatMap((provider) => {
       const policy = policies[provider];
+      if (provider === 'antigravity' && policy.mode !== 'only') return [];
       return [
-        provider,
-        policy.mode === 'only'
-          ? { mode: 'only', account_ref: policy.accountRef }
-          : { mode: 'automatic' },
+        [
+          provider,
+          policy.mode === 'only'
+            ? { mode: 'only', account_ref: policy.accountRef }
+            : { mode: 'automatic' },
+        ],
       ];
     })
-  ) as Record<ClientProfileProvider, { mode: string; account_ref?: string }>;
+  ) as Partial<Record<ClientProfileProvider, { mode: string; account_ref?: string }>>;
 
 const serializeDraft = (draft: ClientProfileDraft) => ({
   label: draft.label.trim(),

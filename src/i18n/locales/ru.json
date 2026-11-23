@@ -2670,7 +2670,8 @@
     "refresh_error_title": "Не удалось обновить маршруты клиентов",
     "providers": {
       "claude": "Claude",
-      "codex": "Codex"
+      "codex": "Codex",
+      "antigravity": "Antigravity"
     },
     "pill": {
       "automatic": "Автоматически",
@@ -2988,6 +2989,7 @@
     "rule": {
       "claude": "Claude: {{rule}}",
       "codex": "Codex: {{rule}}",
+      "antigravity": "Antigravity: {{rule}}",
       "follows": "по порядку",
       "only": "только {{account}}",
       "only_missing": "только удалённый аккаунт",
@@ -2997,9 +2999,12 @@
       "change": "Изменить",
       "change_aria": "Изменить: правило Claude для {{client}}",
       "change_codex": "Правило Codex",
+      "change_antigravity": "Правило Antigravity",
       "change_codex_aria": "Правило Codex для {{client}}",
+      "change_antigravity_aria": "Правило Antigravity для {{client}}",
       "automatic": "автоматически",
       "codex_will_fail": "Аккаунт Codex клиента {{client}} сейчас не может обслуживать, поэтому его запросы Codex завершаются ошибкой.",
+      "antigravity_will_fail": "Аккаунт Antigravity клиента {{client}} сейчас не может обслуживать, поэтому его запросы Antigravity завершаются ошибкой.",
       "strict_warning_generic": "Если его аккаунт закончится, {{client}} перестанет работать, а не переключится на запасной."
     },
     "keys": {

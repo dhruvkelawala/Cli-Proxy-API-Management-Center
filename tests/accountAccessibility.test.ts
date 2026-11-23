@@ -356,6 +356,11 @@ describe('Routing page and its More disclosure', () => {
       expect(
         named('routing.rule.change_codex_aria').startsWith(visible('routing.rule.change_codex'))
       ).toBe(true);
+      expect(
+        named('routing.rule.change_antigravity_aria').startsWith(
+          visible('routing.rule.change_antigravity')
+        )
+      ).toBe(true);
       expect(named('routing.keys.manage_aria').startsWith(visible('routing.keys.manage'))).toBe(
         true
       );

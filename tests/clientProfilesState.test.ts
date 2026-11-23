@@ -113,19 +113,19 @@ const snapshot: ClientProfilesSnapshot = {
       profileRef: P_MINI,
       label: 'Mini · T3 Claude',
       revision: 1,
-      policies: { claude: { mode: 'automatic' }, codex: { mode: 'automatic' } },
+      policies: { claude: { mode: 'automatic' }, codex: { mode: 'automatic' }, antigravity: { mode: 'automatic' } },
     },
     {
       profileRef: P_MBP,
       label: 'MacBook · T3 Claude',
       revision: 3,
-      policies: { claude: { mode: 'only', accountRef: GONE_REF }, codex: { mode: 'automatic' } },
+      policies: { claude: { mode: 'only', accountRef: GONE_REF }, codex: { mode: 'automatic' }, antigravity: { mode: 'automatic' } },
     },
     {
       profileRef: P_MBP_B,
       label: 'MacBook · T3 Claude B',
       revision: 2,
-      policies: { claude: { mode: 'only', accountRef: B_REF }, codex: { mode: 'automatic' } },
+      policies: { claude: { mode: 'only', accountRef: B_REF }, codex: { mode: 'automatic' }, antigravity: { mode: 'automatic' } },
     },
   ],
   keys: [{ keyRef: 'k1', label: 'MacBook key', profileRef: P_MBP_B, revision: 1 }],
@@ -185,7 +185,7 @@ describe('client profiles store: capability and loading', () => {
     const outcome = await useClientProfilesStore.getState().mutate((revision) =>
       clientProfilesApi.createProfile(revision, {
         label: 'x',
-        policies: { claude: { mode: 'automatic' }, codex: { mode: 'automatic' } },
+        policies: { claude: { mode: 'automatic' }, codex: { mode: 'automatic' }, antigravity: { mode: 'automatic' } },
       })
     );
     expect(outcome).toMatchObject({ ok: false, kind: 'unsupported' });
@@ -312,7 +312,7 @@ describe('client profiles store: writes', () => {
     const outcome = await useClientProfilesStore.getState().mutate((revision) =>
       clientProfilesApi.updateProfile(revision, P_MINI, {
         label: 'Mini · T3 Claude',
-        policies: { claude: onlyA, codex: { mode: 'automatic' } },
+        policies: { claude: onlyA, codex: { mode: 'automatic' }, antigravity: { mode: 'automatic' } },
       })
     );
     expect(outcome).toMatchObject({ ok: false, kind: 'stale', error: { status: 412 } });
@@ -335,7 +335,7 @@ describe('client profiles store: writes', () => {
     const retry = await useClientProfilesStore.getState().mutate((revision) =>
       clientProfilesApi.updateProfile(revision, P_MINI, {
         label: 'Mini · T3 Claude',
-        policies: { claude: editor.draft ?? onlyA, codex: { mode: 'automatic' } },
+        policies: { claude: editor.draft ?? onlyA, codex: { mode: 'automatic' }, antigravity: { mode: 'automatic' } },
       })
     );
     expect(retry.ok).toBe(true);
@@ -498,12 +498,14 @@ describe('client routes presentation model', () => {
     ).toEqual({
       claude: { mode: 'only', accountRef: A_REF },
       codex: { mode: 'automatic' },
+      antigravity: { mode: 'automatic' },
     });
     const odd = {
       ...snapshot.profiles[0],
       policies: {
         claude: { mode: 'automatic' as const },
         codex: { mode: 'unknown' as const, rawMode: 'prefer' },
+        antigravity: { mode: 'automatic' as const },
       },
     };
     expect(policiesWithEdit(odd, 'claude', { mode: 'automatic' })).toBeNull();

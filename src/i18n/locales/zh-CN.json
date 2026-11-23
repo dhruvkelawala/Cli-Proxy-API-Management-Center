@@ -2600,7 +2600,8 @@
     "refresh_error_title": "无法刷新客户端路由",
     "providers": {
       "claude": "Claude",
-      "codex": "Codex"
+      "codex": "Codex",
+      "antigravity": "Antigravity"
     },
     "pill": {
       "automatic": "自动",
@@ -2906,6 +2907,7 @@
     "rule": {
       "claude": "Claude：{{rule}}",
       "codex": "Codex：{{rule}}",
+      "antigravity": "Antigravity：{{rule}}",
       "follows": "按顺序",
       "only": "仅 {{account}}",
       "only_missing": "仅一个已不存在的账号",
@@ -2915,9 +2917,12 @@
       "change": "更改",
       "change_aria": "更改：{{client}} 的 Claude 规则",
       "change_codex": "Codex 规则",
+      "change_antigravity": "Antigravity 规则",
       "change_codex_aria": "Codex 规则：{{client}}",
+      "change_antigravity_aria": "Antigravity 规则：{{client}}",
       "automatic": "自动",
       "codex_will_fail": "{{client}} 的 Codex 账号目前无法服务，因此其 Codex 请求会失败。",
+      "antigravity_will_fail": "{{client}} 的 Antigravity 账号目前无法服务，因此其 Antigravity 请求会失败。",
       "strict_warning_generic": "如果它的账号用完，{{client}} 会停止工作，不会切换到备用。"
     },
     "keys": {

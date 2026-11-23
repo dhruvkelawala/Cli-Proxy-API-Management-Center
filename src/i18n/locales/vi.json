@@ -2615,7 +2615,8 @@
     "refresh_error_title": "Không làm mới được định tuyến máy khách",
     "providers": {
       "claude": "Claude",
-      "codex": "Codex"
+      "codex": "Codex",
+      "antigravity": "Antigravity"
     },
     "pill": {
       "automatic": "Tự động",
@@ -2925,6 +2926,7 @@
     "rule": {
       "claude": "Claude: {{rule}}",
       "codex": "Codex: {{rule}}",
+      "antigravity": "Antigravity: {{rule}}",
       "follows": "theo thứ tự",
       "only": "chỉ {{account}}",
       "only_missing": "chỉ một tài khoản không còn",
@@ -2934,9 +2936,12 @@
       "change": "Đổi",
       "change_aria": "Đổi: quy tắc Claude cho {{client}}",
       "change_codex": "Quy tắc Codex",
+      "change_antigravity": "Quy tắc Antigravity",
       "change_codex_aria": "Quy tắc Codex cho {{client}}",
+      "change_antigravity_aria": "Quy tắc Antigravity cho {{client}}",
       "automatic": "tự động",
       "codex_will_fail": "Tài khoản Codex của {{client}} hiện không phục vụ được nên yêu cầu Codex của nó sẽ lỗi.",
+      "antigravity_will_fail": "Tài khoản Antigravity của {{client}} hiện không phục vụ được nên yêu cầu Antigravity của nó sẽ lỗi.",
       "strict_warning_generic": "Nếu tài khoản của nó hết, {{client}} sẽ ngừng hoạt động thay vì chuyển sang dự phòng."
     },
     "keys": {

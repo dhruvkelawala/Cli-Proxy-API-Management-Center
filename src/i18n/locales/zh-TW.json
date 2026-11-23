@@ -2626,7 +2626,8 @@
     "refresh_error_title": "無法重新整理用戶端路由",
     "providers": {
       "claude": "Claude",
-      "codex": "Codex"
+      "codex": "Codex",
+      "antigravity": "Antigravity"
     },
     "pill": {
       "automatic": "自動",
@@ -2932,6 +2933,7 @@
     "rule": {
       "claude": "Claude：{{rule}}",
       "codex": "Codex：{{rule}}",
+      "antigravity": "Antigravity：{{rule}}",
       "follows": "依順序",
       "only": "僅 {{account}}",
       "only_missing": "僅一個已不存在的帳號",
@@ -2941,9 +2943,12 @@
       "change": "變更",
       "change_aria": "變更：{{client}} 的 Claude 規則",
       "change_codex": "Codex 規則",
+      "change_antigravity": "Antigravity 規則",
       "change_codex_aria": "Codex 規則：{{client}}",
+      "change_antigravity_aria": "Antigravity 規則：{{client}}",
       "automatic": "自動",
       "codex_will_fail": "{{client}} 的 Codex 帳號目前無法服務，因此其 Codex 請求會失敗。",
+      "antigravity_will_fail": "{{client}} 的 Antigravity 帳號目前無法服務，因此其 Antigravity 請求會失敗。",
       "strict_warning_generic": "如果它的帳號用完，{{client}} 會停止運作，不會切換到備用。"
     },
     "keys": {

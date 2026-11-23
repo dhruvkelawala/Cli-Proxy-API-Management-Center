@@ -316,7 +316,7 @@ describe('Routing section rendering', () => {
           profileRef: 'p-mini',
           label: 'Mini · Claude',
           revision: 1,
-          policies: { claude: { mode: 'automatic' }, codex: { mode: 'automatic' } },
+          policies: { claude: { mode: 'automatic' }, codex: { mode: 'automatic' }, antigravity: { mode: 'automatic' } },
         },
         {
           profileRef: 'p-mbp',
@@ -325,6 +325,7 @@ describe('Routing section rendering', () => {
           policies: {
             claude: { mode: 'automatic' },
             codex: { mode: 'only', accountRef: CODEX_REF },
+            antigravity: { mode: 'automatic' },
           },
         },
       ],
@@ -384,13 +385,13 @@ describe('review notes', () => {
         profileRef: 'p-mini',
         label: 'Mini · Claude',
         revision: 1,
-        policies: { claude: { mode: 'automatic' }, codex: { mode: 'automatic' } },
+        policies: { claude: { mode: 'automatic' }, codex: { mode: 'automatic' }, antigravity: { mode: 'automatic' } },
       },
       {
         profileRef: 'p-mbp',
         label: 'MacBook · Claude',
         revision: 1,
-        policies: { claude: { mode: 'automatic' }, codex: { mode: 'only', accountRef: 'x' } },
+        policies: { claude: { mode: 'automatic' }, codex: { mode: 'only', accountRef: 'x' }, antigravity: { mode: 'automatic' } },
       },
     ],
     keys: [],

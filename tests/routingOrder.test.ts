@@ -353,6 +353,7 @@ describe('clients and locks', () => {
           ? ({ mode: 'automatic' } as const)
           : ({ mode: 'only', accountRef: claude === 'work' ? WORK_REF : 'acct-gone' } as const),
       codex: { mode: 'automatic' } as const,
+      antigravity: { mode: 'automatic' } as const,
     },
   });
   const snapshotOf = (profiles: ReturnType<typeof profile>[]): ClientProfilesSnapshot => ({
@@ -593,6 +594,7 @@ describe('review fixes: hint, locks, quota freshness', () => {
         codex === 'auto'
           ? ({ mode: 'automatic' } as const)
           : ({ mode: 'only', accountRef: 'x' } as const),
+      antigravity: { mode: 'automatic' } as const,
     },
   });
 

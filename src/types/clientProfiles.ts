@@ -6,8 +6,11 @@
  * excludes them, and the dashboard only sends a raw key value when associating or rotating one.
  */
 
-/** Providers with independent client profile rules. Both are mandatory on every profile. */
-export const CLIENT_PROFILE_PROVIDERS = ['claude', 'codex'] as const;
+/**
+ * Providers with independent client profile rules. Claude and Codex are mandatory on every
+ * profile; Antigravity came later, and a gateway treats a missing Antigravity rule as Automatic.
+ */
+export const CLIENT_PROFILE_PROVIDERS = ['claude', 'codex', 'antigravity'] as const;
 export type ClientProfileProvider = (typeof CLIENT_PROFILE_PROVIDERS)[number];
 
 export type ClientProfilePolicy =
