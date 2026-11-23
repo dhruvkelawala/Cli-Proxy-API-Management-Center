@@ -3,6 +3,7 @@ import { useClientProfilesStore } from '@/stores/useClientProfilesStore';
 import type { AuthFileItem } from '@/types';
 import { buildAccountClientLinks, type AccountClientLinks } from '../accountLinks';
 import { AccountPinSheet } from '../components/AccountPinSheet';
+import { isClientProfileProvider } from '../model';
 import { deriveAccountTitle } from '@/features/authFiles/identity';
 
 type PinSheetState = { credentialRef: string; label: string; open: boolean; id: number };
@@ -61,7 +62,10 @@ export function useAccountClientRoutes(files: AuthFileItem[]) {
     sheet && snapshot
       ? (snapshot.accounts.find((account) => account.credentialRef === sheet.credentialRef) ?? null)
       : null;
-  const sheetProvider = sheetAccount?.provider === 'codex' ? 'codex' : 'claude';
+  const sheetProvider =
+    sheetAccount && isClientProfileProvider(sheetAccount.provider)
+      ? sheetAccount.provider
+      : 'claude';
 
   const element =
     sheet && snapshot && capabilities ? (

@@ -460,6 +460,7 @@ export const AUTOMATIC_POLICY: WritableClientProfilePolicy = { mode: 'automatic'
 export const DEFAULT_NEW_PROFILE_POLICIES: WritableClientProfilePolicies = {
   claude: AUTOMATIC_POLICY,
   codex: AUTOMATIC_POLICY,
+  antigravity: AUTOMATIC_POLICY,
 };
 
 /* ------------------------------------------------------------------ */

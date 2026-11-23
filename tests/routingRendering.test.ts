@@ -70,13 +70,13 @@ const snapshot: ClientProfilesSnapshot = {
       profileRef: 'p-mini',
       label: 'Mini · Claude',
       revision: 1,
-      policies: { claude: { mode: 'automatic' }, codex: { mode: 'automatic' } },
+      policies: { claude: { mode: 'automatic' }, codex: { mode: 'automatic' }, antigravity: { mode: 'automatic' } },
     },
     {
       profileRef: 'p-mbp',
       label: 'MacBook · Claude',
       revision: 1,
-      policies: { claude: { mode: 'only', accountRef: 'acct-work' }, codex: { mode: 'automatic' } },
+      policies: { claude: { mode: 'only', accountRef: 'acct-work' }, codex: { mode: 'automatic' }, antigravity: { mode: 'automatic' } },
     },
   ],
   keys: [{ keyRef: 'k1', label: 'MacBook key', profileRef: 'p-mbp', revision: 1 }],
@@ -384,13 +384,48 @@ describe('review fixes: rendering', () => {
     );
   });
 
+  test('More lists the Antigravity rule and flags an Antigravity Only rule that will fail', () => {
+    const withAntigravityLock: ClientProfilesSnapshot = {
+      ...snapshot,
+      profiles: [
+        {
+          ...snapshot.profiles[0],
+          policies: {
+            claude: { mode: 'automatic' },
+            codex: { mode: 'automatic' },
+            antigravity: { mode: 'only', accountRef: 'gone' },
+          },
+        },
+      ],
+      targetStates: { 'p-mini': { antigravity: 'target_removed' } },
+    };
+    const markup = render(
+      createElement(RoutingMore, {
+        band: null,
+        routes: describeClientRoutes(withAntigravityLock, 'claude', []),
+        snapshot: withAntigravityLock,
+        files: null,
+        onEditRule: noop,
+        onOpenProfile: noop,
+      })
+    );
+    expect(markup).toContain(
+      t('routing.rule.antigravity', { rule: t('routing.rule.only_missing') })
+    );
+    expect(markup).toContain(t('routing.rule.antigravity_will_fail', { client: 'Mini' }));
+    expect(markup).toContain('data-cell="p-mini:antigravity"');
+    expect(markup).toContain(
+      `aria-label="${t('routing.rule.change_antigravity_aria', { client: 'Mini' })}"`
+    );
+  });
+
   test('More flags a Codex Only rule that will fail', () => {
     const withCodexLock: ClientProfilesSnapshot = {
       ...snapshot,
       profiles: [
         {
           ...snapshot.profiles[0],
-          policies: { claude: { mode: 'automatic' }, codex: { mode: 'only', accountRef: 'gone' } },
+          policies: { claude: { mode: 'automatic' }, codex: { mode: 'only', accountRef: 'gone' }, antigravity: { mode: 'automatic' } },
         },
       ],
       targetStates: { 'p-mini': { codex: 'target_removed' } },

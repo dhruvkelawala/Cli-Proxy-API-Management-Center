@@ -91,8 +91,11 @@ export function ProfileSheet(props: ProfileSheetProps) {
   // A rename re-sends both saved rules unchanged; an unreadable saved rule blocks it.
   const renameClaude = profile ? toWritablePolicy(profile.policies.claude) : null;
   const renameCodex = profile ? toWritablePolicy(profile.policies.codex) : null;
+  const renameAntigravity = profile ? toWritablePolicy(profile.policies.antigravity) : null;
   const renamePolicies =
-    renameClaude && renameCodex ? { claude: renameClaude, codex: renameCodex } : null;
+    renameClaude && renameCodex && renameAntigravity
+      ? { claude: renameClaude, codex: renameCodex, antigravity: renameAntigravity }
+      : null;
 
   const busy = saving || mutating;
   const confirmClose = useSheetCloseGuard({ busy, dirty });

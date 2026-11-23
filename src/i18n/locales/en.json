@@ -2609,7 +2609,8 @@
     "refresh_error_title": "Couldn't refresh client routes",
     "providers": {
       "claude": "Claude",
-      "codex": "Codex"
+      "codex": "Codex",
+      "antigravity": "Antigravity"
     },
     "pill": {
       "automatic": "Automatic",
@@ -2919,6 +2920,7 @@
     "rule": {
       "claude": "Claude: {{rule}}",
       "codex": "Codex: {{rule}}",
+      "antigravity": "Antigravity: {{rule}}",
       "follows": "follows the order",
       "only": "only {{account}}",
       "only_missing": "only an account that’s gone",
@@ -2928,9 +2930,12 @@
       "change": "Change",
       "change_aria": "Change: Claude rule for {{client}}",
       "change_codex": "Codex rule",
+      "change_antigravity": "Antigravity rule",
       "change_codex_aria": "Codex rule for {{client}}",
+      "change_antigravity_aria": "Antigravity rule for {{client}}",
       "automatic": "automatic",
       "codex_will_fail": "{{client}}’s Codex account can’t serve right now, so its Codex requests fail.",
+      "antigravity_will_fail": "{{client}}’s Antigravity account can’t serve right now, so its Antigravity requests fail.",
       "strict_warning_generic": "If its account runs out, {{client}} stops working instead of falling back."
     },
     "keys": {

@@ -89,6 +89,9 @@ const normalizePolicies = (value: unknown): ClientProfilePolicies => {
   return {
     claude: normalizePolicy(record.claude),
     codex: normalizePolicy(record.codex),
+    // Gateways from before Antigravity send no rule for it, and apply none: Automatic.
+    antigravity:
+      record.antigravity === undefined ? { mode: 'automatic' } : normalizePolicy(record.antigravity),
   };
 };
 
@@ -220,18 +223,35 @@ const requireKey = (value: unknown): ClientProfileKey => {
   return key;
 };
 
-export const serializeClientProfilePolicies = (policies: WritableClientProfilePolicies) =>
+/**
+ * Whether the last capability probe advertised Antigravity rules. A gateway that does keeps a
+ * saved Antigravity rule when an update leaves it out, so the rule must be sent explicitly.
+ */
+let gatewayHasAntigravity = false;
+
+/**
+ * Antigravity's rule is sent when the gateway advertises it. Otherwise an Automatic rule is left
+ * out, because older gateways reject the provider name; an Only rule is still sent, so the
+ * gateway refuses it instead of the dashboard dropping it.
+ */
+export const serializeClientProfilePolicies = (
+  policies: WritableClientProfilePolicies,
+  antigravityKnown = gatewayHasAntigravity
+) =>
   Object.fromEntries(
-    CLIENT_PROFILE_PROVIDERS.map((provider) => {
+    CLIENT_PROFILE_PROVIDERS.flatMap((provider) => {
       const policy = policies[provider];
+      if (provider === 'antigravity' && !antigravityKnown && policy.mode !== 'only') return [];
       return [
-        provider,
-        policy.mode === 'only'
-          ? { mode: 'only', account_ref: policy.accountRef }
-          : { mode: 'automatic' },
+        [
+          provider,
+          policy.mode === 'only'
+            ? { mode: 'only', account_ref: policy.accountRef }
+            : { mode: 'automatic' },
+        ],
       ];
     })
-  ) as Record<ClientProfileProvider, { mode: string; account_ref?: string }>;
+  ) as Partial<Record<ClientProfileProvider, { mode: string; account_ref?: string }>>;
 
 const serializeDraft = (draft: ClientProfileDraft) => ({
   label: draft.label.trim(),
@@ -302,9 +322,12 @@ export const clientProfilesApi = {
   /** Capability probe. 404 or an unknown contract means Unsupported; other errors throw. */
   async probe(): Promise<ClientProfilesSupport> {
     try {
-      return normalizeClientProfilesCapabilities(
+      const support = normalizeClientProfilesCapabilities(
         await apiClient.get<unknown>('/client-profiles/capabilities')
       );
+      gatewayHasAntigravity =
+        support.supported && support.capabilities.providers.includes('antigravity');
+      return support;
     } catch (error) {
       if (isClientProfilesNotFound(error)) return { supported: false, reason: 'not_found' };
       throw error;
