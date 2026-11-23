@@ -256,6 +256,39 @@ describe('Antigravity rules', () => {
     expect(snapshot.profiles[0].policies.antigravity).toEqual({ mode: 'automatic' });
   });
 
+  test('a gateway that advertises Antigravity gets its rule explicitly, Automatic included', async () => {
+    const probeWith = async (providers: string[]) => {
+      const get = mock('get', { contract_version: 1, management: true, providers });
+      await clientProfilesApi.probe();
+      get.mockRestore();
+    };
+    await probeWith(['claude', 'codex', 'antigravity']);
+    try {
+      const post = mock('post', {
+        revision: '"next"',
+        result: { profile_ref: PROFILE_REF, label: 'T3', revision: 1, policies: {} },
+      });
+      await clientProfilesApi.createProfile(ETAG, {
+        label: 'T3',
+        policies: {
+          claude: { mode: 'automatic' },
+          codex: { mode: 'automatic' },
+          antigravity: { mode: 'automatic' },
+        },
+      });
+      expect(post.mock.calls[0][1]).toEqual({
+        label: 'T3',
+        policies: {
+          claude: { mode: 'automatic' },
+          codex: { mode: 'automatic' },
+          antigravity: { mode: 'automatic' },
+        },
+      });
+    } finally {
+      await probeWith(['claude', 'codex']);
+    }
+  });
+
   test('an Automatic Antigravity rule is left out so older gateways accept the save', () => {
     const automatic = {
       claude: { mode: 'automatic' as const },

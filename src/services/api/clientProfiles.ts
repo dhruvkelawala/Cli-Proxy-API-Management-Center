@@ -224,14 +224,24 @@ const requireKey = (value: unknown): ClientProfileKey => {
 };
 
 /**
- * An Automatic Antigravity rule is left out: gateways that know Antigravity store a missing rule
- * as Automatic, and older ones reject the provider name. An Only rule is always sent.
+ * Whether the last capability probe advertised Antigravity rules. A gateway that does keeps a
+ * saved Antigravity rule when an update leaves it out, so the rule must be sent explicitly.
  */
-export const serializeClientProfilePolicies = (policies: WritableClientProfilePolicies) =>
+let gatewayHasAntigravity = false;
+
+/**
+ * Antigravity's rule is sent when the gateway advertises it. Otherwise an Automatic rule is left
+ * out, because older gateways reject the provider name; an Only rule is still sent, so the
+ * gateway refuses it instead of the dashboard dropping it.
+ */
+export const serializeClientProfilePolicies = (
+  policies: WritableClientProfilePolicies,
+  antigravityKnown = gatewayHasAntigravity
+) =>
   Object.fromEntries(
     CLIENT_PROFILE_PROVIDERS.flatMap((provider) => {
       const policy = policies[provider];
-      if (provider === 'antigravity' && policy.mode !== 'only') return [];
+      if (provider === 'antigravity' && !antigravityKnown && policy.mode !== 'only') return [];
       return [
         [
           provider,
@@ -312,9 +322,12 @@ export const clientProfilesApi = {
   /** Capability probe. 404 or an unknown contract means Unsupported; other errors throw. */
   async probe(): Promise<ClientProfilesSupport> {
     try {
-      return normalizeClientProfilesCapabilities(
+      const support = normalizeClientProfilesCapabilities(
         await apiClient.get<unknown>('/client-profiles/capabilities')
       );
+      gatewayHasAntigravity =
+        support.supported && support.capabilities.providers.includes('antigravity');
+      return support;
     } catch (error) {
       if (isClientProfilesNotFound(error)) return { supported: false, reason: 'not_found' };
       throw error;
